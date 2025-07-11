@@ -48,11 +48,15 @@
 }
 
 .btn-primary {
-  @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200;
+  @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-primary-700 focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .btn-secondary {
-  @apply bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200;
+  @apply bg-gray-200 text-gray-800 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-danger {
+  @apply bg-danger-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-danger-700 focus:ring-2 focus:ring-danger-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .card {
@@ -84,26 +88,39 @@
   @apply bg-gray-50;
 }
 
-/* Status badges */
-.status-badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-}
-
-.status-active {
-  @apply bg-success-100 text-success-800;
-}
-
-.status-inactive {
-  @apply bg-gray-100 text-gray-800;
-}
-
-.status-pending {
-  @apply bg-secondary-100 text-secondary-800;
-}
-
 /* Loading spinner */
 .spinner {
   @apply animate-spin rounded-full border-2 border-gray-200 border-t-primary-600;
+}
+
+/* Print styles */
+@media print {
+  .print-hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:border-0 {
+    border: 0 !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:break-before-page {
+    break-before: page;
+  }
+
+  .print\:break-after-page {
+    break-after: page;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 /* Responsive utilities */
@@ -111,7 +128,7 @@
   .mobile-hidden {
     display: none !important;
   }
-  
+
   .mobile-full {
     width: 100% !important;
   }

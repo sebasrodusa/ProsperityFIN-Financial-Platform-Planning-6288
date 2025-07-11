@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { twMerge } from 'tailwind-merge';
 
 const LoadingSpinner = ({ size = 'md', className = '' }) => {
   const sizeClasses = {
@@ -10,11 +11,14 @@ const LoadingSpinner = ({ size = 'md', className = '' }) => {
   };
 
   return (
-    <div className={`flex items-center justify-center ${className}`}>
+    <div className={twMerge('flex items-center justify-center', className)}>
       <motion.div
         animate={{ rotate: 360 }}
         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className={`${sizeClasses[size]} border-2 border-gray-200 border-t-primary-600 rounded-full`}
+        className={twMerge(
+          sizeClasses[size],
+          'border-2 border-gray-200 border-t-primary-600 rounded-full'
+        )}
       />
     </div>
   );

@@ -1,4 +1,5 @@
 import React from 'react';
+import { twMerge } from 'tailwind-merge';
 
 const StatusBadge = ({ status, className = '' }) => {
   const getStatusStyles = (status) => {
@@ -23,7 +24,13 @@ const StatusBadge = ({ status, className = '' }) => {
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusStyles(status)} ${className}`}>
+    <span
+      className={twMerge(
+        'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium',
+        getStatusStyles(status),
+        className
+      )}
+    >
       {status}
     </span>
   );

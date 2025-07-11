@@ -1,4 +1,5 @@
 import React from 'react';
+import { twMerge } from 'tailwind-merge';
 
 const Toggle = ({ enabled, onChange, size = 'md', label = '', disabled = false }) => {
   const sizes = {
@@ -18,21 +19,19 @@ const Toggle = ({ enabled, onChange, size = 'md', label = '', disabled = false }
       <button
         type="button"
         onClick={() => !disabled && onChange(!enabled)}
-        className={`
-          ${sizes[size]}
-          ${enabled ? 'bg-primary-600' : 'bg-gray-200'}
-          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          relative inline-flex flex-shrink-0 rounded-full border-2 border-transparent 
-          transition-colors duration-200 ease-in-out focus:outline-none
-        `}
+        className={twMerge(
+          sizes[size],
+          enabled ? 'bg-primary-600' : 'bg-gray-200',
+          disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          'relative inline-flex flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+        )}
       >
         <span
-          className={`
-            ${enabled ? 'translate-x-full' : 'translate-x-0'}
-            ${toggleSizes[size]}
-            pointer-events-none inline-block transform rounded-full bg-white shadow 
-            transition duration-200 ease-in-out
-          `}
+          className={twMerge(
+            enabled ? 'translate-x-full' : 'translate-x-0',
+            toggleSizes[size],
+            'pointer-events-none inline-block transform rounded-full bg-white shadow transition duration-200 ease-in-out'
+          )}
         />
       </button>
       {label && (

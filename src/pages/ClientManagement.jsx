@@ -109,14 +109,6 @@ const ClientManagement = () => {
                     <h3 className="font-semibold text-gray-900">{client.name}</h3>
                     <div className="flex items-center space-x-2">
                       <StatusBadge status={client.status} />
-                      <div className="flex items-center space-x-2">
-                        <span className="text-sm text-gray-600">Portal Access</span>
-                        <Toggle
-                          enabled={client.hasAccess}
-                          onChange={() => handleTogglePortalAccess(client.id, client.hasAccess)}
-                          size="sm"
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -163,6 +155,16 @@ const ClientManagement = () => {
                     <span>{client.employerName}</span>
                   </div>
                 )}
+                
+                {/* Portal Access Toggle */}
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-sm text-gray-600">Portal Access</span>
+                  <Toggle
+                    enabled={client.hasAccess || false}
+                    onChange={() => handleTogglePortalAccess(client.id, client.hasAccess)}
+                    size="sm"
+                  />
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
