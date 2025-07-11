@@ -6,6 +6,7 @@ import { useData } from '../contexts/DataContext';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import StatusBadge from '../components/ui/StatusBadge';
+import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
@@ -21,8 +22,7 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredClients = clients.filter(client => {
-    const matchesSearch = 
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email.toLowerCase().includes(searchTerm.toLowerCase());
     if (user?.role === 'financial_professional') {
       return matchesSearch && client.advisorId === user.id;
@@ -52,17 +52,12 @@ const ClientManagement = () => {
     }
   }, [deleteClient]);
 
-  const handleCloseAddModal = useCallback(() => {
-    setIsAddModalOpen(false);
-  }, []);
-
-  const handleCloseEditModal = useCallback(() => {
-    setIsEditModalOpen(false);
-    setSelectedClient(null);
-  }, []);
+  const handleTogglePortalAccess = useCallback((clientId, currentAccess) => {
+    updateClient(clientId, { hasAccess: !currentAccess });
+  }, [updateClient]);
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
@@ -109,14 +104,20 @@ const ClientManagement = () => {
             <div key={client.id} className="card hover:shadow-medium transition-shadow">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
-                  <img
-                    src={client.avatar}
-                    alt={client.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
+                  <img src={client.avatar} alt={client.name} className="w-12 h-12 rounded-full object-cover" />
                   <div>
                     <h3 className="font-semibold text-gray-900">{client.name}</h3>
-                    <StatusBadge status={client.status} />
+                    <div className="flex items-center space-x-2">
+                      <StatusBadge status={client.status} />
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600">Portal Access</span>
+                        <Toggle
+                          enabled={client.hasAccess}
+                          onChange={() => handleTogglePortalAccess(client.id, client.hasAccess)}
+                          size="sm"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -150,26 +151,16 @@ const ClientManagement = () => {
                   <SafeIcon icon={FiPhone} className="w-4 h-4" />
                   <span>{client.phone}</span>
                 </div>
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <SafeIcon icon={FiMapPin} className="w-4 h-4" />
-                  <span>{client.address}</span>
-                </div>
+                {client.address && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-600">
+                    <SafeIcon icon={FiMapPin} className="w-4 h-4" />
+                    <span>{client.address}</span>
+                  </div>
+                )}
                 {client.employerName && (
                   <div className="flex items-center space-x-2 text-sm text-gray-600">
                     <SafeIcon icon={FiBriefcase} className="w-4 h-4" />
                     <span>{client.employerName}</span>
-                  </div>
-                )}
-                {client.spouse && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <SafeIcon icon={FiUser} className="w-4 h-4" />
-                    <span>Spouse: {client.spouse.name}</span>
-                  </div>
-                )}
-                {client.children && client.children.length > 0 && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600">
-                    <SafeIcon icon={FiUsers} className="w-4 h-4" />
-                    <span>{client.children.length} children</span>
                   </div>
                 )}
               </div>
@@ -185,39 +176,43 @@ const ClientManagement = () => {
         </motion.div>
 
         {/* Add Client Modal */}
-        {isAddModalOpen && (
-          <Modal
-            isOpen={isAddModalOpen}
-            onClose={handleCloseAddModal}
-            title="Add New Client"
-            size="xl"
-          >
-            <ClientForm
-              onSubmit={handleAddClient}
-              onCancel={handleCloseAddModal}
-              isEditing={false}
-            />
-          </Modal>
-        )}
+        <Modal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          title="Add New Client"
+          size="xl"
+        >
+          <ClientForm
+            onSubmit={handleAddClient}
+            onCancel={() => setIsAddModalOpen(false)}
+            isEditing={false}
+          />
+        </Modal>
 
         {/* Edit Client Modal */}
-        {isEditModalOpen && selectedClient && (
-          <Modal
-            isOpen={isEditModalOpen}
-            onClose={handleCloseEditModal}
-            title="Edit Client"
-            size="xl"
-          >
+        <Modal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedClient(null);
+          }}
+          title="Edit Client"
+          size="xl"
+        >
+          {selectedClient && (
             <ClientForm
               initialData={selectedClient}
               onSubmit={handleUpdateClient}
-              onCancel={handleCloseEditModal}
+              onCancel={() => {
+                setIsEditModalOpen(false);
+                setSelectedClient(null);
+              }}
               isEditing={true}
             />
-          </Modal>
-        )}
+          )}
+        </Modal>
       </div>
-    </>
+    </div>
   );
 };
 
