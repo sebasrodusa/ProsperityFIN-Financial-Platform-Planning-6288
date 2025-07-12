@@ -1,35 +1,32 @@
-import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../contexts/AuthContext';
+import React,{useState} from 'react';
+import {Link,useLocation,useNavigate} from 'react-router-dom';
+import {motion,AnimatePresence} from 'framer-motion';
+import {useAuth} from '../../contexts/AuthContext';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { 
-  FiHome, FiUsers, FiFileText, FiSettings, FiLogOut, FiChevronDown, 
-  FiEdit, FiBarChart2, FiActivity, FiList, FiUser, FiMail, FiPhone 
-} = FiIcons;
+const {FiHome,FiUsers,FiFileText,FiSettings,FiLogOut,FiChevronDown,FiEdit,FiBarChart2,FiActivity,FiList,FiUser,FiMail,FiPhone,FiSliders}=FiIcons;
 
 // Team ID mapping
-const TEAM_IDS = [
-  { id: 'emd_rodriguez', name: 'EMD Rodriguez' },
-  { id: 'md_garcia', name: 'MD Garcia' },
-  { id: 'md_samaniego', name: 'MD Samaniego' }
+const TEAM_IDS=[
+  {id: 'emd_rodriguez',name: 'EMD Rodriguez'},
+  {id: 'md_garcia',name: 'MD Garcia'},
+  {id: 'md_samaniego',name: 'MD Samaniego'}
 ];
 
 // Default avatar placeholder
-const DEFAULT_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face';
+const DEFAULT_AVATAR='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face';
 
-const Navbar = () => {
-  const { user, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+const Navbar=()=> {
+  const {user,logout}=useAuth();
+  const location=useLocation();
+  const navigate=useNavigate();
+  const [isProfileOpen,setIsProfileOpen]=useState(false);
 
   // Debug user data
-  console.log('Current user data:', user);
+  console.log('Current user data:',user);
 
-  const getRoleDisplayName = (role) => {
+  const getRoleDisplayName=(role)=> {
     switch (role) {
       case 'admin': return 'Administrator';
       case 'manager': return 'Manager';
@@ -39,42 +36,47 @@ const Navbar = () => {
     }
   };
 
-  const getNavItems = () => {
-    if (user?.role === 'client') {
+  const getNavItems=()=> {
+    if (user?.role==='client') {
       return [
-        { path: '/client-portal', label: 'Dashboard', icon: FiHome },
-        { path: '/client-financial-analysis', label: 'Financial Info', icon: FiActivity },
-        { path: '/profile-settings', label: 'Settings', icon: FiSettings }
+        {path: '/client-portal',label: 'Dashboard',icon: FiHome},
+        {path: '/client-financial-analysis',label: 'Financial Info',icon: FiActivity},
+        {path: '/profile-settings',label: 'Settings',icon: FiSettings}
       ];
     }
-
-    const commonItems = [
-      { path: '/dashboard', label: 'Dashboard', icon: FiHome },
-      { path: '/crm', label: 'CRM', icon: FiList },
-      { path: '/clients', label: 'Clients', icon: FiUsers },
-      { path: '/financial-analysis', label: 'Financial Analysis', icon: FiBarChart2 },
-      { path: '/proposals', label: 'Projections', icon: FiFileText }
+    
+    const commonItems=[
+      {path: '/dashboard',label: 'Dashboard',icon: FiHome},
+      {path: '/crm',label: 'CRM',icon: FiList},
+      {path: '/clients',label: 'Clients',icon: FiUsers},
+      {path: '/financial-analysis',label: 'Financial Analysis',icon: FiBarChart2},
+      {path: '/proposals',label: 'Projections',icon: FiFileText}
     ];
 
-    if (user?.role === 'admin' || user?.role === 'manager') {
-      commonItems.push({ path: '/users', label: 'Users', icon: FiSettings });
+    if (user?.role==='admin') {
+      commonItems.push(
+        {path: '/users',label: 'Users',icon: FiUser},
+        {path: '/projections-settings',label: 'Projections Settings',icon: FiSliders}
+      );
+    } else if (user?.role==='manager') {
+      commonItems.push({path: '/users',label: 'Users',icon: FiUser});
     }
-
-    commonItems.push({ path: '/profile-settings', label: 'Settings', icon: FiSettings });
-
+    
+    commonItems.push({path: '/profile-settings',label: 'Settings',icon: FiSettings});
+    
     return commonItems;
   };
 
-  const navItems = getNavItems();
+  const navItems=getNavItems();
 
-  const handleLogout = () => {
+  const handleLogout=()=> {
     logout();
     navigate('/login');
   };
 
   // Get user avatar with fallback
-  const userAvatar = user?.avatar || DEFAULT_AVATAR;
-  const userAgentCode = user?.agentCode || '';
+  const userAvatar=user?.avatar || DEFAULT_AVATAR;
+  const userAgentCode=user?.agentCode || '';
 
   return (
     <nav className="bg-white shadow-soft border-b border-gray-100">
@@ -82,7 +84,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
-            <Link to={user?.role === 'client' ? '/client-portal' : '/dashboard'} className="flex items-center space-x-3">
+            <Link to={user?.role==='client' ? '/client-portal' : '/dashboard'} className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">P</span>
               </div>
@@ -95,18 +97,14 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path || 
-                             (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-              
+            {navItems.map((item)=> {
+              const isActive=location.pathname===item.path || (item.path !=='/dashboard' && location.pathname.startsWith(item.path));
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary-100 text-primary-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    isActive ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   <SafeIcon icon={item.icon} className="w-4 h-4" />
@@ -119,7 +117,7 @@ const Navbar = () => {
           {/* Profile Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              onClick={()=> setIsProfileOpen(!isProfileOpen)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="relative group">
@@ -127,8 +125,8 @@ const Navbar = () => {
                   src={userAvatar}
                   alt={user?.name || 'User'}
                   className="w-8 h-8 rounded-full object-cover"
-                  onError={(e) => {
-                    e.target.src = DEFAULT_AVATAR;
+                  onError={(e)=> {
+                    e.target.src=DEFAULT_AVATAR;
                   }}
                 />
                 <div className="absolute bottom-0 right-0 bg-primary-600 text-white p-1 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity">
@@ -148,9 +146,9 @@ const Navbar = () => {
             <AnimatePresence>
               {isProfileOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
+                  initial={{opacity: 0,y: -10}}
+                  animate={{opacity: 1,y: 0}}
+                  exit={{opacity: 0,y: -10}}
                   className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-medium border border-gray-100 py-1 z-50"
                 >
                   <div className="px-4 py-3 border-b border-gray-100">
@@ -159,8 +157,8 @@ const Navbar = () => {
                         src={userAvatar}
                         alt={user?.name || 'User'}
                         className="w-12 h-12 rounded-full object-cover"
-                        onError={(e) => {
-                          e.target.src = DEFAULT_AVATAR;
+                        onError={(e)=> {
+                          e.target.src=DEFAULT_AVATAR;
                         }}
                       />
                       <div>
@@ -171,7 +169,7 @@ const Navbar = () => {
                         )}
                         {user?.teamId && (
                           <p className="text-xs text-secondary-600">
-                            Team: {TEAM_IDS.find(team => team.id === user?.teamId)?.name || user?.teamId}
+                            Team: {TEAM_IDS.find(team=> team.id===user?.teamId)?.name || user?.teamId}
                           </p>
                         )}
                       </div>
@@ -192,18 +190,18 @@ const Navbar = () => {
                   <div className="py-1">
                     <Link
                       to="/profile-settings"
-                      onClick={() => setIsProfileOpen(false)}
+                      onClick={()=> setIsProfileOpen(false)}
                       className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     >
                       <SafeIcon icon={FiUser} className="w-4 h-4" />
                       <span>Profile Settings</span>
                     </Link>
 
-                    {user?.role !== 'client' && (
+                    {user?.role !=='client' && (
                       <>
                         <Link
                           to="/financial-analysis"
-                          onClick={() => setIsProfileOpen(false)}
+                          onClick={()=> setIsProfileOpen(false)}
                           className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           <SafeIcon icon={FiBarChart2} className="w-4 h-4" />
@@ -211,7 +209,7 @@ const Navbar = () => {
                         </Link>
                         <Link
                           to="/proposals"
-                          onClick={() => setIsProfileOpen(false)}
+                          onClick={()=> setIsProfileOpen(false)}
                           className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         >
                           <SafeIcon icon={FiFileText} className="w-4 h-4" />
@@ -222,7 +220,7 @@ const Navbar = () => {
 
                     <div className="border-t border-gray-100 mt-1 pt-1">
                       <button
-                        onClick={() => {
+                        onClick={()=> {
                           setIsProfileOpen(false);
                           handleLogout();
                         }}
@@ -243,18 +241,14 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       <div className="md:hidden border-t border-gray-100">
         <div className="px-4 py-2 space-y-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path || 
-                           (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
-            
+          {navItems.map((item)=> {
+            const isActive=location.pathname===item.path || (item.path !=='/dashboard' && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  isActive ? 'bg-primary-100 text-primary-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
                 <SafeIcon icon={item.icon} className="w-4 h-4" />
