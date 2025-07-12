@@ -2,27 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
+import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
 import StatusBadge from '../components/ui/StatusBadge';
+import StatusBadgeWithIcon from '../components/crm/StatusBadgeWithIcon';
+import TaskList from '../components/crm/TaskList';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { 
-  FiArrowLeft, FiEdit, FiTrash2, FiBarChart2, FiFileText, FiActivity,
-  FiUser, FiMail, FiPhone, FiMapPin, FiBriefcase, FiCalendar, FiUsers
-} = FiIcons;
+const { FiArrowLeft, FiEdit, FiTrash2, FiBarChart2, FiFileText, FiActivity, FiUser, FiMail, FiPhone, 
+       FiMapPin, FiBriefcase, FiCalendar, FiUsers, FiList, FiCheck, FiDollarSign, FiArchive } = FiIcons;
 
 const ClientDetails = () => {
   const { clientId } = useParams();
   const navigate = useNavigate();
   const { clients, users, updateClient, deleteClient } = useData();
+  const { getClientStatus, getClientTasks, updateClientTask } = useCrm();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  
+  const [clientStatus, setClientStatus] = useState(null);
+  const [clientTasks, setClientTasks] = useState([]);
+
   const client = clients.find(c => c.id === clientId);
   const advisor = users.find(u => u.id === client?.advisorId);
+
+  // Load CRM data
+  useEffect(() => {
+    if (client) {
+      const status = getClientStatus(clientId);
+      const tasks = getClientTasks(clientId);
+      setClientStatus(status);
+      setClientTasks(tasks);
+    }
+  }, [client, clientId, getClientStatus, getClientTasks]);
 
   const handleDelete = () => {
     if (window.confirm('Are you sure you want to delete this client?')) {
@@ -38,6 +52,32 @@ const ClientDetails = () => {
 
   const handleTogglePortalAccess = () => {
     updateClient(clientId, { hasAccess: !client.hasAccess });
+  };
+  
+  const handleToggleArchive = () => {
+    updateClient(clientId, { 
+      isArchived: !client.isArchived,
+      lastActivity: new Date().toISOString()
+    });
+  };
+
+  const handleToggleTaskCompletion = async (taskId, currentStatus) => {
+    const result = await updateClientTask(clientId, taskId, {
+      completed: !currentStatus
+    });
+    if (result.success) {
+      // Refresh tasks
+      setClientTasks(getClientTasks(clientId));
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   if (!client) {
@@ -73,18 +113,20 @@ const ClientDetails = () => {
               <SafeIcon icon={FiArrowLeft} className="w-4 h-4" />
               <span>Back to Clients</span>
             </Link>
-
             <div className="flex justify-between items-start">
               <div className="flex items-center space-x-4">
-                <img
-                  src={client.avatar}
-                  alt={client.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
+                <img src={client.avatar} alt={client.name} className="w-16 h-16 rounded-full object-cover" />
                 <div>
-                  <h1 className="text-3xl font-heading font-bold text-gray-900">
-                    {client.name}
-                  </h1>
+                  <div className="flex items-center space-x-2">
+                    <h1 className="text-3xl font-heading font-bold text-gray-900">
+                      {client.name}
+                    </h1>
+                    {client.isArchived && (
+                      <span className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full">
+                        Archived
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center space-x-2 mt-1">
                     <StatusBadge status={client.status} />
                     <div className="flex items-center space-x-2 mt-2">
@@ -93,29 +135,22 @@ const ClientDetails = () => {
                       </span>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-600">Portal Access</span>
-                        <Toggle
-                          enabled={client.hasAccess || false}
-                          onChange={handleTogglePortalAccess}
-                          size="sm"
-                        />
+                        <Toggle enabled={client.hasAccess || false} onChange={handleTogglePortalAccess} size="sm" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-
               <div className="flex space-x-3">
-                <button
-                  onClick={() => setIsEditModalOpen(true)}
-                  className="btn-secondary flex items-center space-x-2"
-                >
+                <button onClick={handleToggleArchive} className="btn-secondary flex items-center space-x-2">
+                  <SafeIcon icon={FiArchive} className="w-4 h-4" />
+                  <span>{client.isArchived ? 'Unarchive' : 'Archive'}</span>
+                </button>
+                <button onClick={() => setIsEditModalOpen(true)} className="btn-secondary flex items-center space-x-2">
                   <SafeIcon icon={FiEdit} className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
-                <button
-                  onClick={handleDelete}
-                  className="btn-danger flex items-center space-x-2"
-                >
+                <button onClick={handleDelete} className="btn-danger flex items-center space-x-2">
                   <SafeIcon icon={FiTrash2} className="w-4 h-4" />
                   <span>Delete</span>
                 </button>
@@ -134,9 +169,7 @@ const ClientDetails = () => {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                      Contact Information
-                    </h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h4>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
@@ -153,9 +186,7 @@ const ClientDetails = () => {
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                      Personal Details
-                    </h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Personal Details</h4>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiCalendar} className="w-5 h-5 text-gray-400" />
@@ -175,6 +206,12 @@ const ClientDetails = () => {
                         <div className="flex items-center space-x-3">
                           <SafeIcon icon={FiBriefcase} className="w-5 h-5 text-gray-400" />
                           <span className="text-gray-700">Employer: {client.employerName}</span>
+                        </div>
+                      )}
+                      {client.targetRevenue && (
+                        <div className="flex items-center space-x-3">
+                          <SafeIcon icon={FiDollarSign} className="w-5 h-5 text-gray-400" />
+                          <span className="text-success-600 font-medium">Target Revenue: {formatCurrency(client.targetRevenue)}</span>
                         </div>
                       )}
                     </div>
@@ -265,7 +302,9 @@ const ClientDetails = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {Object.entries(client.financialProfile.income).map(([key, value]) => (
                           <div key={key} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                            <span className="text-gray-700">{key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                            <span className="text-gray-700">
+                              {key.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </span>
                             <span className="font-medium text-success-600">${value.toLocaleString()}</span>
                           </div>
                         ))}
@@ -344,6 +383,63 @@ const ClientDetails = () => {
                   </div>
                 </div>
               </div>
+
+              {/* CRM Section - New */}
+              <div className="card">
+                <div className="card-header">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold text-gray-900">CRM Overview</h2>
+                    <Link to={`/clients/${clientId}/crm`} className="btn-primary flex items-center space-x-2">
+                      <SafeIcon icon={FiList} className="w-4 h-4" />
+                      <span>Full CRM</span>
+                    </Link>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  {/* Current Status */}
+                  <div className="p-4 bg-primary-50 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-medium text-gray-900">Current Status</h4>
+                      {clientStatus && <StatusBadgeWithIcon status={clientStatus.status} />}
+                    </div>
+                  </div>
+
+                  {/* Task Summary */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-gray-900">Upcoming Tasks</h4>
+                    {clientTasks.length > 0 ? (
+                      <div className="space-y-3">
+                        {clientTasks
+                          .filter(task => !task.completed)
+                          .slice(0, 3)
+                          .map(task => (
+                            <div key={task.id} className="flex items-start p-3 bg-gray-50 rounded-lg">
+                              <button
+                                onClick={() => handleToggleTaskCompletion(task.id, task.completed)}
+                                className="mt-1 p-1 rounded-full flex-shrink-0 bg-gray-100 text-gray-400 hover:bg-gray-200"
+                              >
+                                <SafeIcon icon={FiCheck} className="w-4 h-4" />
+                              </button>
+                              <div className="ml-3">
+                                <p className="font-medium text-gray-900">{task.taskName}</p>
+                                {task.dueDate && (
+                                  <p className="text-xs text-gray-500 mt-1">Due: {task.dueDate}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic p-3 bg-gray-50 rounded-lg">No pending tasks</p>
+                    )}
+                    <div className="text-right">
+                      <Link to={`/clients/${clientId}/crm`} className="text-primary-600 hover:text-primary-700 text-sm">
+                        View all tasks
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Sidebar */}
@@ -368,7 +464,6 @@ const ClientDetails = () => {
                       </div>
                     </div>
                   </Link>
-
                   <Link
                     to={`/clients/${clientId}/evaluation`}
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
@@ -381,7 +476,18 @@ const ClientDetails = () => {
                       </div>
                     </div>
                   </Link>
-
+                  <Link
+                    to={`/clients/${clientId}/crm`}
+                    className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <SafeIcon icon={FiList} className="w-5 h-5 text-primary-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">CRM Management</p>
+                        <p className="text-sm text-gray-500">Manage client relationship</p>
+                      </div>
+                    </div>
+                  </Link>
                   <Link
                     to="/proposals"
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
@@ -415,11 +521,11 @@ const ClientDetails = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Portal Access</span>
-                    <Toggle
-                      enabled={client.hasAccess || false}
-                      onChange={handleTogglePortalAccess}
-                      size="sm"
-                    />
+                    <Toggle enabled={client.hasAccess || false} onChange={handleTogglePortalAccess} size="sm" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Archived</span>
+                    <Toggle enabled={client.isArchived || false} onChange={handleToggleArchive} size="sm" />
                   </div>
                   {client.nextReviewDate && (
                     <div className="flex items-center justify-between">

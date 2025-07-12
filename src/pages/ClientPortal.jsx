@@ -12,12 +12,13 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiUser, FiEdit, FiBarChart2, FiActivity, FiFileText, FiMail, FiPhone, FiMapPin, FiCalendar, FiUsers, FiBriefcase, FiShield, FiStar, FiBuilding, FiDollarSign, FiTrendingUp } = FiIcons;
+const { FiUser, FiEdit, FiBarChart2, FiActivity, FiFileText, FiMail, FiPhone, FiMapPin, FiCalendar, FiUsers, FiBriefcase, FiShield, FiStar, FiBuilding, FiDollarSign, FiTrendingUp, FiSettings } = FiIcons;
 
 const ClientPortal = () => {
   const { user } = useAuth();
   const { clients, proposals, users, updateClient } = useData();
   const { analysis, loadAnalysis, loading: analysisLoading } = useFinancialAnalysis();
+  
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [latestProposal, setLatestProposal] = useState(null);
@@ -38,7 +39,7 @@ const ClientPortal = () => {
   useEffect(() => {
     if (clientData) {
       setLoading(false);
-      
+
       // Find the advisor for this client
       const clientAdvisor = users.find(u => u.id === clientData.advisorId);
       setAdvisor(clientAdvisor);
@@ -88,7 +89,7 @@ const ClientPortal = () => {
     const totalAssets = analysis.assets_fa7?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
     const totalLiabilities = analysis.liabilities_fa7?.reduce((sum, liability) => sum + parseFloat(liability.amount || 0), 0) || 0;
     const netWorth = totalAssets - totalLiabilities;
-    
+
     return { totalAssets, totalLiabilities, netWorth };
   };
 
@@ -137,22 +138,15 @@ const ClientPortal = () => {
                 <div className="card-header">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
-                    <button
-                      onClick={() => setIsEditModalOpen(true)}
-                      className="btn-secondary flex items-center space-x-2"
-                    >
-                      <SafeIcon icon={FiEdit} className="w-4 h-4" />
-                      <span>Edit Info</span>
-                    </button>
+                    <Link to="/profile-settings" className="btn-secondary flex items-center space-x-2">
+                      <SafeIcon icon={FiSettings} className="w-4 h-4" />
+                      <span>Edit Profile</span>
+                    </Link>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-4 mb-6">
-                  <img
-                    src={clientData.avatar}
-                    alt={clientData.name}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
+                  <img src={clientData.avatar} alt={clientData.name} className="w-20 h-20 rounded-full object-cover" />
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900">{clientData.name}</h3>
                     <p className="text-gray-600">{clientData.email}</p>
@@ -235,6 +229,7 @@ const ClientPortal = () => {
                 <div className="card-header">
                   <h3 className="text-lg font-semibold text-gray-900">Financial Overview</h3>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center p-4 bg-success-50 rounded-lg">
                     <div className="flex items-center justify-center mb-2">
@@ -243,6 +238,7 @@ const ClientPortal = () => {
                     <p className="text-2xl font-bold text-success-600">{formatCurrency(financialOverview.totalAssets)}</p>
                     <p className="text-sm text-gray-600">Total Assets</p>
                   </div>
+
                   <div className="text-center p-4 bg-danger-50 rounded-lg">
                     <div className="flex items-center justify-center mb-2">
                       <SafeIcon icon={FiTrendingUp} className="w-6 h-6 text-danger-500" />
@@ -250,6 +246,7 @@ const ClientPortal = () => {
                     <p className="text-2xl font-bold text-danger-600">{formatCurrency(financialOverview.totalLiabilities)}</p>
                     <p className="text-sm text-gray-600">Total Liabilities</p>
                   </div>
+
                   <div className="text-center p-4 bg-primary-50 rounded-lg">
                     <div className="flex items-center justify-center mb-2">
                       <SafeIcon icon={FiDollarSign} className="w-6 h-6 text-primary-500" />
@@ -279,6 +276,7 @@ const ClientPortal = () => {
                           ))}
                       </div>
                     </div>
+
                     <div>
                       <h5 className="font-medium text-gray-800 mb-3">Top Expenses</h5>
                       <div className="space-y-2">
@@ -347,18 +345,18 @@ const ClientPortal = () => {
                     </button>
                   )}
 
-                  <button
-                    onClick={() => setIsEditModalOpen(true)}
+                  <Link
+                    to="/profile-settings"
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
                   >
                     <div className="flex items-center space-x-3">
-                      <SafeIcon icon={FiEdit} className="w-5 h-5 text-primary-600" />
+                      <SafeIcon icon={FiSettings} className="w-5 h-5 text-primary-600" />
                       <div>
-                        <p className="font-medium text-gray-900">Edit Personal Information</p>
-                        <p className="text-sm text-gray-500">Update your profile details</p>
+                        <p className="font-medium text-gray-900">Edit Profile Settings</p>
+                        <p className="text-sm text-gray-500">Update your account information</p>
                       </div>
                     </div>
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -377,12 +375,19 @@ const ClientPortal = () => {
                             <p className="font-medium text-gray-900">{goal.title}</p>
                             <p className="text-xs text-gray-600">Target: {formatCurrency(goal.targetAmount)}</p>
                           </div>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${goal.priority === 'high' ? 'bg-danger-100 text-danger-800' : goal.priority === 'medium' ? 'bg-secondary-100 text-secondary-800' : 'bg-success-100 text-success-800'}`}>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            goal.priority === 'high' ? 'bg-danger-100 text-danger-800' :
+                            goal.priority === 'medium' ? 'bg-secondary-100 text-secondary-800' :
+                            'bg-success-100 text-success-800'
+                          }`}>
                             {goal.priority}
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                          <div className="bg-primary-600 h-2 rounded-full" style={{ width: `${progress}%` }}></div>
+                          <div
+                            className="bg-primary-600 h-2 rounded-full"
+                            style={{ width: `${progress}%` }}
+                          ></div>
                         </div>
                         <div className="flex justify-between text-xs text-gray-600">
                           <span>{Math.round(progress)}% complete</span>
@@ -391,12 +396,14 @@ const ClientPortal = () => {
                       </div>
                     );
                   })}
+
                   {(!analysis.financial_goals_fa7 || analysis.financial_goals_fa7.length === 0) && (
                     <div className="p-4 text-center text-gray-500">
                       <p>No financial goals set</p>
                       <Link to="/client-financial-analysis" className="text-primary-600 hover:underline text-sm block mt-2">Add goals</Link>
                     </div>
                   )}
+
                   {analysis.financial_goals_fa7 && analysis.financial_goals_fa7.length > 3 && (
                     <Link to="/client-financial-analysis" className="text-primary-600 hover:underline text-sm block text-center">
                       View all {analysis.financial_goals_fa7.length} goals
@@ -419,7 +426,6 @@ const ClientPortal = () => {
                     />
                     <h4 className="text-lg font-semibold text-gray-900">{advisor.name}</h4>
                     <p className="text-sm text-gray-600 mb-4">{advisor.email}</p>
-                    
                     <div className="space-y-3 text-left">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiShield} className="w-4 h-4 text-primary-600" />
@@ -434,7 +440,6 @@ const ClientPortal = () => {
                         <span className="text-sm text-gray-700">Dedicated to your financial success</span>
                       </div>
                     </div>
-
                     <button className="w-full mt-4 btn-primary flex items-center justify-center space-x-2">
                       <SafeIcon icon={FiMail} className="w-4 h-4" />
                       <span>Contact Your Advisor</span>
@@ -503,7 +508,10 @@ const ClientPortal = () => {
         {latestProposal && (
           <div>
             <div className="mb-4 flex justify-end space-x-3 print:hidden">
-              <button onClick={() => window.print()} className="btn-secondary flex items-center space-x-2">
+              <button
+                onClick={() => window.print()}
+                className="btn-secondary flex items-center space-x-2"
+              >
                 <SafeIcon icon={FiFileText} className="w-4 h-4" />
                 <span>Print</span>
               </button>

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import supabase from '../lib/supabase';
 
 const AuthContext = createContext();
 
@@ -76,13 +77,49 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('prosperityFin_user');
+    
+    // If using Supabase auth, would also sign out there
+    try {
+      if (supabase) {
+        supabase.auth.signOut();
+      }
+    } catch (error) {
+      console.error("Error signing out from Supabase:", error);
+    }
+  };
+
+  const updateUserProfile = async (updates) => {
+    // Update the local user state
+    const updatedUser = { ...user, ...updates };
+    setUser(updatedUser);
+    localStorage.setItem('prosperityFin_user', JSON.stringify(updatedUser));
+    
+    // If using Supabase, would also update the user profile there
+    try {
+      if (supabase) {
+        // Update profile in user_profiles table
+        await supabase
+          .from('user_profiles')
+          .upsert({ 
+            id: user.id,
+            ...updates,
+            updated_at: new Date().toISOString()
+          });
+      }
+    } catch (error) {
+      console.error("Error updating Supabase profile:", error);
+      // Still return success since local update worked
+    }
+    
+    return updatedUser;
   };
 
   const value = {
     user,
     login,
     logout,
-    loading
+    loading,
+    updateUserProfile
   };
 
   return (

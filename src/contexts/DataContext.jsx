@@ -22,7 +22,7 @@ export const DataProvider = ({ children }) => {
   }, []);
 
   const initializeMockData = () => {
-    // Mock Clients Data with more complete information
+    // Mock Clients Data with CRM fields
     const mockClients = [
       {
         id: '1',
@@ -40,6 +40,65 @@ export const DataProvider = ({ children }) => {
         nextReviewDate: '2024-02-15',
         employerName: 'Tech Innovations Inc.',
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
+        // CRM Fields
+        crmStatus: 'follow_up_decision',
+        lastActivity: '2024-01-10T10:30:00Z',
+        crmNotes: [
+          {
+            id: '1',
+            content: 'Initial meeting went well. Client is interested in retirement planning and life insurance. Needs to discuss with spouse.',
+            createdAt: '2024-01-05T14:30:00Z',
+            type: 'note'
+          },
+          {
+            id: '2',
+            content: 'Follow-up call scheduled for next week. Client has questions about whole life vs term life insurance.',
+            createdAt: '2024-01-08T09:15:00Z',
+            type: 'note'
+          }
+        ],
+        crmTasks: [
+          {
+            id: '1',
+            name: 'Send life insurance comparison document',
+            dueDate: '2024-01-15',
+            priority: 'high',
+            completed: true,
+            createdAt: '2024-01-05T14:30:00Z',
+            completedAt: '2024-01-12T11:00:00Z'
+          },
+          {
+            id: '2',
+            name: 'Schedule follow-up meeting with spouse',
+            dueDate: '2024-01-20',
+            priority: 'medium',
+            completed: false,
+            createdAt: '2024-01-08T09:15:00Z'
+          }
+        ],
+        statusHistory: [
+          {
+            id: '1',
+            fromStatus: 'create_proposal',
+            toStatus: 'follow_up_decision',
+            changedAt: '2024-01-10T10:30:00Z',
+            notes: 'Proposal sent, waiting for decision'
+          },
+          {
+            id: '2',
+            fromStatus: 'interested_not_ready',
+            toStatus: 'create_proposal',
+            changedAt: '2024-01-08T15:20:00Z',
+            notes: 'Client ready for proposal after spouse discussion'
+          },
+          {
+            id: '3',
+            fromStatus: null,
+            toStatus: 'interested_not_ready',
+            changedAt: '2024-01-05T14:30:00Z',
+            notes: 'Initial status set after first meeting'
+          }
+        ],
         spouse: {
           name: 'Jane Smith',
           email: 'jane.smith@example.com',
@@ -111,6 +170,36 @@ export const DataProvider = ({ children }) => {
         nextReviewDate: '2024-03-20',
         employerName: 'Financial Services LLC',
         avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
+        // CRM Fields
+        crmStatus: 'create_proposal',
+        lastActivity: '2024-01-12T16:45:00Z',
+        crmNotes: [
+          {
+            id: '1',
+            content: 'Young professional looking for term life insurance and disability coverage. Budget conscious.',
+            createdAt: '2024-01-12T16:45:00Z',
+            type: 'note'
+          }
+        ],
+        crmTasks: [
+          {
+            id: '1',
+            name: 'Research competitive term life rates',
+            dueDate: '2024-01-18',
+            priority: 'medium',
+            completed: false,
+            createdAt: '2024-01-12T16:45:00Z'
+          }
+        ],
+        statusHistory: [
+          {
+            id: '1',
+            fromStatus: 'follow_up_meeting',
+            toStatus: 'create_proposal',
+            changedAt: '2024-01-12T16:45:00Z',
+            notes: 'Ready to move forward with term life proposal'
+          }
+        ],
         children: [
           { name: 'Thomas Johnson', dateOfBirth: '2015-05-18' }
         ],
@@ -171,6 +260,36 @@ export const DataProvider = ({ children }) => {
         nextReviewDate: '2024-07-15',
         employerName: 'Tech Innovations Inc.',
         avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
+        // CRM Fields
+        crmStatus: 'client_won',
+        lastActivity: '2024-01-15T12:00:00Z',
+        crmNotes: [
+          {
+            id: '1',
+            content: 'Successfully converted client! Purchased whole life policy and set up retirement planning.',
+            createdAt: '2024-01-15T12:00:00Z',
+            type: 'note'
+          }
+        ],
+        crmTasks: [
+          {
+            id: '1',
+            name: 'Schedule annual review meeting',
+            dueDate: '2024-07-15',
+            priority: 'low',
+            completed: false,
+            createdAt: '2024-01-15T12:00:00Z'
+          }
+        ],
+        statusHistory: [
+          {
+            id: '1',
+            fromStatus: 'application_submitted',
+            toStatus: 'client_won',
+            changedAt: '2024-01-15T12:00:00Z',
+            notes: 'Application approved, client onboarded successfully'
+          }
+        ],
         spouse: {
           name: 'Jane Smith',
           email: 'jane.smith@example.com',
@@ -347,11 +466,29 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for clients
   const addClient = (client) => {
-    setClients(prev => [...prev, { ...client, id: Date.now().toString(), createdAt: new Date().toISOString() }]);
+    setClients(prev => [...prev, {
+      ...client,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      // Initialize CRM fields
+      crmStatus: 'initial_meeting',
+      crmNotes: [],
+      crmTasks: [],
+      statusHistory: [{
+        id: Date.now().toString(),
+        fromStatus: null,
+        toStatus: 'initial_meeting',
+        changedAt: new Date().toISOString(),
+        notes: 'Initial status set'
+      }],
+      lastActivity: new Date().toISOString()
+    }]);
   };
 
   const updateClient = (id, updates) => {
-    setClients(prev => prev.map(client => client.id === id ? { ...client, ...updates } : client));
+    setClients(prev => prev.map(client => 
+      client.id === id ? { ...client, ...updates } : client
+    ));
   };
 
   const deleteClient = (id) => {
@@ -360,11 +497,17 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for users
   const addUser = (user) => {
-    setUsers(prev => [...prev, { ...user, id: Date.now().toString(), createdAt: new Date().toISOString() }]);
+    setUsers(prev => [...prev, {
+      ...user,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    }]);
   };
 
   const updateUser = (id, updates) => {
-    setUsers(prev => prev.map(user => user.id === id ? { ...user, ...updates } : user));
+    setUsers(prev => prev.map(user => 
+      user.id === id ? { ...user, ...updates } : user
+    ));
   };
 
   const deleteUser = (id) => {
@@ -373,11 +516,17 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for proposals
   const addProposal = (proposal) => {
-    setProposals(prev => [...prev, { ...proposal, id: Date.now().toString(), createdAt: new Date().toISOString() }]);
+    setProposals(prev => [...prev, {
+      ...proposal,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    }]);
   };
 
   const updateProposal = (id, updates) => {
-    setProposals(prev => prev.map(proposal => proposal.id === id ? { ...proposal, ...updates } : proposal));
+    setProposals(prev => prev.map(proposal => 
+      proposal.id === id ? { ...proposal, ...updates } : proposal
+    ));
   };
 
   const deleteProposal = (id) => {

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiFileText, FiBarChart2, FiEdit, FiActivity } = FiIcons;
+const { FiMenu, FiX, FiUser, FiLogOut, FiChevronDown, FiFileText, FiBarChart2, FiEdit, FiActivity, FiSettings, FiUsers } = FiIcons;
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -31,6 +31,7 @@ const Navbar = () => {
 
     return [
       { name: 'Dashboard', path: '/dashboard', roles: ['admin', 'manager', 'financial_professional'] },
+      { name: 'CRM', path: '/crm', roles: ['admin', 'manager', 'financial_professional'] },
       { name: 'Clients', path: '/clients', roles: ['admin', 'manager', 'financial_professional'] },
       { name: 'Financial Analysis', path: '/financial-analysis', roles: ['admin', 'manager', 'financial_professional'] },
       { name: 'Proposals', path: '/proposals', roles: ['admin', 'manager', 'financial_professional'] },
@@ -74,7 +75,9 @@ const Navbar = () => {
                 key={item.path}
                 to={item.path}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-1 ${
-                  location.pathname === item.path
+                  location.pathname === item.path || 
+                  (item.path === '/crm' && location.pathname.startsWith('/crm')) ||
+                  (item.path === '/clients' && location.pathname.startsWith('/clients'))
                     ? 'text-primary-600 bg-primary-50'
                     : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
                 }`}
@@ -114,7 +117,16 @@ const Navbar = () => {
                   <p className="text-sm font-medium text-gray-900">{user?.name}</p>
                   <p className="text-xs text-gray-500">{user?.email}</p>
                 </div>
-                
+
+                {/* Profile Settings Link */}
+                <Link
+                  to="/profile-settings"
+                  className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <SafeIcon icon={FiSettings} className="w-4 h-4" />
+                  <span>Profile Settings</span>
+                </Link>
+
                 {user?.role === 'client' && (
                   <>
                     <Link
@@ -133,7 +145,7 @@ const Navbar = () => {
                     </Link>
                   </>
                 )}
-                
+
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -172,7 +184,9 @@ const Navbar = () => {
                 to={item.path}
                 onClick={() => setIsMenuOpen(false)}
                 className={`flex items-center space-x-1 block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  location.pathname === item.path
+                  location.pathname === item.path ||
+                  (item.path === '/crm' && location.pathname.startsWith('/crm')) ||
+                  (item.path === '/clients' && location.pathname.startsWith('/clients'))
                     ? 'text-primary-600 bg-primary-50'
                     : 'text-gray-700 hover:text-primary-600 hover:bg-gray-50'
                 }`}
@@ -181,6 +195,16 @@ const Navbar = () => {
                 <span>{item.name}</span>
               </Link>
             ))}
+
+            {/* Add Profile Settings to mobile menu */}
+            <Link
+              to="/profile-settings"
+              onClick={() => setIsMenuOpen(false)}
+              className="flex items-center space-x-1 block px-3 py-2 rounded-md text-base font-medium transition-colors text-gray-700 hover:text-primary-600 hover:bg-gray-50"
+            >
+              <SafeIcon icon={FiSettings} className="w-4 h-4" />
+              <span>Profile Settings</span>
+            </Link>
           </div>
         </motion.div>
       )}
