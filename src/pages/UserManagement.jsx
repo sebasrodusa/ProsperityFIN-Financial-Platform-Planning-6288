@@ -1,4 +1,3 @@
-```jsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,7 +30,8 @@ const UserManagement = () => {
     role: '',
     teamId: '',
     agentCode: '',
-    avatar: ''
+    avatar: '',
+    status: 'active'
   });
   const [imagePreview, setImagePreview] = useState(null);
 
@@ -39,7 +39,7 @@ const UserManagement = () => {
     const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (u.agentCode || '').toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     if (user?.role === 'manager') {
       return matchesSearch && (u.teamId === user.teamId || u.role === 'client');
     }
@@ -48,14 +48,26 @@ const UserManagement = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    // Generate a default agent code if needed for non-client roles
+    let agentCode = formData.agentCode;
+    if (formData.role !== 'client' && !agentCode) {
+      const prefix = formData.role === 'admin' ? 'ADM' : 
+                    formData.role === 'manager' ? 'MGR' : 'FP';
+      agentCode = `${prefix}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+    }
+
+    const userData = {
+      ...formData,
+      agentCode,
+      avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+    };
+
     if (selectedUser) {
-      updateUser(selectedUser.id, formData);
+      updateUser(selectedUser.id, userData);
       setIsEditModalOpen(false);
     } else {
-      addUser({
-        ...formData,
-        avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-      });
+      addUser(userData);
       setIsAddModalOpen(false);
     }
     resetForm();
@@ -68,7 +80,8 @@ const UserManagement = () => {
       role: '',
       teamId: '',
       agentCode: '',
-      avatar: ''
+      avatar: '',
+      status: 'active'
     });
     setImagePreview(null);
     setSelectedUser(null);
@@ -82,7 +95,8 @@ const UserManagement = () => {
       role: userToEdit.role,
       teamId: userToEdit.teamId || '',
       agentCode: userToEdit.agentCode || '',
-      avatar: userToEdit.avatar
+      avatar: userToEdit.avatar,
+      status: userToEdit.status || 'active'
     });
     setImagePreview(userToEdit.avatar);
     setIsEditModalOpen(true);
@@ -340,29 +354,29 @@ const UserManagement = () => {
             </div>
 
             {/* Agent Code - Only for admin, manager, and financial professional */}
-            {formData.role !== 'client' && (
+            {formData.role && formData.role !== 'client' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Agent Code *
+                  Agent Code
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.agentCode}
                   onChange={(e) => setFormData({ ...formData, agentCode: e.target.value })}
                   className="form-input"
-                  placeholder="Enter agent code"
+                  placeholder="Enter agent code (optional - will be auto-generated if empty)"
                 />
               </div>
             )}
 
-            {/* Team ID Selection - Only for admin, manager, and financial professional */}
-            {formData.role !== 'client' && (
+            {/* Team Selection - Only for admin, manager, and financial professional */}
+            {formData.role && formData.role !== 'client' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Team
+                  Team *
                 </label>
                 <select
+                  required
                   value={formData.teamId}
                   onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
                   className="form-input"
@@ -376,6 +390,21 @@ const UserManagement = () => {
                 </select>
               </div>
             )}
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="form-input"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
 
             <div className="flex justify-end space-x-3">
               <button
@@ -401,4 +430,3 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
-```

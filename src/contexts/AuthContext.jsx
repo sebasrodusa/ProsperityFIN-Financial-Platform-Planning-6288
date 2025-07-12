@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -15,8 +14,7 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   // Login function
   const login = async (email, password) => {
@@ -24,7 +22,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Mock user data based on email
       let mockUser;
       if (email === 'admin@prosperityfin.com') {
@@ -71,17 +69,16 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Check password (simple mock)
-      if (password !== 'admin123' && password !== 'manager123' && 
-          password !== 'advisor123' && password !== 'client123') {
+      if (password !== 'admin123' && password !== 'manager123' && password !== 'advisor123' && password !== 'client123') {
         throw new Error('Invalid credentials');
       }
 
       // Set the user in state
       setUser(mockUser);
-      
+
       // Store the user in localStorage for persistence
       localStorage.setItem('user', JSON.stringify(mockUser));
-      
+
       return mockUser;
     } catch (error) {
       console.error('Login error:', error);
@@ -95,17 +92,23 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
-    navigate('/login');
   };
 
   // Check for existing session on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuthStatus = () => {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        }
+      } catch (error) {
+        console.error('Error parsing stored user:', error);
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     checkAuthStatus();
