@@ -5,8 +5,8 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiPlus, FiTrash2, FiShield } = FiIcons;
 
-const InsuranceSection = ({ 
-  policies = [], 
+const InsuranceSection = ({
+  policies = [],
   onPoliciesChange,
   needsCalculator = {
     annualIncome: 0,
@@ -33,7 +33,11 @@ const InsuranceSection = ({
 
   const handleAddPolicy = useCallback(() => {
     if (newPolicy.carrier && newPolicy.policyType && newPolicy.coverageAmount) {
-      onPoliciesChange([...policies, { ...newPolicy, id: Date.now() }]);
+      const updatedPolicies = [...policies, {
+        ...newPolicy,
+        id: Date.now()
+      }];
+      onPoliciesChange(updatedPolicies);
       setNewPolicy({
         carrier: '',
         policyType: '',
@@ -44,6 +48,23 @@ const InsuranceSection = ({
       });
     }
   }, [newPolicy, policies, onPoliciesChange]);
+
+  const handleUpdatePolicy = (id, field, value) => {
+    const updated = policies.map(policy => 
+      policy.id === id ? { ...policy, [field]: value } : policy
+    );
+    onPoliciesChange(updated);
+  };
+
+  const handleDeletePolicy = (id) => {
+    const updated = policies.filter(policy => policy.id !== id);
+    onPoliciesChange(updated);
+  };
+
+  const handleCalculatorChange = (field, value) => {
+    const updatedCalculator = { ...needsCalculator, [field]: value };
+    onNeedsCalculatorChange(updatedCalculator);
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -61,13 +82,13 @@ const InsuranceSection = ({
       parseFloat(needsCalculator.finalExpenses) +
       parseFloat(needsCalculator.educationFund)
     );
-
+    
     const totalResources = (
       parseFloat(needsCalculator.existingCoverage) +
       parseFloat(needsCalculator.liquidAssets) +
       parseFloat(needsCalculator.retirementAccounts)
     );
-
+    
     return Math.max(0, totalNeeds - totalResources);
   };
 
@@ -80,7 +101,6 @@ const InsuranceSection = ({
         <div className="card-header">
           <h3 className="text-lg font-semibold text-gray-900">Life Insurance Policies</h3>
         </div>
-        
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -112,26 +132,61 @@ const InsuranceSection = ({
               {policies.map((policy) => (
                 <tr key={policy.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {policy.carrier}
+                    <input
+                      type="text"
+                      value={policy.carrier}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'carrier', e.target.value)}
+                      className="form-input"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {policy.policyType}
+                    <select
+                      value={policy.policyType}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'policyType', e.target.value)}
+                      className="form-input"
+                    >
+                      <option value="">Select Type</option>
+                      <option value="Term Life">Term Life</option>
+                      <option value="Whole Life">Whole Life</option>
+                      <option value="Universal Life">Universal Life</option>
+                      <option value="Variable Life">Variable Life</option>
+                    </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(policy.coverageAmount)}
+                    <input
+                      type="number"
+                      value={policy.coverageAmount}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'coverageAmount', e.target.value)}
+                      className="form-input"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatCurrency(policy.annualPremium)}
+                    <input
+                      type="number"
+                      value={policy.annualPremium}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'annualPremium', e.target.value)}
+                      className="form-input"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {policy.issueDate}
+                    <input
+                      type="date"
+                      value={policy.issueDate}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'issueDate', e.target.value)}
+                      className="form-input"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {policy.beneficiary}
+                    <input
+                      type="text"
+                      value={policy.beneficiary}
+                      onChange={(e) => handleUpdatePolicy(policy.id, 'beneficiary', e.target.value)}
+                      className="form-input"
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <button
-                      onClick={() => onPoliciesChange(policies.filter(p => p.id !== policy.id))}
+                      onClick={() => handleDeletePolicy(policy.id)}
                       className="text-danger-600 hover:text-danger-900"
                     >
                       <SafeIcon icon={FiTrash2} className="w-4 h-4" />
@@ -150,13 +205,13 @@ const InsuranceSection = ({
             <input
               type="text"
               value={newPolicy.carrier}
-              onChange={(e) => setNewPolicy({ ...newPolicy, carrier: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, carrier: e.target.value})}
               className="form-input"
               placeholder="Insurance Carrier"
             />
             <select
               value={newPolicy.policyType}
-              onChange={(e) => setNewPolicy({ ...newPolicy, policyType: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, policyType: e.target.value})}
               className="form-input"
             >
               <option value="">Select Policy Type</option>
@@ -168,27 +223,27 @@ const InsuranceSection = ({
             <input
               type="number"
               value={newPolicy.coverageAmount}
-              onChange={(e) => setNewPolicy({ ...newPolicy, coverageAmount: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, coverageAmount: e.target.value})}
               className="form-input"
               placeholder="Coverage Amount"
             />
             <input
               type="number"
               value={newPolicy.annualPremium}
-              onChange={(e) => setNewPolicy({ ...newPolicy, annualPremium: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, annualPremium: e.target.value})}
               className="form-input"
               placeholder="Annual Premium"
             />
             <input
               type="date"
               value={newPolicy.issueDate}
-              onChange={(e) => setNewPolicy({ ...newPolicy, issueDate: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, issueDate: e.target.value})}
               className="form-input"
             />
             <input
               type="text"
               value={newPolicy.beneficiary}
-              onChange={(e) => setNewPolicy({ ...newPolicy, beneficiary: e.target.value })}
+              onChange={(e) => setNewPolicy({...newPolicy, beneficiary: e.target.value})}
               className="form-input"
               placeholder="Beneficiary"
             />
@@ -222,7 +277,6 @@ const InsuranceSection = ({
         <div className="card-header">
           <h3 className="text-lg font-semibold text-gray-900">Life Insurance Needs Calculator</h3>
         </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h4 className="font-medium text-gray-900 mb-3">Insurance Needs</h4>
@@ -234,7 +288,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.annualIncome}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, annualIncome: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('annualIncome', e.target.value)}
                   className="form-input"
                   placeholder="Annual income"
                 />
@@ -246,7 +300,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.yearsToReplace}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, yearsToReplace: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('yearsToReplace', e.target.value)}
                   className="form-input"
                   placeholder="Years to replace"
                 />
@@ -258,7 +312,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.finalExpenses}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, finalExpenses: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('finalExpenses', e.target.value)}
                   className="form-input"
                   placeholder="Final expenses"
                 />
@@ -270,14 +324,13 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.educationFund}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, educationFund: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('educationFund', e.target.value)}
                   className="form-input"
                   placeholder="Education fund needed"
                 />
               </div>
             </div>
           </div>
-          
           <div>
             <h4 className="font-medium text-gray-900 mb-3">Available Resources</h4>
             <div className="space-y-4">
@@ -288,7 +341,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.existingCoverage}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, existingCoverage: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('existingCoverage', e.target.value)}
                   className="form-input"
                   placeholder="Existing coverage"
                 />
@@ -300,7 +353,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.liquidAssets}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, liquidAssets: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('liquidAssets', e.target.value)}
                   className="form-input"
                   placeholder="Liquid assets"
                 />
@@ -312,7 +365,7 @@ const InsuranceSection = ({
                 <input
                   type="number"
                   value={needsCalculator.retirementAccounts}
-                  onChange={(e) => onNeedsCalculatorChange({ ...needsCalculator, retirementAccounts: e.target.value })}
+                  onChange={(e) => handleCalculatorChange('retirementAccounts', e.target.value)}
                   className="form-input"
                   placeholder="Retirement accounts"
                 />

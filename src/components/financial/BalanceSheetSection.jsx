@@ -63,7 +63,11 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
 
   const handleAddLiability = useCallback(() => {
     if (newLiability.description && newLiability.amount && newLiability.category) {
-      onLiabilityChange([...liabilities, { ...newLiability, id: Date.now() }]);
+      const newLiabilities = [...liabilities, {
+        ...newLiability,
+        id: Date.now()
+      }];
+      onLiabilityChange(newLiabilities);
       setNewLiability({
         category: '',
         description: '',
@@ -72,6 +76,18 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
       });
     }
   }, [newLiability, liabilities, onLiabilityChange]);
+
+  const handleUpdateLiability = (id, field, value) => {
+    const updated = liabilities.map(liability => 
+      liability.id === id ? { ...liability, [field]: value } : liability
+    );
+    onLiabilityChange(updated);
+  };
+
+  const handleDeleteLiability = (id) => {
+    const updated = liabilities.filter(liability => liability.id !== id);
+    onLiabilityChange(updated);
+  };
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
@@ -122,12 +138,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
             >
               <select
                 value={liability.category}
-                onChange={(e) => {
-                  const updated = liabilities.map(l =>
-                    l.id === liability.id ? { ...l, category: e.target.value } : l
-                  );
-                  onLiabilityChange(updated);
-                }}
+                onChange={(e) => handleUpdateLiability(liability.id, 'category', e.target.value)}
                 className="form-input w-40"
               >
                 <option value="">Select category</option>
@@ -141,43 +152,26 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
               <input
                 type="text"
                 value={liability.description}
-                onChange={(e) => {
-                  const updated = liabilities.map(l =>
-                    l.id === liability.id ? { ...l, description: e.target.value } : l
-                  );
-                  onLiabilityChange(updated);
-                }}
+                onChange={(e) => handleUpdateLiability(liability.id, 'description', e.target.value)}
                 className="form-input flex-1"
                 placeholder="Liability description"
               />
               <input
                 type="number"
                 value={liability.amount}
-                onChange={(e) => {
-                  const updated = liabilities.map(l =>
-                    l.id === liability.id ? { ...l, amount: e.target.value } : l
-                  );
-                  onLiabilityChange(updated);
-                }}
+                onChange={(e) => handleUpdateLiability(liability.id, 'amount', e.target.value)}
                 className="form-input w-32"
                 placeholder="Amount"
               />
               <input
                 type="number"
                 value={liability.interestRate}
-                onChange={(e) => {
-                  const updated = liabilities.map(l =>
-                    l.id === liability.id ? { ...l, interestRate: e.target.value } : l
-                  );
-                  onLiabilityChange(updated);
-                }}
+                onChange={(e) => handleUpdateLiability(liability.id, 'interestRate', e.target.value)}
                 className="form-input w-32"
                 placeholder="Interest Rate %"
               />
               <button
-                onClick={() => {
-                  onLiabilityChange(liabilities.filter(l => l.id !== liability.id));
-                }}
+                onClick={() => handleDeleteLiability(liability.id)}
                 className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiTrash2} className="w-4 h-4" />
@@ -189,7 +183,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
           <div className="flex items-center space-x-4">
             <select
               value={newLiability.category}
-              onChange={(e) => setNewLiability({ ...newLiability, category: e.target.value })}
+              onChange={(e) => setNewLiability({...newLiability, category: e.target.value})}
               className="form-input w-40"
             >
               <option value="">Select category</option>
@@ -203,21 +197,21 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
             <input
               type="text"
               value={newLiability.description}
-              onChange={(e) => setNewLiability({ ...newLiability, description: e.target.value })}
+              onChange={(e) => setNewLiability({...newLiability, description: e.target.value})}
               className="form-input flex-1"
               placeholder="New liability"
             />
             <input
               type="number"
               value={newLiability.amount}
-              onChange={(e) => setNewLiability({ ...newLiability, amount: e.target.value })}
+              onChange={(e) => setNewLiability({...newLiability, amount: e.target.value})}
               className="form-input w-32"
               placeholder="Amount"
             />
             <input
               type="number"
               value={newLiability.interestRate}
-              onChange={(e) => setNewLiability({ ...newLiability, interestRate: e.target.value })}
+              onChange={(e) => setNewLiability({...newLiability, interestRate: e.target.value})}
               className="form-input w-32"
               placeholder="Interest Rate %"
             />

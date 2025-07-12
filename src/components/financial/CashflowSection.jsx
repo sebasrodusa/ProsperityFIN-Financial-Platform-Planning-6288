@@ -15,51 +15,87 @@ const INCOME_CATEGORIES = [
 ];
 
 const EXPENSE_CATEGORIES = [
-  { id: 'housing', label: 'Housing', items: [
-    { id: 'mortgage', label: 'Mortgage or Rent' },
-    { id: 'home_insurance', label: 'Home Insurance' },
-    { id: 'electricity', label: 'Home Electricity' },
-    { id: 'utilities', label: 'Water, Gas & Sewer' }
-  ]},
-  { id: 'transportation', label: 'Transportation', items: [
-    { id: 'auto_loan', label: 'Auto Loan / Lease' },
-    { id: 'car_insurance', label: 'Car Insurance' },
-    { id: 'gas_toll', label: 'Gas, Toll and Parking' }
-  ]},
-  { id: 'living', label: 'Living Expenses', items: [
-    { id: 'groceries', label: 'Groceries' },
-    { id: 'household', label: 'Household Expenses' },
-    { id: 'dining', label: 'Dining Out' },
-    { id: 'entertainment', label: 'Entertainment' }
-  ]},
-  { id: 'health', label: 'Healthcare', items: [
-    { id: 'health_insurance', label: 'Health Insurance' },
-    { id: 'prescriptions', label: 'Prescriptions' }
-  ]},
-  { id: 'family', label: 'Family', items: [
-    { id: 'childcare', label: 'Child Sitting & Care' },
-    { id: 'education', label: 'Educational' },
-    { id: 'alimony', label: 'Alimony & Child Support' }
-  ]},
-  { id: 'debt', label: 'Debt Payments', items: [
-    { id: 'credit_card', label: 'Credit Card' },
-    { id: 'personal_loans', label: 'Personal Loans' }
-  ]},
-  { id: 'communication', label: 'Communication & Services', items: [
-    { id: 'cable_internet', label: 'Cable & Internet' },
-    { id: 'mobile', label: 'Mobile Phone' },
-    { id: 'subscriptions', label: 'Subscriptions' }
-  ]},
-  { id: 'personal', label: 'Personal Care', items: [
-    { id: 'gym', label: 'Gym' },
-    { id: 'hair_salon', label: 'Hair Salon' },
-    { id: 'personal_care', label: 'Personal Care' }
-  ]},
-  { id: 'discretionary', label: 'Discretionary', items: [
-    { id: 'travel', label: 'Travel & Vacation' },
-    { id: 'charity', label: 'Tithe & Charity' },
-    { id: 'other', label: 'Others' }
-  ]}
+  {
+    id: 'housing',
+    label: 'Housing',
+    items: [
+      { id: 'mortgage', label: 'Mortgage or Rent' },
+      { id: 'home_insurance', label: 'Home Insurance' },
+      { id: 'electricity', label: 'Home Electricity' },
+      { id: 'utilities', label: 'Water, Gas & Sewer' }
+    ]
+  },
+  {
+    id: 'transportation',
+    label: 'Transportation',
+    items: [
+      { id: 'auto_loan', label: 'Auto Loan / Lease' },
+      { id: 'car_insurance', label: 'Car Insurance' },
+      { id: 'gas_toll', label: 'Gas, Toll and Parking' }
+    ]
+  },
+  {
+    id: 'living',
+    label: 'Living Expenses',
+    items: [
+      { id: 'groceries', label: 'Groceries' },
+      { id: 'household', label: 'Household Expenses' },
+      { id: 'dining', label: 'Dining Out' },
+      { id: 'entertainment', label: 'Entertainment' }
+    ]
+  },
+  {
+    id: 'health',
+    label: 'Healthcare',
+    items: [
+      { id: 'health_insurance', label: 'Health Insurance' },
+      { id: 'prescriptions', label: 'Prescriptions' }
+    ]
+  },
+  {
+    id: 'family',
+    label: 'Family',
+    items: [
+      { id: 'childcare', label: 'Child Sitting & Care' },
+      { id: 'education', label: 'Educational' },
+      { id: 'alimony', label: 'Alimony & Child Support' }
+    ]
+  },
+  {
+    id: 'debt',
+    label: 'Debt Payments',
+    items: [
+      { id: 'credit_card', label: 'Credit Card' },
+      { id: 'personal_loans', label: 'Personal Loans' }
+    ]
+  },
+  {
+    id: 'communication',
+    label: 'Communication & Services',
+    items: [
+      { id: 'cable_internet', label: 'Cable & Internet' },
+      { id: 'mobile', label: 'Mobile Phone' },
+      { id: 'subscriptions', label: 'Subscriptions' }
+    ]
+  },
+  {
+    id: 'personal',
+    label: 'Personal Care',
+    items: [
+      { id: 'gym', label: 'Gym' },
+      { id: 'hair_salon', label: 'Hair Salon' },
+      { id: 'personal_care', label: 'Personal Care' }
+    ]
+  },
+  {
+    id: 'discretionary',
+    label: 'Discretionary',
+    items: [
+      { id: 'travel', label: 'Travel & Vacation' },
+      { id: 'charity', label: 'Tithe & Charity' },
+      { id: 'other', label: 'Others' }
+    ]
+  }
 ];
 
 const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, onExpenseChange }) => {
@@ -76,11 +112,12 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
   const handleAddIncome = useCallback(() => {
     if (newIncomeSource.category && newIncomeSource.amount) {
       const categoryLabel = INCOME_CATEGORIES.find(cat => cat.id === newIncomeSource.category)?.label;
-      onIncomeChange([...incomeSources, {
+      const newIncomeSources = [...incomeSources, {
         ...newIncomeSource,
-        id: Date.now(),
+        id: Date.now().toString(),
         description: categoryLabel
-      }]);
+      }];
+      onIncomeChange(newIncomeSources);
       setNewIncomeSource({
         category: '',
         amount: '',
@@ -127,6 +164,18 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
     }).format(amount);
   };
 
+  const handleIncomeUpdate = (id, field, value) => {
+    const updated = incomeSources.map(source => 
+      source.id === id ? { ...source, [field]: value } : source
+    );
+    onIncomeChange(updated);
+  };
+
+  const handleIncomeDelete = (id) => {
+    const updated = incomeSources.filter(source => source.id !== id);
+    onIncomeChange(updated);
+  };
+
   return (
     <div className="space-y-6">
       {/* Income Section */}
@@ -148,23 +197,13 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
               <input
                 type="number"
                 value={source.amount}
-                onChange={(e) => {
-                  const updated = incomeSources.map(s =>
-                    s.id === source.id ? { ...s, amount: e.target.value } : s
-                  );
-                  onIncomeChange(updated);
-                }}
+                onChange={(e) => handleIncomeUpdate(source.id, 'amount', e.target.value)}
                 className="form-input w-32"
                 placeholder="Amount"
               />
               <select
                 value={source.frequency}
-                onChange={(e) => {
-                  const updated = incomeSources.map(s =>
-                    s.id === source.id ? { ...s, frequency: e.target.value } : s
-                  );
-                  onIncomeChange(updated);
-                }}
+                onChange={(e) => handleIncomeUpdate(source.id, 'frequency', e.target.value)}
                 className="form-input w-32"
               >
                 <option value="monthly">Monthly</option>
@@ -172,7 +211,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                 <option value="weekly">Weekly</option>
               </select>
               <button
-                onClick={() => onIncomeChange(incomeSources.filter(s => s.id !== source.id))}
+                onClick={() => handleIncomeDelete(source.id)}
                 className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
               >
                 <SafeIcon icon={FiTrash2} className="w-4 h-4" />
@@ -184,7 +223,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
           <div className="flex items-center space-x-4">
             <select
               value={newIncomeSource.category}
-              onChange={(e) => setNewIncomeSource({ ...newIncomeSource, category: e.target.value })}
+              onChange={(e) => setNewIncomeSource({...newIncomeSource, category: e.target.value})}
               className="form-input flex-1"
             >
               <option value="">Select Income Type</option>
@@ -197,13 +236,13 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
             <input
               type="number"
               value={newIncomeSource.amount}
-              onChange={(e) => setNewIncomeSource({ ...newIncomeSource, amount: e.target.value })}
+              onChange={(e) => setNewIncomeSource({...newIncomeSource, amount: e.target.value})}
               className="form-input w-32"
               placeholder="Amount"
             />
             <select
               value={newIncomeSource.frequency}
-              onChange={(e) => setNewIncomeSource({ ...newIncomeSource, frequency: e.target.value })}
+              onChange={(e) => setNewIncomeSource({...newIncomeSource, frequency: e.target.value})}
               className="form-input w-32"
             >
               <option value="monthly">Monthly</option>

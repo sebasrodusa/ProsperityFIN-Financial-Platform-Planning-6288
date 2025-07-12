@@ -13,8 +13,10 @@ import TaskList from '../components/crm/TaskList';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiArrowLeft, FiEdit, FiTrash2, FiBarChart2, FiFileText, FiActivity, FiUser, FiMail, FiPhone, 
-       FiMapPin, FiBriefcase, FiCalendar, FiUsers, FiList, FiCheck, FiDollarSign, FiArchive } = FiIcons;
+const {
+  FiArrowLeft, FiEdit, FiTrash2, FiBarChart2, FiFileText, FiActivity, FiUser, FiMail, 
+  FiPhone, FiMapPin, FiBriefcase, FiCalendar, FiUsers, FiList, FiCheck, FiDollarSign, FiArchive
+} = FiIcons;
 
 const ClientDetails = () => {
   const { clientId } = useParams();
@@ -53,18 +55,16 @@ const ClientDetails = () => {
   const handleTogglePortalAccess = () => {
     updateClient(clientId, { hasAccess: !client.hasAccess });
   };
-  
+
   const handleToggleArchive = () => {
-    updateClient(clientId, { 
+    updateClient(clientId, {
       isArchived: !client.isArchived,
       lastActivity: new Date().toISOString()
     });
   };
 
   const handleToggleTaskCompletion = async (taskId, currentStatus) => {
-    const result = await updateClientTask(clientId, taskId, {
-      completed: !currentStatus
-    });
+    const result = await updateClientTask(clientId, taskId, { completed: !currentStatus });
     if (result.success) {
       // Refresh tasks
       setClientTasks(getClientTasks(clientId));
@@ -113,9 +113,14 @@ const ClientDetails = () => {
               <SafeIcon icon={FiArrowLeft} className="w-4 h-4" />
               <span>Back to Clients</span>
             </Link>
+
             <div className="flex justify-between items-start">
               <div className="flex items-center space-x-4">
-                <img src={client.avatar} alt={client.name} className="w-16 h-16 rounded-full object-cover" />
+                <img
+                  src={client.avatar}
+                  alt={client.name}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
                 <div>
                   <div className="flex items-center space-x-2">
                     <h1 className="text-3xl font-heading font-bold text-gray-900">
@@ -130,27 +135,43 @@ const ClientDetails = () => {
                   <div className="flex items-center space-x-2 mt-1">
                     <StatusBadge status={client.status} />
                     <div className="flex items-center space-x-2 mt-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${client.status === 'active' ? 'bg-success-100 text-success-800' : 'bg-gray-100 text-gray-800'}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        client.status === 'active' ? 'bg-success-100 text-success-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
                         {client.status}
                       </span>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-600">Portal Access</span>
-                        <Toggle enabled={client.hasAccess || false} onChange={handleTogglePortalAccess} size="sm" />
+                        <Toggle
+                          enabled={client.hasAccess || false}
+                          onChange={handleTogglePortalAccess}
+                          size="sm"
+                        />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
               <div className="flex space-x-3">
-                <button onClick={handleToggleArchive} className="btn-secondary flex items-center space-x-2">
+                <button
+                  onClick={handleToggleArchive}
+                  className="btn-secondary flex items-center space-x-2"
+                >
                   <SafeIcon icon={FiArchive} className="w-4 h-4" />
                   <span>{client.isArchived ? 'Unarchive' : 'Archive'}</span>
                 </button>
-                <button onClick={() => setIsEditModalOpen(true)} className="btn-secondary flex items-center space-x-2">
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="btn-secondary flex items-center space-x-2"
+                >
                   <SafeIcon icon={FiEdit} className="w-4 h-4" />
                   <span>Edit</span>
                 </button>
-                <button onClick={handleDelete} className="btn-danger flex items-center space-x-2">
+                <button
+                  onClick={handleDelete}
+                  className="btn-danger flex items-center space-x-2"
+                >
                   <SafeIcon icon={FiTrash2} className="w-4 h-4" />
                   <span>Delete</span>
                 </button>
@@ -384,12 +405,15 @@ const ClientDetails = () => {
                 </div>
               </div>
 
-              {/* CRM Section - New */}
+              {/* CRM Section */}
               <div className="card">
                 <div className="card-header">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-gray-900">CRM Overview</h2>
-                    <Link to={`/clients/${clientId}/crm`} className="btn-primary flex items-center space-x-2">
+                    <Link
+                      to={`/clients/${clientId}/crm`}
+                      className="btn-primary flex items-center space-x-2"
+                    >
                       <SafeIcon icon={FiList} className="w-4 h-4" />
                       <span>Full CRM</span>
                     </Link>
@@ -433,7 +457,10 @@ const ClientDetails = () => {
                       <p className="text-gray-500 italic p-3 bg-gray-50 rounded-lg">No pending tasks</p>
                     )}
                     <div className="text-right">
-                      <Link to={`/clients/${clientId}/crm`} className="text-primary-600 hover:text-primary-700 text-sm">
+                      <Link
+                        to={`/clients/${clientId}/crm`}
+                        className="text-primary-600 hover:text-primary-700 text-sm"
+                      >
                         View all tasks
                       </Link>
                     </div>
@@ -464,18 +491,20 @@ const ClientDetails = () => {
                       </div>
                     </div>
                   </Link>
+
                   <Link
-                    to={`/clients/${clientId}/evaluation`}
+                    to={`/financial-analysis/${clientId}`}
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
                   >
                     <div className="flex items-center space-x-3">
                       <SafeIcon icon={FiActivity} className="w-5 h-5 text-primary-600" />
                       <div>
-                        <p className="font-medium text-gray-900">Financial Evaluation</p>
-                        <p className="text-sm text-gray-500">Assess financial health</p>
+                        <p className="font-medium text-gray-900">Financial Analysis</p>
+                        <p className="text-sm text-gray-500">Complete financial planning</p>
                       </div>
                     </div>
                   </Link>
+
                   <Link
                     to={`/clients/${clientId}/crm`}
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
@@ -488,6 +517,7 @@ const ClientDetails = () => {
                       </div>
                     </div>
                   </Link>
+
                   <Link
                     to="/proposals"
                     className="block w-full p-3 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
@@ -521,11 +551,19 @@ const ClientDetails = () => {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Portal Access</span>
-                    <Toggle enabled={client.hasAccess || false} onChange={handleTogglePortalAccess} size="sm" />
+                    <Toggle
+                      enabled={client.hasAccess || false}
+                      onChange={handleTogglePortalAccess}
+                      size="sm"
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Archived</span>
-                    <Toggle enabled={client.isArchived || false} onChange={handleToggleArchive} size="sm" />
+                    <Toggle
+                      enabled={client.isArchived || false}
+                      onChange={handleToggleArchive}
+                      size="sm"
+                    />
                   </div>
                   {client.nextReviewDate && (
                     <div className="flex items-center justify-between">

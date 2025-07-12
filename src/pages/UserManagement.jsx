@@ -1,3 +1,4 @@
+```jsx
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,7 +9,14 @@ import StatusBadge from '../components/ui/StatusBadge';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiPlus, FiSearch, FiEdit, FiTrash2, FiMail, FiCalendar, FiUser } = FiIcons;
+const { FiPlus, FiSearch, FiEdit, FiTrash2, FiMail, FiCalendar, FiUser, FiUpload } = FiIcons;
+
+// Team ID options
+const TEAM_IDS = [
+  { id: 'emd_rodriguez', name: 'EMD Rodriguez' },
+  { id: 'md_garcia', name: 'MD Garcia' },
+  { id: 'md_samaniego', name: 'MD Samaniego' }
+];
 
 const UserManagement = () => {
   const { user } = useAuth();
@@ -21,12 +29,16 @@ const UserManagement = () => {
     name: '',
     email: '',
     role: '',
-    teamId: ''
+    teamId: '',
+    agentCode: '',
+    avatar: ''
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   const filteredUsers = users.filter(u => {
     const matchesSearch = u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         u.email.toLowerCase().includes(searchTerm.toLowerCase());
+      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (u.agentCode || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     if (user?.role === 'manager') {
       return matchesSearch && (u.teamId === user.teamId || u.role === 'client');
@@ -42,7 +54,7 @@ const UserManagement = () => {
     } else {
       addUser({
         ...formData,
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+        avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
       });
       setIsAddModalOpen(false);
     }
@@ -54,8 +66,11 @@ const UserManagement = () => {
       name: '',
       email: '',
       role: '',
-      teamId: ''
+      teamId: '',
+      agentCode: '',
+      avatar: ''
     });
+    setImagePreview(null);
     setSelectedUser(null);
   };
 
@@ -65,8 +80,11 @@ const UserManagement = () => {
       name: userToEdit.name,
       email: userToEdit.email,
       role: userToEdit.role,
-      teamId: userToEdit.teamId || ''
+      teamId: userToEdit.teamId || '',
+      agentCode: userToEdit.agentCode || '',
+      avatar: userToEdit.avatar
     });
+    setImagePreview(userToEdit.avatar);
     setIsEditModalOpen(true);
   };
 
@@ -94,10 +112,21 @@ const UserManagement = () => {
     return false;
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setFormData(prev => ({ ...prev, avatar: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -147,6 +176,8 @@ const UserManagement = () => {
                 <th>User</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>Agent Code</th>
+                <th>Team</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Actions</th>
@@ -164,9 +195,6 @@ const UserManagement = () => {
                       />
                       <div>
                         <p className="font-medium text-gray-900">{userItem.name}</p>
-                        {userItem.teamId && (
-                          <p className="text-sm text-gray-500">Team: {userItem.teamId}</p>
-                        )}
                       </div>
                     </div>
                   </td>
@@ -180,6 +208,18 @@ const UserManagement = () => {
                     <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-xs font-medium">
                       {getRoleDisplayName(userItem.role)}
                     </span>
+                  </td>
+                  <td>
+                    {userItem.agentCode && (
+                      <span className="text-gray-600">{userItem.agentCode}</span>
+                    )}
+                  </td>
+                  <td>
+                    {userItem.teamId && (
+                      <span className="px-3 py-1 bg-secondary-100 text-secondary-800 rounded-full text-xs font-medium">
+                        {TEAM_IDS.find(team => team.id === userItem.teamId)?.name || userItem.teamId}
+                      </span>
+                    )}
                   </td>
                   <td>
                     <StatusBadge status={userItem.status} />
@@ -216,17 +256,39 @@ const UserManagement = () => {
           </table>
         </motion.div>
 
-        {/* Add User Modal */}
+        {/* Add/Edit User Modal */}
         <Modal
-          isOpen={isAddModalOpen}
+          isOpen={isAddModalOpen || isEditModalOpen}
           onClose={() => {
             setIsAddModalOpen(false);
+            setIsEditModalOpen(false);
             resetForm();
           }}
-          title="Add New User"
+          title={selectedUser ? 'Edit User' : 'Add New User'}
           size="md"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Profile Picture */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative">
+                <img
+                  src={imagePreview || formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover"
+                />
+                <label className="absolute bottom-0 right-0 bg-primary-600 text-white p-2 rounded-full cursor-pointer hover:bg-primary-700 transition-colors">
+                  <SafeIcon icon={FiUpload} className="w-4 h-4" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+              <p className="text-sm text-gray-500">Click the upload button to change profile picture</p>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Full Name *
@@ -277,18 +339,41 @@ const UserManagement = () => {
               </select>
             </div>
 
-            {(formData.role === 'manager' || formData.role === 'financial_professional') && (
+            {/* Agent Code - Only for admin, manager, and financial professional */}
+            {formData.role !== 'client' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Team ID
+                  Agent Code *
                 </label>
                 <input
                   type="text"
+                  required
+                  value={formData.agentCode}
+                  onChange={(e) => setFormData({ ...formData, agentCode: e.target.value })}
+                  className="form-input"
+                  placeholder="Enter agent code"
+                />
+              </div>
+            )}
+
+            {/* Team ID Selection - Only for admin, manager, and financial professional */}
+            {formData.role !== 'client' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Team
+                </label>
+                <select
                   value={formData.teamId}
                   onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
                   className="form-input"
-                  placeholder="Enter team ID"
-                />
+                >
+                  <option value="">Select team</option>
+                  {TEAM_IDS.map(team => (
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
 
@@ -297,99 +382,6 @@ const UserManagement = () => {
                 type="button"
                 onClick={() => {
                   setIsAddModalOpen(false);
-                  resetForm();
-                }}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-              <button type="submit" className="btn-primary">
-                Add User
-              </button>
-            </div>
-          </form>
-        </Modal>
-
-        {/* Edit User Modal */}
-        <Modal
-          isOpen={isEditModalOpen}
-          onClose={() => {
-            setIsEditModalOpen(false);
-            resetForm();
-          }}
-          title="Edit User"
-          size="md"
-        >
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="form-input"
-                placeholder="Enter full name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="form-input"
-                placeholder="Enter email address"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Role *
-              </label>
-              <select
-                required
-                value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="form-input"
-              >
-                <option value="">Select role</option>
-                {user?.role === 'admin' && (
-                  <>
-                    <option value="admin">Administrator</option>
-                    <option value="manager">Manager</option>
-                  </>
-                )}
-                <option value="financial_professional">Financial Professional</option>
-                <option value="client">Client</option>
-              </select>
-            </div>
-
-            {(formData.role === 'manager' || formData.role === 'financial_professional') && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Team ID
-                </label>
-                <input
-                  type="text"
-                  value={formData.teamId}
-                  onChange={(e) => setFormData({ ...formData, teamId: e.target.value })}
-                  className="form-input"
-                  placeholder="Enter team ID"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={() => {
                   setIsEditModalOpen(false);
                   resetForm();
                 }}
@@ -398,7 +390,7 @@ const UserManagement = () => {
                 Cancel
               </button>
               <button type="submit" className="btn-primary">
-                Update User
+                {selectedUser ? 'Update User' : 'Add User'}
               </button>
             </div>
           </form>
@@ -409,3 +401,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+```

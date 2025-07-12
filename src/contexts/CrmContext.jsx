@@ -40,66 +40,21 @@ export const CrmProvider = ({ children }) => {
     },
     history: {
       '1': [
-        {
-          id: '101',
-          clientId: '1',
-          status: 'initial_meeting_completed',
-          notes: 'First meeting went well. Client interested in retirement planning.',
-          createdAt: '2023-12-01T10:30:00Z'
-        }
+        { id: '101', clientId: '1', status: 'initial_meeting_completed', notes: 'First meeting went well. Client interested in retirement planning.', createdAt: '2023-12-01T10:30:00Z' }
       ],
       '2': [
-        {
-          id: '201',
-          clientId: '2',
-          status: 'initial_meeting_completed',
-          notes: 'Discussed college funding options.',
-          createdAt: '2023-11-28T13:00:00Z'
-        },
-        {
-          id: '202',
-          clientId: '2',
-          status: 'follow_up_meeting',
-          notes: 'Scheduling follow-up to present retirement options.',
-          createdAt: '2023-12-02T14:15:00Z'
-        }
+        { id: '201', clientId: '2', status: 'initial_meeting_completed', notes: 'Discussed college funding options.', createdAt: '2023-11-28T13:00:00Z' },
+        { id: '202', clientId: '2', status: 'follow_up_meeting', notes: 'Scheduling follow-up to present retirement options.', createdAt: '2023-12-02T14:15:00Z' }
       ],
       '4': [
-        {
-          id: '401',
-          clientId: '4',
-          status: 'initial_meeting_completed',
-          notes: 'Comprehensive review of current financial situation.',
-          createdAt: '2023-11-20T11:00:00Z'
-        },
-        {
-          id: '402',
-          clientId: '4',
-          status: 'follow_up_meeting',
-          notes: 'Presented initial findings and recommendations.',
-          createdAt: '2023-11-30T15:30:00Z'
-        },
-        {
-          id: '403',
-          clientId: '4',
-          status: 'create_proposal',
-          notes: 'Client interested in LIRP strategy. Working on proposal.',
-          createdAt: '2023-12-05T09:45:00Z'
-        }
+        { id: '401', clientId: '4', status: 'initial_meeting_completed', notes: 'Comprehensive review of current financial situation.', createdAt: '2023-11-20T11:00:00Z' },
+        { id: '402', clientId: '4', status: 'follow_up_meeting', notes: 'Presented initial findings and recommendations.', createdAt: '2023-11-30T15:30:00Z' },
+        { id: '403', clientId: '4', status: 'create_proposal', notes: 'Client interested in LIRP strategy. Working on proposal.', createdAt: '2023-12-05T09:45:00Z' }
       ]
     },
     tasks: {
       '1': [
-        {
-          id: '1001',
-          clientId: '1',
-          taskName: 'Send follow-up email',
-          description: 'Include retirement planning resources',
-          dueDate: '2023-12-08',
-          completed: true,
-          createdAt: '2023-12-01T11:00:00Z',
-          updatedAt: '2023-12-02T09:30:00Z'
-        }
+        { id: '1001', clientId: '1', taskName: 'Send follow-up email', description: 'Include retirement planning resources', dueDate: '2023-12-08', completed: true, createdAt: '2023-12-01T11:00:00Z', updatedAt: '2023-12-02T09:30:00Z' }
       ]
     }
   };
@@ -137,7 +92,11 @@ export const CrmProvider = ({ children }) => {
       // Update status
       const updatedStatuses = {
         ...clientStatuses,
-        [clientId]: { clientId, status: newStatus, updatedAt: timestamp }
+        [clientId]: {
+          clientId,
+          status: newStatus,
+          updatedAt: timestamp
+        }
       };
       setClientStatuses(updatedStatuses);
 
@@ -176,7 +135,6 @@ export const CrmProvider = ({ children }) => {
         createdAt: timestamp,
         updatedAt: timestamp
       };
-
       const clientTaskList = clientTasks[clientId] || [];
       const updatedTasks = {
         ...clientTasks,
@@ -197,10 +155,9 @@ export const CrmProvider = ({ children }) => {
     try {
       const timestamp = new Date().toISOString();
       const clientTaskList = clientTasks[clientId] || [];
-      const updatedClientTasks = clientTaskList.map(task =>
+      const updatedClientTasks = clientTaskList.map(task => 
         task.id === taskId ? { ...task, ...updates, updatedAt: timestamp } : task
       );
-
       const updatedTasks = {
         ...clientTasks,
         [clientId]: updatedClientTasks
@@ -220,7 +177,6 @@ export const CrmProvider = ({ children }) => {
     try {
       const clientTaskList = clientTasks[clientId] || [];
       const updatedClientTasks = clientTaskList.filter(task => task.id !== taskId);
-
       const updatedTasks = {
         ...clientTasks,
         [clientId]: updatedClientTasks
@@ -237,7 +193,11 @@ export const CrmProvider = ({ children }) => {
 
   // Get client status
   const getClientStatus = (clientId) => {
-    return clientStatuses[clientId] || { clientId, status: 'initial_meeting_completed', updatedAt: new Date().toISOString() };
+    return clientStatuses[clientId] || {
+      clientId,
+      status: 'initial_meeting_completed',
+      updatedAt: new Date().toISOString()
+    };
   };
 
   // Get client history

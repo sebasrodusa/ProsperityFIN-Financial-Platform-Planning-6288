@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+
 // Import supabase but wrap usage in try/catch to prevent crashes
 import supabase from '../lib/supabase';
 
@@ -203,7 +204,9 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       // Check if we have mock data for this client
       if (mockFinancialData[clientId]) {
-        setAnalysis(mockFinancialData[clientId]);
+        // Use a deep copy to prevent reference issues
+        const analysisData = JSON.parse(JSON.stringify(mockFinancialData[clientId]));
+        setAnalysis(analysisData);
       } else {
         // If no mock data, create empty template
         setAnalysis({
@@ -246,6 +249,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       // For now, just simulate a successful save
       console.log('Saving analysis data:', data);
+      
       const savedAnalysis = {
         ...data,
         id: data.id || 'new-analysis-id',
@@ -253,7 +257,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
       };
       
       setAnalysis(savedAnalysis);
-      
+
       // Update the mock data for future reference
       if (data.client_id && mockFinancialData[data.client_id]) {
         mockFinancialData[data.client_id] = savedAnalysis;

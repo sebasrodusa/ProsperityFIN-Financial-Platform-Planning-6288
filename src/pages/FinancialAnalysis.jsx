@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
+import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import CashflowSection from '../components/financial/CashflowSection';
@@ -9,47 +11,25 @@ import BalanceSheetSection from '../components/financial/BalanceSheetSection';
 import InsuranceSection from '../components/financial/InsuranceSection';
 import FinancialPlanningSection from '../components/financial/FinancialPlanningSection';
 import FinancialGoalsSection from '../components/financial/FinancialGoalsSection';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiDollarSign, FiTrendingUp, FiShield, FiFileText, FiTarget, FiSave, FiDownload, FiPlus, FiUser } = FiIcons;
+const { FiDollarSign, FiTrendingUp, FiShield, FiFileText, FiTarget, FiSave, FiDownload, FiUser, FiArrowLeft } = FiIcons;
 
 const FinancialAnalysis = () => {
+  const { clientId } = useParams(); // Optional - if accessed from client details
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { clients } = useData();
+  const { analysis, loadAnalysis, saveAnalysis, loading } = useFinancialAnalysis();
+  
   const [activeTab, setActiveTab] = useState('cashflow');
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-
-  // Financial data state
-  const [financialData, setFinancialData] = useState({
-    incomeSources: [],
-    expenses: [],
-    assets: [],
-    liabilities: [],
-    insurancePolicies: [],
-    insuranceCalculator: {
-      annualIncome: 0,
-      yearsToReplace: 20,
-      finalExpenses: 25000,
-      educationFund: 0,
-      existingCoverage: 0,
-      liquidAssets: 0,
-      retirementAccounts: 0
-    },
-    financialGoals: [],
-    estateChecklist: {
-      will: { completed: false, lastUpdated: '', notes: '' },
-      powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
-      healthcareDirective: { completed: false, lastUpdated: '', notes: '' },
-      trust: { completed: false, lastUpdated: '', notes: '' },
-      beneficiaryDesignations: { completed: false, lastUpdated: '', notes: '' },
-      guardianship: { completed: false, lastUpdated: '', notes: '' },
-      emergencyFund: { completed: false, lastUpdated: '', notes: '' },
-      taxPlanning: { completed: false, lastUpdated: '', notes: '' }
-    },
-    legacyWishes: ''
-  });
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Filter clients based on user role
   const availableClients = clients.filter(client => {
@@ -59,6 +39,24 @@ const FinancialAnalysis = () => {
     return true;
   });
 
+  // Initialize with client from URL params or require selection
+  useEffect(() => {
+    if (clientId) {
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        setSelectedClient(client);
+        loadAnalysis(clientId);
+      }
+    }
+  }, [clientId, clients, loadAnalysis]);
+
+  // Load analysis when client is selected
+  useEffect(() => {
+    if (selectedClient && !clientId) {
+      loadAnalysis(selectedClient.id);
+    }
+  }, [selectedClient, loadAnalysis, clientId]);
+
   const tabs = [
     { id: 'cashflow', name: 'Cashflow', icon: FiDollarSign },
     { id: 'balance', name: 'Balance Sheet', icon: FiTrendingUp },
@@ -67,32 +65,76 @@ const FinancialAnalysis = () => {
     { id: 'planning', name: 'Estate Planning', icon: FiFileText }
   ];
 
-  const handleSaveAnalysis = () => {
-    if (!selectedClient) {
+  const handleSaveAnalysis = async () => {
+    if (!selectedClient || !analysis) {
       alert('Please select a client first');
       return;
     }
-    
-    // Here you would save to Supabase
-    console.log('Saving analysis for client:', selectedClient.id, financialData);
-    alert('Analysis saved successfully!');
+
+    setIsSaving(true);
+    try {
+      await saveAnalysis(analysis);
+      setHasChanges(false);
+      setSaveSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+    } catch (error) {
+      alert('Error saving analysis. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDownloadPDF = () => {
+  const handleGenerateReport = () => {
     if (!selectedClient) {
       alert('Please select a client first');
       return;
     }
     
-    // Here you would generate and download PDF
-    console.log('Generating PDF for client:', selectedClient.id);
-    alert('PDF generation feature coming soon!');
+    // Navigate to the financial report page
+    navigate(`/clients/${selectedClient.id}/report`);
   };
+
+  const handleClientSelect = (client) => {
+    setSelectedClient(client);
+    setIsClientModalOpen(false);
+    loadAnalysis(client.id);
+  };
+
+  const handleDataChange = (section, data) => {
+    if (!analysis) return;
+    
+    // Create a copy of the analysis object
+    const updatedAnalysis = { ...analysis };
+    
+    // Update the specific section
+    updatedAnalysis[section] = data;
+    
+    // Update the analysis in the context
+    saveAnalysis(updatedAnalysis);
+    setHasChanges(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-center">
+            <LoadingSpinner size="lg" />
+            <p className="mt-4 text-gray-600">Loading financial analysis...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -101,15 +143,31 @@ const FinancialAnalysis = () => {
         >
           {/* Header */}
           <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h1 className="text-3xl font-heading font-bold text-gray-900">Financial Analysis</h1>
+            <div className="flex items-center mb-4">
+              {clientId && (
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mr-4"
+                >
+                  <SafeIcon icon={FiArrowLeft} className="w-4 h-4" />
+                  <span>Back</span>
+                </button>
+              )}
+              <div className="flex-1">
+                <h1 className="text-3xl font-heading font-bold text-gray-900">
+                  Financial Analysis
+                  {selectedClient && (
+                    <span className="text-xl text-gray-600 ml-2">- {selectedClient.name}</span>
+                  )}
+                </h1>
                 <p className="text-gray-600 mt-2">
                   Comprehensive financial planning and analysis tool
                 </p>
               </div>
-              
-              <div className="flex items-center space-x-4 mt-4 sm:mt-0">
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4">
+              {!clientId && (
                 <button
                   onClick={() => setIsClientModalOpen(true)}
                   className="btn-secondary flex items-center space-x-2"
@@ -117,23 +175,31 @@ const FinancialAnalysis = () => {
                   <SafeIcon icon={FiUser} className="w-4 h-4" />
                   <span>{selectedClient ? selectedClient.name : 'Select Client'}</span>
                 </button>
-                
-                <button
-                  onClick={handleSaveAnalysis}
-                  className="btn-secondary flex items-center space-x-2"
-                >
-                  <SafeIcon icon={FiSave} className="w-4 h-4" />
-                  <span>Save</span>
-                </button>
-                
-                <button
-                  onClick={handleDownloadPDF}
-                  className="btn-primary flex items-center space-x-2"
-                >
-                  <SafeIcon icon={FiDownload} className="w-4 h-4" />
-                  <span>Download PDF</span>
-                </button>
-              </div>
+              )}
+              
+              <button
+                onClick={handleSaveAnalysis}
+                disabled={!selectedClient || !hasChanges || isSaving}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <SafeIcon icon={FiSave} className="w-4 h-4" />
+                <span>{isSaving ? 'Saving...' : 'Save'}</span>
+              </button>
+              
+              <button
+                onClick={handleGenerateReport}
+                disabled={!selectedClient}
+                className="btn-primary flex items-center space-x-2"
+              >
+                <SafeIcon icon={FiDownload} className="w-4 h-4" />
+                <span>Generate Report</span>
+              </button>
+              
+              {saveSuccess && (
+                <span className="px-3 py-1 bg-success-100 text-success-800 rounded-lg text-sm">
+                  Analysis saved successfully!
+                </span>
+              )}
             </div>
           </div>
 
@@ -147,100 +213,139 @@ const FinancialAnalysis = () => {
           )}
 
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200 mb-8">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <SafeIcon icon={tab.icon} className="w-4 h-4" />
-                  <span>{tab.name}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
+          {selectedClient && (
+            <>
+              <div className="border-b border-gray-200 mb-8 overflow-x-auto">
+                <nav className="-mb-px flex space-x-8">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap ${
+                        activeTab === tab.id
+                          ? 'border-primary-500 text-primary-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <SafeIcon icon={tab.icon} className="w-4 h-4" />
+                      <span>{tab.name}</span>
+                    </button>
+                  ))}
+                </nav>
+              </div>
 
-          {/* Tab Content */}
-          <div className="space-y-6">
-            {activeTab === 'cashflow' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <CashflowSection
-                  incomeSources={financialData.incomeSources}
-                  expenses={financialData.expenses}
-                  onIncomeChange={(sources) => setFinancialData({ ...financialData, incomeSources: sources })}
-                  onExpenseChange={(expenses) => setFinancialData({ ...financialData, expenses })}
-                />
-              </motion.div>
-            )}
+              {/* Tab Content */}
+              <div className="space-y-6">
+                {activeTab === 'cashflow' && analysis && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <CashflowSection
+                      incomeSources={analysis.income_sources_fa7 || []}
+                      expenses={analysis.expenses_fa7 || []}
+                      onIncomeChange={(sources) => handleDataChange('income_sources_fa7', sources)}
+                      onExpenseChange={(expenses) => handleDataChange('expenses_fa7', expenses)}
+                    />
+                  </motion.div>
+                )}
 
-            {activeTab === 'balance' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <BalanceSheetSection
-                  assets={financialData.assets}
-                  liabilities={financialData.liabilities}
-                  onAssetChange={(assets) => setFinancialData({ ...financialData, assets })}
-                  onLiabilityChange={(liabilities) => setFinancialData({ ...financialData, liabilities })}
-                />
-              </motion.div>
-            )}
+                {activeTab === 'balance' && analysis && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <BalanceSheetSection
+                      assets={analysis.assets_fa7 || []}
+                      liabilities={analysis.liabilities_fa7 || []}
+                      onAssetChange={(assets) => handleDataChange('assets_fa7', assets)}
+                      onLiabilityChange={(liabilities) => handleDataChange('liabilities_fa7', liabilities)}
+                    />
+                  </motion.div>
+                )}
 
-            {activeTab === 'insurance' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <InsuranceSection
-                  policies={financialData.insurancePolicies}
-                  onPoliciesChange={(policies) => setFinancialData({ ...financialData, insurancePolicies: policies })}
-                  needsCalculator={financialData.insuranceCalculator}
-                  onNeedsCalculatorChange={(calculator) => setFinancialData({ ...financialData, insuranceCalculator: calculator })}
-                />
-              </motion.div>
-            )}
+                {activeTab === 'insurance' && analysis && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <InsuranceSection
+                      policies={analysis.insurance_policies_fa7 || []}
+                      onPoliciesChange={(policies) => handleDataChange('insurance_policies_fa7', policies)}
+                      needsCalculator={analysis.insuranceCalculator || {
+                        annualIncome: 0,
+                        yearsToReplace: 20,
+                        finalExpenses: 25000,
+                        educationFund: 0,
+                        existingCoverage: 0,
+                        liquidAssets: 0,
+                        retirementAccounts: 0
+                      }}
+                      onNeedsCalculatorChange={(calculator) => handleDataChange('insuranceCalculator', calculator)}
+                    />
+                  </motion.div>
+                )}
 
-            {activeTab === 'goals' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <FinancialGoalsSection
-                  goals={financialData.financialGoals}
-                  onGoalsChange={(goals) => setFinancialData({ ...financialData, financialGoals: goals })}
-                />
-              </motion.div>
-            )}
+                {activeTab === 'goals' && analysis && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <FinancialGoalsSection
+                      goals={analysis.financial_goals_fa7 || []}
+                      onGoalsChange={(goals) => handleDataChange('financial_goals_fa7', goals)}
+                    />
+                  </motion.div>
+                )}
 
-            {activeTab === 'planning' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
+                {activeTab === 'planning' && analysis && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <FinancialPlanningSection
+                      checklist={analysis.estateChecklist || {
+                        will: { completed: false, lastUpdated: '', notes: '' },
+                        powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
+                        healthcareDirective: { completed: false, lastUpdated: '', notes: '' },
+                        trust: { completed: false, lastUpdated: '', notes: '' },
+                        beneficiaryDesignations: { completed: false, lastUpdated: '', notes: '' },
+                        guardianship: { completed: false, lastUpdated: '', notes: '' },
+                        emergencyFund: { completed: false, lastUpdated: '', notes: '' },
+                        taxPlanning: { completed: false, lastUpdated: '', notes: '' }
+                      }}
+                      onChecklistChange={(checklist) => handleDataChange('estateChecklist', checklist)}
+                      legacyWishes={analysis.legacyWishes || ''}
+                      onLegacyWishesChange={(wishes) => handleDataChange('legacyWishes', wishes)}
+                    />
+                  </motion.div>
+                )}
+              </div>
+            </>
+          )}
+
+          {/* Bottom Save Button */}
+          {hasChanges && selectedClient && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="fixed bottom-6 right-6 z-50"
+            >
+              <button
+                onClick={handleSaveAnalysis}
+                disabled={isSaving}
+                className="btn-primary flex items-center space-x-2 shadow-lg"
               >
-                <FinancialPlanningSection
-                  checklist={financialData.estateChecklist}
-                  onChecklistChange={(checklist) => setFinancialData({ ...financialData, estateChecklist: checklist })}
-                  legacyWishes={financialData.legacyWishes}
-                  onLegacyWishesChange={(wishes) => setFinancialData({ ...financialData, legacyWishes: wishes })}
-                />
-              </motion.div>
-            )}
-          </div>
+                <SafeIcon icon={FiSave} className="w-4 h-4" />
+                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+              </button>
+            </motion.div>
+          )}
         </motion.div>
       </div>
 
@@ -255,10 +360,7 @@ const FinancialAnalysis = () => {
           {availableClients.map((client) => (
             <button
               key={client.id}
-              onClick={() => {
-                setSelectedClient(client);
-                setIsClientModalOpen(false);
-              }}
+              onClick={() => handleClientSelect(client)}
               className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
             >
               <div className="flex items-center space-x-3">
@@ -274,7 +376,6 @@ const FinancialAnalysis = () => {
               </div>
             </button>
           ))}
-          
           {availableClients.length === 0 && (
             <div className="text-center py-8">
               <p className="text-gray-500">No clients available</p>
