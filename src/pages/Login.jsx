@@ -32,13 +32,6 @@ const Login = () => {
     }
   };
 
-  const demoCredentials = [
-    { email: 'admin@prosperityfin.com', password: 'admin123', role: 'Administrator' },
-    { email: 'manager@prosperityfin.com', password: 'manager123', role: 'Manager' },
-    { email: 'advisor@prosperityfin.com', password: 'advisor123', role: 'Financial Professional' },
-    { email: 'client@prosperityfin.com', password: 'client123', role: 'Client' }
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -119,44 +112,45 @@ const Login = () => {
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center space-x-2"
-          >
-            {loading ? (
-              <LoadingSpinner size="sm" />
-            ) : (
-              <span>Sign In</span>
-            )}
-          </button>
-        </motion.form>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white p-6 rounded-xl shadow-medium"
-        >
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Demo Credentials:</h3>
-          <div className="space-y-2">
-            {demoCredentials.map((cred, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setEmail(cred.email);
-                  setPassword(cred.password);
-                }}
-                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">{cred.role}</span>
-                  <span className="text-xs text-gray-500">{cred.email}</span>
-                </div>
-              </button>
-            ))}
+          <div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full flex items-center justify-center space-x-2"
+            >
+              {loading ? (
+                <LoadingSpinner size="sm" />
+              ) : (
+                <span>Sign In</span>
+              )}
+            </button>
           </div>
-        </motion.div>
+
+          <div className="text-center text-sm">
+            <span className="text-gray-600">Don't have an account?</span>
+            <a
+              href="https://prosperityfin.com/signup"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Sign up here
+            </a>
+          </div>
+
+          <div className="text-center text-xs text-gray-500">
+            <p>
+              By signing in, you agree to our{' '}
+              <a href="#" className="text-primary-600 hover:text-primary-700">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="#" className="text-primary-600 hover:text-primary-700">
+                Privacy Policy
+              </a>
+            </p>
+          </div>
+        </motion.form>
       </motion.div>
     </div>
   );
