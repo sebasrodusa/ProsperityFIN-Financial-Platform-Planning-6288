@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import supabase from '../lib/supabase';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -20,66 +21,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock user data based on email
-      let mockUser;
-      if (email === 'admin@prosperityfin.com') {
-        mockUser = {
-          id: '1',
-          email: 'admin@prosperityfin.com',
-          name: 'Admin User',
-          role: 'admin',
-          agentCode: 'ADM001',
-          teamId: 'emd_rodriguez',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-        };
-      } else if (email === 'manager@prosperityfin.com') {
-        mockUser = {
-          id: '2',
-          email: 'manager@prosperityfin.com',
-          name: 'Sarah Johnson',
-          role: 'manager',
-          agentCode: 'MGR001',
-          teamId: 'md_garcia',
-          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face'
-        };
-      } else if (email === 'advisor@prosperityfin.com') {
-        mockUser = {
-          id: '3',
-          email: 'advisor@prosperityfin.com',
-          name: 'Michael Chen',
-          role: 'financial_professional',
-          agentCode: 'FP001',
-          teamId: 'md_samaniego',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-        };
-      } else if (email === 'client@prosperityfin.com') {
-        mockUser = {
-          id: '4',
-          email: 'client@prosperityfin.com',
-          name: 'John Smith',
-          role: 'client',
-          advisorId: '3',
-          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
-        };
-      } else {
-        throw new Error('Invalid credentials');
-      }
-
-      // Check password (simple mock)
-      if (password !== 'admin123' && password !== 'manager123' && password !== 'advisor123' && password !== 'client123') {
-        throw new Error('Invalid credentials');
-      }
-
-      // Set the user in state
-      setUser(mockUser);
-
-      // Store the user in localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(mockUser));
-
-      return mockUser;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setUser(data.user);
+      return data.user;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -89,29 +34,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Logout function
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem('user');
   };
 
-  // Check for existing session on component mount
+  // Load current session and subscribe to auth changes
   useEffect(() => {
-    const checkAuthStatus = () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setUser(parsedUser);
-        }
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
-      } finally {
-        setLoading(false);
-      }
-    };
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
 
-    checkAuthStatus();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   // Provide the auth context value
