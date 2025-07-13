@@ -1,4 +1,3 @@
-```javascript
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import SafeIcon from '../../common/SafeIcon';
@@ -33,7 +32,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
     // Store children data in children_info JSONB column
     children_info: []
   });
-  
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -87,7 +85,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
   const handleChildChange = (index, field, value) => {
     setFormData(prev => ({
       ...prev,
-      children_info: prev.children_info.map((child, i) => 
+      children_info: prev.children_info.map((child, i) =>
         i === index ? { ...child, [field]: value } : child
       )
     }));
@@ -110,7 +108,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       console.log('Preparing client data for Supabase:', formData);
 
@@ -129,8 +127,8 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         target_revenue: formData.target_revenue ? parseFloat(formData.target_revenue) : null,
         spouse_info: formData.spouse_info || null,
         children_info: formData.children_info || null,
-        advisor_id: user.id,
-        created_by: user.id,
+        advisor_id: user?.id,
+        created_by: user?.id,
         created_at: new Date().toISOString(),
         // CRM fields with snake_case
         crm_status: 'initial_meeting',
@@ -162,6 +160,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
           .select();
 
         if (error) throw error;
+
         console.log('Client updated successfully in Supabase:', data);
         onSubmit(data[0] || updateData);
       } else {
@@ -171,6 +170,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
           .select();
 
         if (error) throw error;
+
         console.log('Client added successfully to Supabase:', data);
         onSubmit(data[0] || clientData);
       }
@@ -203,7 +203,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Email Address *
@@ -221,7 +220,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Phone Number
@@ -238,7 +236,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Date of Birth
@@ -254,7 +251,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Gender
@@ -272,7 +268,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             <option value="Prefer not to say">Prefer not to say</option>
           </select>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Marital Status
@@ -328,7 +323,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Target Revenue
@@ -361,7 +355,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               placeholder="Enter spouse name"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Spouse Email
@@ -375,7 +368,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               placeholder="Enter spouse email"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Spouse Phone
@@ -389,7 +381,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               placeholder="Enter spouse phone"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Spouse Date of Birth
@@ -402,7 +393,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               className="form-input"
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Spouse Gender
@@ -419,7 +409,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               <option value="Other">Other</option>
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Spouse Employer
@@ -449,7 +438,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
             <span>Add Child</span>
           </button>
         </div>
-
         <div className="space-y-4">
           {formData.children_info.map((child, index) => (
             <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
@@ -498,7 +486,6 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
               Grant portal access
             </label>
           </div>
-
           {isEditing && (
             <div className="flex items-center">
               <input
@@ -550,4 +537,3 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
 };
 
 export default ClientForm;
-```
