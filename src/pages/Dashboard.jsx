@@ -75,7 +75,7 @@ const Dashboard = () => {
     };
 
     activeClients.forEach(client => {
-      if (client.crmStatus && statusDistribution.hasOwnProperty(client.crmStatus)) {
+      if (client.crmStatus && Object.prototype.hasOwnProperty.call(statusDistribution, client.crmStatus)) {
         statusDistribution[client.crmStatus]++;
       }
     });
