@@ -31,33 +31,6 @@ export const CrmProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Mock data for client statuses, history and tasks
-  const mockData = {
-    statuses: {
-      '1': { clientId: '1', status: 'initial_meeting_completed', updatedAt: '2023-12-01T10:30:00Z' },
-      '2': { clientId: '2', status: 'follow_up_meeting', updatedAt: '2023-12-02T14:15:00Z' },
-      '4': { clientId: '4', status: 'create_proposal', updatedAt: '2023-12-05T09:45:00Z' }
-    },
-    history: {
-      '1': [
-        { id: '101', clientId: '1', status: 'initial_meeting_completed', notes: 'First meeting went well. Client interested in retirement planning.', createdAt: '2023-12-01T10:30:00Z' }
-      ],
-      '2': [
-        { id: '201', clientId: '2', status: 'initial_meeting_completed', notes: 'Discussed college funding options.', createdAt: '2023-11-28T13:00:00Z' },
-        { id: '202', clientId: '2', status: 'follow_up_meeting', notes: 'Scheduling follow-up to present retirement options.', createdAt: '2023-12-02T14:15:00Z' }
-      ],
-      '4': [
-        { id: '401', clientId: '4', status: 'initial_meeting_completed', notes: 'Comprehensive review of current financial situation.', createdAt: '2023-11-20T11:00:00Z' },
-        { id: '402', clientId: '4', status: 'follow_up_meeting', notes: 'Presented initial findings and recommendations.', createdAt: '2023-11-30T15:30:00Z' },
-        { id: '403', clientId: '4', status: 'create_proposal', notes: 'Client interested in LIRP strategy. Working on proposal.', createdAt: '2023-12-05T09:45:00Z' }
-      ]
-    },
-    tasks: {
-      '1': [
-        { id: '1001', clientId: '1', taskName: 'Send follow-up email', description: 'Include retirement planning resources', dueDate: '2023-12-08', completed: true, createdAt: '2023-12-01T11:00:00Z', updatedAt: '2023-12-02T09:30:00Z' }
-      ]
-    }
-  };
 
   // Load client CRM data
   useEffect(() => {
@@ -66,11 +39,66 @@ export const CrmProvider = ({ children }) => {
         setLoading(true);
         setError(null);
 
-        // In a real implementation, this would fetch from Supabase
-        // For now, we'll use mock data
-        setClientStatuses(mockData.statuses);
-        setStatusHistory(mockData.history);
-        setClientTasks(mockData.tasks);
+        const { data: statusData, error: statusError } = await supabase
+          .from('crm_client_statuses_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+
+        if (statusError) throw statusError;
+
+        const statuses = {};
+        (statusData || []).forEach(row => {
+          statuses[row.client_id] = {
+            clientId: row.client_id,
+            status: row.status,
+            updatedAt: row.updated_at
+          };
+        });
+
+        const { data: historyData, error: historyError } = await supabase
+          .from('crm_status_history_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+
+        if (historyError) throw historyError;
+
+        const history = {};
+        (historyData || []).forEach(row => {
+          if (!history[row.client_id]) history[row.client_id] = [];
+          history[row.client_id].push({
+            id: row.id,
+            clientId: row.client_id,
+            status: row.status,
+            notes: row.notes,
+            createdAt: row.created_at
+          });
+        });
+
+        const { data: tasksData, error: tasksError } = await supabase
+          .from('crm_client_tasks_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+
+        if (tasksError) throw tasksError;
+
+        const tasks = {};
+        (tasksData || []).forEach(task => {
+          if (!tasks[task.client_id]) tasks[task.client_id] = [];
+          tasks[task.client_id].push({
+            id: task.id,
+            clientId: task.client_id,
+            taskName: task.task_name,
+            description: task.description,
+            dueDate: task.due_date,
+            completed: task.completed,
+            createdAt: task.created_at,
+            updatedAt: task.updated_at
+          });
+        });
+
+        setClientStatuses(statuses);
+        setStatusHistory(history);
+        setClientTasks(tasks);
       } catch (err) {
         console.error('Error loading CRM data:', err);
         setError('Failed to load CRM data');
@@ -89,33 +117,53 @@ export const CrmProvider = ({ children }) => {
     try {
       const timestamp = new Date().toISOString();
 
-      // Update status
-      const updatedStatuses = {
-        ...clientStatuses,
-        [clientId]: {
-          clientId,
+      const { data: statusData, error: statusError } = await supabase
+        .from('crm_client_statuses_pf')
+        .upsert({
+          client_id: clientId,
           status: newStatus,
-          updatedAt: timestamp
+          updated_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
+
+      if (statusError) throw statusError;
+
+      setClientStatuses(prev => ({
+        ...prev,
+        [clientId]: {
+          clientId: statusData.client_id,
+          status: statusData.status,
+          updatedAt: statusData.updated_at
         }
-      };
-      setClientStatuses(updatedStatuses);
+      }));
 
-      // Add to history
-      const historyEntry = {
-        id: Date.now().toString(),
-        clientId,
-        status: newStatus,
-        notes,
-        createdAt: timestamp
-      };
-      const clientHistory = statusHistory[clientId] || [];
-      const updatedHistory = {
-        ...statusHistory,
-        [clientId]: [...clientHistory, historyEntry]
-      };
-      setStatusHistory(updatedHistory);
+      const { data: historyEntry, error: historyError } = await supabase
+        .from('crm_status_history_pf')
+        .insert({
+          client_id: clientId,
+          status: newStatus,
+          notes,
+          created_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
 
-      // In a real implementation, would save to Supabase here
+      if (historyError) throw historyError;
+
+      setStatusHistory(prev => ({
+        ...prev,
+        [clientId]: [...(prev[clientId] || []), {
+          id: historyEntry.id,
+          clientId: historyEntry.client_id,
+          status: historyEntry.status,
+          notes: historyEntry.notes,
+          createdAt: historyEntry.created_at
+        }]
+      }));
+
       return { success: true };
     } catch (err) {
       console.error('Error updating client status:', err);
@@ -127,23 +175,39 @@ export const CrmProvider = ({ children }) => {
   const addClientTask = async (clientId, taskData) => {
     try {
       const timestamp = new Date().toISOString();
-      const newTask = {
-        id: Date.now().toString(),
-        clientId,
-        ...taskData,
-        completed: false,
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-      const clientTaskList = clientTasks[clientId] || [];
-      const updatedTasks = {
-        ...clientTasks,
-        [clientId]: [...clientTaskList, newTask]
-      };
-      setClientTasks(updatedTasks);
 
-      // In a real implementation, would save to Supabase here
-      return { success: true, task: newTask };
+      const { data: task, error } = await supabase
+        .from('crm_client_tasks_pf')
+        .insert({
+          client_id: clientId,
+          task_name: taskData.taskName,
+          description: taskData.description,
+          due_date: taskData.dueDate,
+          completed: false,
+          created_at: timestamp,
+          updated_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClientTasks(prev => ({
+        ...prev,
+        [clientId]: [...(prev[clientId] || []), {
+          id: task.id,
+          clientId: task.client_id,
+          taskName: task.task_name,
+          description: task.description,
+          dueDate: task.due_date,
+          completed: task.completed,
+          createdAt: task.created_at,
+          updatedAt: task.updated_at
+        }]
+      }));
+
+      return { success: true, task };
     } catch (err) {
       console.error('Error adding client task:', err);
       return { success: false, error: err.message };
@@ -154,17 +218,35 @@ export const CrmProvider = ({ children }) => {
   const updateClientTask = async (clientId, taskId, updates) => {
     try {
       const timestamp = new Date().toISOString();
-      const clientTaskList = clientTasks[clientId] || [];
-      const updatedClientTasks = clientTaskList.map(task => 
-        task.id === taskId ? { ...task, ...updates, updatedAt: timestamp } : task
-      );
-      const updatedTasks = {
-        ...clientTasks,
-        [clientId]: updatedClientTasks
-      };
-      setClientTasks(updatedTasks);
 
-      // In a real implementation, would save to Supabase here
+      const { data, error } = await supabase
+        .from('crm_client_tasks_pf')
+        .update({ ...updates, updated_at: timestamp })
+        .eq('id', taskId)
+        .eq('client_id', clientId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClientTasks(prev => ({
+        ...prev,
+        [clientId]: (prev[clientId] || []).map(task =>
+          task.id === taskId
+            ? {
+                id: data.id,
+                clientId: data.client_id,
+                taskName: data.task_name,
+                description: data.description,
+                dueDate: data.due_date,
+                completed: data.completed,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at
+              }
+            : task
+        )
+      }));
+
       return { success: true };
     } catch (err) {
       console.error('Error updating client task:', err);
@@ -175,15 +257,19 @@ export const CrmProvider = ({ children }) => {
   // Delete task
   const deleteClientTask = async (clientId, taskId) => {
     try {
-      const clientTaskList = clientTasks[clientId] || [];
-      const updatedClientTasks = clientTaskList.filter(task => task.id !== taskId);
-      const updatedTasks = {
-        ...clientTasks,
-        [clientId]: updatedClientTasks
-      };
-      setClientTasks(updatedTasks);
+      const { error } = await supabase
+        .from('crm_client_tasks_pf')
+        .delete()
+        .eq('id', taskId)
+        .eq('client_id', clientId);
 
-      // In a real implementation, would delete from Supabase here
+      if (error) throw error;
+
+      setClientTasks(prev => ({
+        ...prev,
+        [clientId]: (prev[clientId] || []).filter(task => task.id !== taskId)
+      }));
+
       return { success: true };
     } catch (err) {
       console.error('Error deleting client task:', err);
