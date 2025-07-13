@@ -1,184 +1,416 @@
+```javascript
 import React, { useState, useEffect } from 'react';
-import Toggle from '../ui/Toggle';
+import { useAuth } from '../../contexts/AuthContext';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import supabase from '../../lib/supabase';
 
-const { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiUsers, FiDollarSign, FiArchive } = FiIcons;
+const { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiUsers, FiPlus, FiTrash2, FiSave, FiX } = FiIcons;
 
 const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
+    date_of_birth: '',
     gender: '',
-    maritalStatus: '',
+    marital_status: '',
     address: '',
-    employerName: '',
-    hasAccess: false,
-    isArchived: false,
-    targetRevenue: '',
-    spouse: {
+    employer_name: '',
+    has_access: false,
+    is_archived: false,
+    target_revenue: '',
+    // Store spouse data in spouse_info JSONB column
+    spouse_info: {
       name: '',
       email: '',
       phone: '',
-      dateOfBirth: '',
+      date_of_birth: '',
       gender: '',
-      employerName: ''
+      employer_name: ''
     },
-    children: []
+    // Store children data in children_info JSONB column
+    children_info: []
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (initialData) {
       setFormData({
-        ...initialData,
-        hasAccess: initialData.hasAccess || false,
-        isArchived: initialData.isArchived || false,
-        targetRevenue: initialData.targetRevenue || '',
-        spouse: initialData.spouse || {
+        name: initialData.name || '',
+        email: initialData.email || '',
+        phone: initialData.phone || '',
+        date_of_birth: initialData.date_of_birth || initialData.dateOfBirth || '',
+        gender: initialData.gender || '',
+        marital_status: initialData.marital_status || initialData.maritalStatus || '',
+        address: initialData.address || '',
+        employer_name: initialData.employer_name || initialData.employerName || '',
+        has_access: initialData.has_access || initialData.hasAccess || false,
+        is_archived: initialData.is_archived || initialData.isArchived || false,
+        target_revenue: initialData.target_revenue || initialData.targetRevenue || '',
+        spouse_info: initialData.spouse_info || initialData.spouse || {
           name: '',
           email: '',
           phone: '',
-          dateOfBirth: '',
+          date_of_birth: '',
           gender: '',
-          employerName: ''
+          employer_name: ''
         },
-        children: initialData.children || []
+        children_info: initialData.children_info || initialData.children || []
       });
     }
   }, [initialData]);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
+  // Handle spouse change to use spouse_info
   const handleSpouseChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      spouse: {
-        ...prev.spouse,
+      spouse_info: {
+        ...prev.spouse_info,
         [name]: value
       }
+    }));
+  };
+
+  // Handle children change to use children_info
+  const handleChildChange = (index, field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      children_info: prev.children_info.map((child, i) => 
+        i === index ? { ...child, [field]: value } : child
+      )
     }));
   };
 
   const handleAddChild = () => {
     setFormData(prev => ({
       ...prev,
-      children: [...prev.children, { name: '', dateOfBirth: '' }]
-    }));
-  };
-
-  const handleChildChange = (index, field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      children: prev.children.map((child, i) =>
-        i === index ? { ...child, [field]: value } : child
-      )
+      children_info: [...prev.children_info, { name: '', date_of_birth: '' }]
     }));
   };
 
   const handleRemoveChild = (index) => {
     setFormData(prev => ({
       ...prev,
-      children: prev.children.filter((_, i) => i !== index)
+      children_info: prev.children_info.filter((_, i) => i !== index)
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    setIsSubmitting(true);
+    
+    try {
+      console.log('Preparing client data for Supabase:', formData);
+
+      // Prepare the client data for insertion with snake_case field names
+      const clientData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        date_of_birth: formData.date_of_birth || null,
+        gender: formData.gender || null,
+        marital_status: formData.marital_status || null,
+        address: formData.address || null,
+        employer_name: formData.employer_name || null,
+        has_access: formData.has_access || false,
+        is_archived: formData.is_archived || false,
+        target_revenue: formData.target_revenue ? parseFloat(formData.target_revenue) : null,
+        spouse_info: formData.spouse_info || null,
+        children_info: formData.children_info || null,
+        advisor_id: user.id,
+        created_by: user.id,
+        created_at: new Date().toISOString(),
+        // CRM fields with snake_case
+        crm_status: 'initial_meeting',
+        crm_notes: [],
+        crm_tasks: [],
+        status_history: [{
+          id: Date.now().toString(),
+          from_status: null,
+          to_status: 'initial_meeting',
+          changed_at: new Date().toISOString(),
+          notes: 'Initial status set'
+        }],
+        last_activity: new Date().toISOString()
+      };
+
+      console.log('Submitting client data to Supabase:', clientData);
+
+      if (isEditing && initialData?.id) {
+        // For updates, don't include created_at and created_by
+        const updateData = { ...clientData };
+        delete updateData.created_at;
+        delete updateData.created_by;
+        updateData.updated_at = new Date().toISOString();
+
+        const { data, error } = await supabase
+          .from('clients_pf')
+          .update(updateData)
+          .eq('id', initialData.id)
+          .select();
+
+        if (error) throw error;
+        console.log('Client updated successfully in Supabase:', data);
+        onSubmit(data[0] || updateData);
+      } else {
+        const { data, error } = await supabase
+          .from('clients_pf')
+          .insert(clientData)
+          .select();
+
+        if (error) throw error;
+        console.log('Client added successfully to Supabase:', data);
+        onSubmit(data[0] || clientData);
+      }
+    } catch (error) {
+      console.error('Error saving client to Supabase:', error);
+      alert(`Failed to save client: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Personal Information */}
+      {/* Basic Information */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Full Name *
+          </label>
+          <div className="relative">
+            <SafeIcon icon={FiUser} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              name="name"
+              required
+              value={formData.name}
+              onChange={handleInputChange}
+              className="form-input pl-10"
+              placeholder="Enter full name"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address *
+          </label>
+          <div className="relative">
+            <SafeIcon icon={FiMail} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              className="form-input pl-10"
+              placeholder="Enter email address"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone Number
+          </label>
+          <div className="relative">
+            <SafeIcon icon={FiPhone} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="form-input pl-10"
+              placeholder="Enter phone number"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Date of Birth
+          </label>
+          <div className="relative">
+            <SafeIcon icon={FiCalendar} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="date"
+              name="date_of_birth"
+              value={formData.date_of_birth}
+              onChange={handleInputChange}
+              className="form-input pl-10"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Gender
+          </label>
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleInputChange}
+            className="form-input"
+          >
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Marital Status
+          </label>
+          <select
+            name="marital_status"
+            value={formData.marital_status}
+            onChange={handleInputChange}
+            className="form-input"
+          >
+            <option value="">Select marital status</option>
+            <option value="Single">Single</option>
+            <option value="Married">Married</option>
+            <option value="Divorced">Divorced</option>
+            <option value="Widowed">Widowed</option>
+            <option value="Separated">Separated</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Address */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Address
+        </label>
+        <div className="relative">
+          <SafeIcon icon={FiMapPin} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+          <textarea
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+            className="form-input pl-10 h-20 resize-none"
+            placeholder="Enter full address"
+          />
+        </div>
+      </div>
+
+      {/* Employment */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Employer Name
+          </label>
+          <div className="relative">
+            <SafeIcon icon={FiBriefcase} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              name="employer_name"
+              value={formData.employer_name}
+              onChange={handleInputChange}
+              className="form-input pl-10"
+              placeholder="Enter employer name"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Target Revenue
+          </label>
+          <input
+            type="number"
+            name="target_revenue"
+            value={formData.target_revenue}
+            onChange={handleInputChange}
+            className="form-input"
+            placeholder="Enter target revenue"
+          />
+        </div>
+      </div>
+
+      {/* Spouse Information */}
+      <div className="border-t border-gray-200 pt-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Spouse Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name *
+              Spouse Name
             </label>
-            <div className="relative">
-              <SafeIcon icon={FiUser} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                name="name"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Enter full name"
-              />
-            </div>
+            <input
+              type="text"
+              name="name"
+              value={formData.spouse_info.name}
+              onChange={handleSpouseChange}
+              className="form-input"
+              placeholder="Enter spouse name"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address *
+              Spouse Email
             </label>
-            <div className="relative">
-              <SafeIcon icon={FiMail} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Enter email address"
-              />
-            </div>
+            <input
+              type="email"
+              name="email"
+              value={formData.spouse_info.email}
+              onChange={handleSpouseChange}
+              className="form-input"
+              placeholder="Enter spouse email"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
+              Spouse Phone
             </label>
-            <div className="relative">
-              <SafeIcon icon={FiPhone} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Enter phone number"
-              />
-            </div>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.spouse_info.phone}
+              onChange={handleSpouseChange}
+              className="form-input"
+              placeholder="Enter spouse phone"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Date of Birth
+              Spouse Date of Birth
             </label>
-            <div className="relative">
-              <SafeIcon icon={FiCalendar} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-              />
-            </div>
+            <input
+              type="date"
+              name="date_of_birth"
+              value={formData.spouse_info.date_of_birth}
+              onChange={handleSpouseChange}
+              className="form-input"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Gender
+              Spouse Gender
             </label>
             <select
               name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
+              value={formData.spouse_info.gender}
+              onChange={handleSpouseChange}
               className="form-input"
             >
               <option value="">Select gender</option>
@@ -190,264 +422,127 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Marital Status
+              Spouse Employer
             </label>
-            <select
-              name="maritalStatus"
-              value={formData.maritalStatus}
-              onChange={handleInputChange}
+            <input
+              type="text"
+              name="employer_name"
+              value={formData.spouse_info.employer_name}
+              onChange={handleSpouseChange}
               className="form-input"
-            >
-              <option value="">Select status</option>
-              <option value="single">Single</option>
-              <option value="married">Married</option>
-              <option value="divorced">Divorced</option>
-              <option value="widowed">Widowed</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address
-            </label>
-            <div className="relative">
-              <SafeIcon icon={FiMapPin} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Enter address"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Employer
-            </label>
-            <div className="relative">
-              <SafeIcon icon={FiBriefcase} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                name="employerName"
-                value={formData.employerName}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Enter employer name"
-              />
-            </div>
-          </div>
-
-          {/* New Target Revenue Field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Target Revenue
-            </label>
-            <div className="relative">
-              <SafeIcon icon={FiDollarSign} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="number"
-                name="targetRevenue"
-                value={formData.targetRevenue}
-                onChange={handleInputChange}
-                className="form-input pl-10"
-                placeholder="Potential revenue value"
-              />
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Estimated revenue value for pipeline calculations
-            </p>
+              placeholder="Enter spouse employer"
+            />
           </div>
         </div>
       </div>
 
-      {/* Spouse Information (if married) */}
-      {formData.maritalStatus === 'married' && (
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Spouse Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Name
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.spouse.name}
-                onChange={handleSpouseChange}
-                className="form-input"
-                placeholder="Enter spouse name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.spouse.email}
-                onChange={handleSpouseChange}
-                className="form-input"
-                placeholder="Enter spouse email"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.spouse.phone}
-                onChange={handleSpouseChange}
-                className="form-input"
-                placeholder="Enter spouse phone"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Date of Birth
-              </label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.spouse.dateOfBirth}
-                onChange={handleSpouseChange}
-                className="form-input"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Gender
-              </label>
-              <select
-                name="gender"
-                value={formData.spouse.gender}
-                onChange={handleSpouseChange}
-                className="form-input"
-              >
-                <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Spouse Employer
-              </label>
-              <input
-                type="text"
-                name="employerName"
-                value={formData.spouse.employerName}
-                onChange={handleSpouseChange}
-                className="form-input"
-                placeholder="Enter spouse employer"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Children Information */}
-      <div>
+      <div className="border-t border-gray-200 pt-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Children</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Children Information</h3>
           <button
             type="button"
             onClick={handleAddChild}
             className="btn-secondary flex items-center space-x-2"
           >
-            <SafeIcon icon={FiUsers} className="w-4 h-4" />
+            <SafeIcon icon={FiPlus} className="w-4 h-4" />
             <span>Add Child</span>
           </button>
         </div>
-        
+
         <div className="space-y-4">
-          {formData.children.map((child, index) => (
-            <div key={index} className="flex items-center space-x-4">
-              <input
-                type="text"
-                value={child.name}
-                onChange={(e) => handleChildChange(index, 'name', e.target.value)}
-                className="form-input flex-1"
-                placeholder="Child name"
-              />
-              <input
-                type="date"
-                value={child.dateOfBirth}
-                onChange={(e) => handleChildChange(index, 'dateOfBirth', e.target.value)}
-                className="form-input w-40"
-              />
+          {formData.children_info.map((child, index) => (
+            <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={child.name}
+                  onChange={(e) => handleChildChange(index, 'name', e.target.value)}
+                  className="form-input"
+                  placeholder="Child name"
+                />
+              </div>
+              <div className="w-40">
+                <input
+                  type="date"
+                  value={child.date_of_birth}
+                  onChange={(e) => handleChildChange(index, 'date_of_birth', e.target.value)}
+                  className="form-input"
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => handleRemoveChild(index)}
-                className="btn-danger"
+                className="p-2 text-danger-600 hover:bg-danger-50 rounded-lg transition-colors"
               >
-                Remove
+                <SafeIcon icon={FiTrash2} className="w-4 h-4" />
               </button>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Portal Access Toggle */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="mb-4">
-          <label className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">Portal Access</span>
-            <Toggle
-              enabled={formData.hasAccess}
-              onChange={(enabled) => setFormData({ ...formData, hasAccess: enabled })}
-              size="sm"
+      {/* Access Settings */}
+      <div className="border-t border-gray-200 pt-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Access Settings</h3>
+        <div className="space-y-4">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              name="has_access"
+              checked={formData.has_access}
+              onChange={handleInputChange}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
-          </label>
-          <p className="mt-1 text-sm text-gray-500">
-            Enable client access to the financial portal
-          </p>
-        </div>
-        
-        {/* Archive Toggle */}
-        <div className="mb-4">
-          <label className="flex items-center justify-between">
-            <span className="text-sm font-medium text-gray-700">
-              <SafeIcon icon={FiArchive} className="inline-block w-4 h-4 mr-1 text-gray-500" />
-              Archive Client
-            </span>
-            <Toggle
-              enabled={formData.isArchived}
-              onChange={(enabled) => setFormData({ ...formData, isArchived: enabled })}
-              size="sm"
-            />
-          </label>
-          <p className="mt-1 text-sm text-gray-500">
-            Archived clients won't appear in the CRM pipeline
-          </p>
+            <label className="ml-2 block text-sm text-gray-900">
+              Grant portal access
+            </label>
+          </div>
+
+          {isEditing && (
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                name="is_archived"
+                checked={formData.is_archived}
+                onChange={handleInputChange}
+                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              />
+              <label className="ml-2 block text-sm text-gray-900">
+                Archive client
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Form Actions */}
-      <div className="flex justify-end space-x-3">
+      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
         <button
           type="button"
           onClick={onCancel}
           className="btn-secondary"
+          disabled={isSubmitting}
         >
+          <SafeIcon icon={FiX} className="w-4 h-4 mr-2" />
           Cancel
         </button>
         <button
           type="submit"
           className="btn-primary"
+          disabled={isSubmitting}
         >
-          {isEditing ? 'Update Client' : 'Add Client'}
+          {isSubmitting ? (
+            <>
+              <div className="spinner w-4 h-4 mr-2" />
+              {isEditing ? 'Updating...' : 'Creating...'}
+            </>
+          ) : (
+            <>
+              <SafeIcon icon={FiSave} className="w-4 h-4 mr-2" />
+              {isEditing ? 'Update Client' : 'Create Client'}
+            </>
+          )}
         </button>
       </div>
     </form>
@@ -455,3 +550,4 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
 };
 
 export default ClientForm;
+```

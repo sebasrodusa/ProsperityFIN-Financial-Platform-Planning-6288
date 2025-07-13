@@ -13,6 +13,7 @@ import FinancialPlanningSection from '../components/financial/FinancialPlanningS
 import FinancialGoalsSection from '../components/financial/FinancialGoalsSection';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
+import supabase from '../lib/supabase';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiDollarSign, FiTrendingUp, FiShield, FiFileText, FiTarget, FiSave, FiDownload, FiUser, FiArrowLeft } = FiIcons;
@@ -23,7 +24,6 @@ const FinancialAnalysis = () => {
   const { user } = useAuth();
   const { clients } = useData();
   const { analysis, loadAnalysis, saveAnalysis, loading } = useFinancialAnalysis();
-  
   const [activeTab, setActiveTab] = useState('cashflow');
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -73,16 +73,68 @@ const FinancialAnalysis = () => {
 
     setIsSaving(true);
     try {
-      await saveAnalysis(analysis);
+      console.log('Saving financial analysis to Supabase:', analysis);
+
+      // Prepare the analysis data with required fields
+      const analysisData = {
+        ...analysis,
+        client_id: selectedClient.id,
+        created_by: user.id, // Add created_by for RLS
+        updated_at: new Date().toISOString()
+      };
+
+      // Check if this is an update or new record
+      if (analysis.id && !analysis.id.startsWith('new-analysis')) {
+        // Update existing record
+        const { data, error } = await supabase
+          .from('financial_analyses_pf')
+          .update(analysisData)
+          .eq('id', analysis.id)
+          .select();
+
+        if (error) throw error;
+        
+        console.log('Financial analysis updated successfully in Supabase:', data);
+        
+        // Update local context with the returned data
+        if (data && data.length > 0) {
+          await saveAnalysis(data[0]);
+        } else {
+          await saveAnalysis(analysisData);
+        }
+      } else {
+        // Insert new record
+        // Remove any temporary ID
+        if (analysisData.id && analysisData.id.startsWith('new-analysis')) {
+          delete analysisData.id;
+        }
+
+        const { data, error } = await supabase
+          .from('financial_analyses_pf')
+          .insert(analysisData)
+          .select();
+
+        if (error) throw error;
+        
+        console.log('Financial analysis created successfully in Supabase:', data);
+        
+        // Update local context with the returned data
+        if (data && data.length > 0) {
+          await saveAnalysis(data[0]);
+        } else {
+          await saveAnalysis(analysisData);
+        }
+      }
+
       setHasChanges(false);
       setSaveSuccess(true);
-      
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
     } catch (error) {
-      alert('Error saving analysis. Please try again.');
+      console.error('Error saving financial analysis to Supabase:', error);
+      alert(`Error saving analysis: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -93,7 +145,6 @@ const FinancialAnalysis = () => {
       alert('Please select a client first');
       return;
     }
-    
     // Navigate to the financial report page
     navigate(`/clients/${selectedClient.id}/report`);
   };
@@ -106,7 +157,7 @@ const FinancialAnalysis = () => {
 
   const handleDataChange = (section, data) => {
     if (!analysis) return;
-    
+
     // Create a copy of the analysis object
     const updatedAnalysis = { ...analysis };
     
@@ -176,7 +227,6 @@ const FinancialAnalysis = () => {
                   <span>{selectedClient ? selectedClient.name : 'Select Client'}</span>
                 </button>
               )}
-              
               <button
                 onClick={handleSaveAnalysis}
                 disabled={!selectedClient || !hasChanges || isSaving}
@@ -185,7 +235,6 @@ const FinancialAnalysis = () => {
                 <SafeIcon icon={FiSave} className="w-4 h-4" />
                 <span>{isSaving ? 'Saving...' : 'Save'}</span>
               </button>
-              
               <button
                 onClick={handleGenerateReport}
                 disabled={!selectedClient}
@@ -194,7 +243,6 @@ const FinancialAnalysis = () => {
                 <SafeIcon icon={FiDownload} className="w-4 h-4" />
                 <span>Generate Report</span>
               </button>
-              
               {saveSuccess && (
                 <span className="px-3 py-1 bg-success-100 text-success-800 rounded-lg text-sm">
                   Analysis saved successfully!
@@ -221,11 +269,7 @@ const FinancialAnalysis = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap ${
-                        activeTab === tab.id
-                          ? 'border-primary-500 text-primary-600'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                      }`}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap ${activeTab === tab.id ? 'border-primary-500 text-primary-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
                     >
                       <SafeIcon icon={tab.icon} className="w-4 h-4" />
                       <span>{tab.name}</span>
@@ -364,11 +408,7 @@ const FinancialAnalysis = () => {
               className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <img
-                  src={client.avatar}
-                  alt={client.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+                <img src={client.avatar} alt={client.name} className="w-10 h-10 rounded-full object-cover" />
                 <div>
                   <p className="font-medium text-gray-900">{client.name}</p>
                   <p className="text-sm text-gray-500">{client.email}</p>

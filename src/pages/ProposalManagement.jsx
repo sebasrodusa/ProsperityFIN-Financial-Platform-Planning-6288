@@ -13,6 +13,7 @@ import ProductConfiguration from '../components/proposals/ProductConfiguration';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import supabase from '../lib/supabase';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiSend, FiCalendar, FiUser, FiDownload, FiPrinter } = FiIcons;
 
@@ -148,6 +149,7 @@ const ProposalManagement = () => {
   const [isPDFModalOpen, setIsPDFModalOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -177,9 +179,8 @@ const ProposalManagement = () => {
   });
 
   const filteredProposals = proposals.filter(proposal => {
-    const matchesSearch = proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         proposal.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                          proposal.description.toLowerCase().includes(searchTerm.toLowerCase());
     if (user?.role === 'financial_professional') {
       return matchesSearch && proposal.advisorId === user.id;
     }
@@ -198,21 +199,71 @@ const ProposalManagement = () => {
     return true;
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const proposalData = {
-      ...formData,
-      advisorId: user.id
-    };
-
-    if (selectedProposal) {
-      updateProposal(selectedProposal.id, proposalData);
-      setIsEditModalOpen(false);
-    } else {
-      addProposal(proposalData);
-      setIsAddModalOpen(false);
+    setIsSubmitting(true);
+    
+    try {
+      console.log('Submitting proposal to Supabase:', formData);
+      
+      const proposalData = {
+        ...formData,
+        advisorId: user.id,
+        client_id: formData.clientId, // Add client_id foreign key
+        advisor_id: user.id, // Add advisor_id foreign key
+        created_by: user.id, // Add created_by for RLS
+        status: 'draft',
+        createdAt: new Date().toISOString()
+      };
+      
+      // For updates
+      if (selectedProposal) {
+        const { data, error } = await supabase
+          .from('projections_pf')
+          .update(proposalData)
+          .eq('id', selectedProposal.id)
+          .select();
+          
+        if (error) throw error;
+        
+        console.log('Proposal updated successfully in Supabase:', data);
+        
+        // Update local state
+        if (data && data.length > 0) {
+          updateProposal(selectedProposal.id, data[0]);
+        } else {
+          updateProposal(selectedProposal.id, proposalData);
+        }
+        
+        setIsEditModalOpen(false);
+      } else {
+        // For new proposals
+        const { data, error } = await supabase
+          .from('projections_pf')
+          .insert(proposalData)
+          .select();
+          
+        if (error) throw error;
+        
+        console.log('Proposal added successfully to Supabase:', data);
+        
+        // Update local state
+        if (data && data.length > 0) {
+          addProposal(data[0]);
+        } else {
+          addProposal(proposalData);
+        }
+        
+        setIsAddModalOpen(false);
+      }
+      
+      resetForm();
+    } catch (error) {
+      console.error('Error saving proposal to Supabase:', error);
+      alert(`Failed to save proposal: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
-    resetForm();
   };
 
   const resetForm = () => {
@@ -268,14 +319,58 @@ const ProposalManagement = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = (proposalId) => {
+  const handleDelete = async (proposalId) => {
     if (window.confirm('Are you sure you want to delete this projection?')) {
-      deleteProposal(proposalId);
+      try {
+        console.log('Deleting proposal from Supabase:', proposalId);
+        
+        // Delete from Supabase
+        const { error } = await supabase
+          .from('projections_pf')
+          .delete()
+          .eq('id', proposalId);
+          
+        if (error) throw error;
+        
+        console.log('Proposal deleted successfully from Supabase');
+        
+        // Update local state
+        deleteProposal(proposalId);
+      } catch (error) {
+        console.error('Error deleting proposal from Supabase:', error);
+        alert(`Failed to delete proposal: ${error.message}`);
+      }
     }
   };
 
-  const handleStatusChange = (proposalId, newStatus) => {
-    updateProposal(proposalId, { status: newStatus });
+  const handleStatusChange = async (proposalId, newStatus) => {
+    try {
+      console.log('Updating proposal status in Supabase:', proposalId, newStatus);
+      
+      // Update in Supabase
+      const { data, error } = await supabase
+        .from('projections_pf')
+        .update({ 
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', proposalId)
+        .select();
+        
+      if (error) throw error;
+      
+      console.log('Proposal status updated successfully in Supabase:', data);
+      
+      // Update local state
+      if (data && data.length > 0) {
+        updateProposal(proposalId, data[0]);
+      } else {
+        updateProposal(proposalId, { status: newStatus });
+      }
+    } catch (error) {
+      console.error('Error updating proposal status in Supabase:', error);
+      alert(`Failed to update status: ${error.message}`);
+    }
   };
 
   const handleViewPDF = (proposal) => {
@@ -288,13 +383,8 @@ const ProposalManagement = () => {
     if (!element) return;
 
     try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true
-      });
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, allowTaint: true });
       const imgData = canvas.toDataURL('image/png');
-      
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
       const pageHeight = 295;
@@ -375,9 +465,11 @@ const ProposalManagement = () => {
             const strategy = FINANCIAL_STRATEGIES.find(s => s.id === proposal.strategy);
             const product = PRODUCT_TYPES[proposal.productType];
             const carrier = DEFAULT_CARRIERS.find(c => c.id === proposal.carrier);
-
             return (
-              <div key={proposal.id} className="card hover:shadow-medium transition-shadow">
+              <div
+                key={proposal.id}
+                className="card hover:shadow-medium transition-shadow"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <StatusBadge status={proposal.status} />
                   <div className="flex items-center space-x-2">
@@ -493,7 +585,7 @@ const ProposalManagement = () => {
                 <select
                   required
                   value={formData.clientId}
-                  onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
+                  onChange={(e) => setFormData({...formData, clientId: e.target.value})}
                   className="form-input"
                 >
                   <option value="">Select a client</option>
@@ -512,13 +604,12 @@ const ProposalManagement = () => {
                   type="text"
                   required
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) => setFormData({...formData, title: e.target.value})}
                   className="form-input"
                   placeholder="Enter projection title"
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Description *
@@ -526,7 +617,7 @@ const ProposalManagement = () => {
               <textarea
                 required
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
                 className="form-input h-24 resize-none"
                 placeholder="Brief description of the strategy projection"
               />
@@ -535,16 +626,16 @@ const ProposalManagement = () => {
             {/* Strategy Selection */}
             <StrategySelector
               selectedStrategy={formData.strategy}
-              onStrategyChange={(strategy) => setFormData({ ...formData, strategy, productType: '', carrier: '' })}
+              onStrategyChange={(strategy) => setFormData({...formData, strategy, productType: '', carrier: ''})}
               selectedProduct={formData.productType}
-              onProductChange={(productType) => setFormData({ ...formData, productType, carrier: '' })}
+              onProductChange={(productType) => setFormData({...formData, productType, carrier: ''})}
             />
 
             {/* Carrier Selection */}
             {formData.productType && (
               <CarrierSelector
                 selectedCarrier={formData.carrier}
-                onCarrierChange={(carrier) => setFormData({ ...formData, carrier })}
+                onCarrierChange={(carrier) => setFormData({...formData, carrier})}
                 selectedProduct={formData.productType}
                 carriers={DEFAULT_CARRIERS}
               />
@@ -567,11 +658,16 @@ const ProposalManagement = () => {
                   resetForm();
                 }}
                 className="btn-secondary"
+                disabled={isSubmitting}
               >
                 Cancel
               </button>
-              <button type="submit" className="btn-primary">
-                {selectedProposal ? 'Update Projection' : 'Create Projection'}
+              <button 
+                type="submit" 
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Saving...' : selectedProposal ? 'Update Projection' : 'Create Projection'}
               </button>
             </div>
           </form>

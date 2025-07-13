@@ -12,10 +12,10 @@ import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import supabase from '../lib/supabase';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
-const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiMail, FiPhone, 
-       FiMapPin, FiCalendar, FiUser, FiUsers, FiBriefcase, FiFilter, 
-       FiList, FiArchive, FiDollarSign, FiToggleRight } = FiIcons;
+const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiMail, FiPhone, FiMapPin, FiCalendar, FiUser, FiUsers, FiBriefcase, FiFilter, FiList, FiArchive, FiDollarSign, FiToggleRight } = FiIcons;
 
 const ClientManagement = () => {
   const { user } = useAuth();
@@ -27,12 +27,13 @@ const ClientManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [showArchived, setShowArchived] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getFilteredClients = () => {
     let filtered = clients.filter(client => {
-      const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          client.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
+      const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                           client.email.toLowerCase().includes(searchTerm.toLowerCase());
+
       // Filter by role
       if (user?.role === 'financial_professional') {
         if (!matchesSearch || client.advisorId !== user.id) {
@@ -41,18 +42,18 @@ const ClientManagement = () => {
       } else if (!matchesSearch) {
         return false;
       }
-      
+
       // Filter by archive status
       if (!showArchived && client.isArchived) {
         return false;
       }
-      
+
       // Apply status filter if selected
       if (statusFilter) {
         const clientStatus = getClientStatus(client.id);
         return clientStatus?.status === statusFilter;
       }
-      
+
       return true;
     });
 
@@ -61,15 +62,77 @@ const ClientManagement = () => {
 
   const filteredClients = getFilteredClients();
 
-  const handleAddClient = useCallback((clientData) => {
-    addClient(clientData);
-    setIsAddModalOpen(false);
-  }, [addClient]);
+  const handleAddClient = useCallback(async (clientData) => {
+    console.log('Adding client to Supabase:', clientData);
+    setIsSubmitting(true);
+    
+    try {
+      // Insert the client into Supabase
+      const { data, error } = await supabase
+        .from('clients_pf')
+        .insert({
+          ...clientData,
+          advisor_id: user.id,
+          created_by: user.id
+        })
+        .select();
+        
+      if (error) throw error;
+      
+      console.log('Client added successfully to Supabase:', data);
+      
+      // Update local state with the returned data
+      if (data && data.length > 0) {
+        addClient(data[0]);
+      } else {
+        // Fallback if no data returned
+        addClient(clientData);
+      }
+      
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Error adding client to Supabase:', error);
+      alert(`Failed to add client: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [addClient, user]);
 
-  const handleUpdateClient = useCallback((clientData) => {
-    updateClient(selectedClient.id, clientData);
-    setIsEditModalOpen(false);
-    setSelectedClient(null);
+  const handleUpdateClient = useCallback(async (clientData) => {
+    console.log('Updating client in Supabase:', clientData);
+    setIsSubmitting(true);
+    
+    try {
+      // Update the client in Supabase
+      const { data, error } = await supabase
+        .from('clients_pf')
+        .update({
+          ...clientData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', selectedClient.id)
+        .select();
+        
+      if (error) throw error;
+      
+      console.log('Client updated successfully in Supabase:', data);
+      
+      // Update local state with the returned data
+      if (data && data.length > 0) {
+        updateClient(selectedClient.id, data[0]);
+      } else {
+        // Fallback if no data returned
+        updateClient(selectedClient.id, clientData);
+      }
+      
+      setIsEditModalOpen(false);
+      setSelectedClient(null);
+    } catch (error) {
+      console.error('Error updating client in Supabase:', error);
+      alert(`Failed to update client: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   }, [updateClient, selectedClient]);
 
   const handleEdit = useCallback((client) => {
@@ -77,21 +140,84 @@ const ClientManagement = () => {
     setIsEditModalOpen(true);
   }, []);
 
-  const handleDelete = useCallback((clientId) => {
+  const handleDelete = useCallback(async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
-      deleteClient(clientId);
+      try {
+        console.log('Deleting client from Supabase:', clientId);
+        
+        // Delete the client from Supabase
+        const { error } = await supabase
+          .from('clients_pf')
+          .delete()
+          .eq('id', clientId);
+          
+        if (error) throw error;
+        
+        console.log('Client deleted successfully from Supabase');
+        
+        // Update local state
+        deleteClient(clientId);
+      } catch (error) {
+        console.error('Error deleting client from Supabase:', error);
+        alert(`Failed to delete client: ${error.message}`);
+      }
     }
   }, [deleteClient]);
 
-  const handleTogglePortalAccess = useCallback((clientId, currentAccess) => {
-    updateClient(clientId, { hasAccess: !currentAccess });
+  const handleTogglePortalAccess = useCallback(async (clientId, currentAccess) => {
+    try {
+      console.log('Toggling portal access in Supabase:', clientId, !currentAccess);
+      
+      // Update the client in Supabase
+      const { data, error } = await supabase
+        .from('clients_pf')
+        .update({ 
+          hasAccess: !currentAccess,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', clientId)
+        .select();
+        
+      if (error) throw error;
+      
+      console.log('Portal access updated successfully in Supabase:', data);
+      
+      // Update local state
+      updateClient(clientId, { hasAccess: !currentAccess });
+    } catch (error) {
+      console.error('Error toggling portal access in Supabase:', error);
+      alert(`Failed to update portal access: ${error.message}`);
+    }
   }, [updateClient]);
 
-  const handleToggleArchive = useCallback((clientId, isArchived) => {
-    updateClient(clientId, { 
-      isArchived: !isArchived,
-      lastActivity: new Date().toISOString()
-    });
+  const handleToggleArchive = useCallback(async (clientId, isArchived) => {
+    try {
+      console.log('Toggling archive status in Supabase:', clientId, !isArchived);
+      
+      // Update the client in Supabase
+      const { data, error } = await supabase
+        .from('clients_pf')
+        .update({
+          isArchived: !isArchived,
+          lastActivity: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', clientId)
+        .select();
+        
+      if (error) throw error;
+      
+      console.log('Archive status updated successfully in Supabase:', data);
+      
+      // Update local state
+      updateClient(clientId, { 
+        isArchived: !isArchived,
+        lastActivity: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error toggling archive status in Supabase:', error);
+      alert(`Failed to update archive status: ${error.message}`);
+    }
   }, [updateClient]);
 
   const formatCurrency = (amount) => {
@@ -139,7 +265,6 @@ const ClientManagement = () => {
                 className="form-input pl-10"
               />
             </div>
-            
             {/* Status Filter - New */}
             <div className="sm:w-64">
               <div className="relative">
@@ -160,7 +285,6 @@ const ClientManagement = () => {
                 </select>
               </div>
             </div>
-            
             <button
               onClick={() => setShowArchived(!showArchived)}
               className={`btn-secondary flex items-center space-x-2 ${showArchived ? 'bg-primary-100 text-primary-800' : ''}`}
@@ -180,8 +304,8 @@ const ClientManagement = () => {
           {filteredClients.map((client) => {
             const clientStatus = getClientStatus(client.id);
             return (
-              <div 
-                key={client.id} 
+              <div
+                key={client.id}
                 className={`card hover:shadow-medium transition-shadow ${client.isArchived ? 'border-dashed border-gray-300 bg-gray-50' : ''}`}
               >
                 <div className="flex items-center justify-between mb-4">
@@ -202,10 +326,7 @@ const ClientManagement = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Link
-                      to={`/clients/${client.id}`}
-                      className="p-2 text-gray-400 hover:text-primary-600 transition-colors"
-                    >
+                    <Link to={`/clients/${client.id}`} className="p-2 text-gray-400 hover:text-primary-600 transition-colors">
                       <SafeIcon icon={FiEye} className="w-4 h-4" />
                     </Link>
                     <button
@@ -274,10 +395,7 @@ const ClientManagement = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     {/* CRM Link - New */}
-                    <Link
-                      to={`/clients/${client.id}/crm`}
-                      className="p-2 text-gray-400 hover:text-primary-600 transition-colors"
-                    >
+                    <Link to={`/clients/${client.id}/crm`} className="p-2 text-gray-400 hover:text-primary-600 transition-colors">
                       <SafeIcon icon={FiList} className="w-4 h-4" />
                     </Link>
                     <button
@@ -292,7 +410,6 @@ const ClientManagement = () => {
               </div>
             );
           })}
-
           {filteredClients.length === 0 && (
             <div className="lg:col-span-3 p-8 text-center bg-white rounded-lg shadow-soft">
               <p className="text-gray-600">No clients found matching your search criteria.</p>
