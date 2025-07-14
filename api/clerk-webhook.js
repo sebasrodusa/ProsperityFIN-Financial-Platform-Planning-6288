@@ -2,8 +2,13 @@ import { Webhook } from 'svix';
 import { supabase } from '../src/lib/supabase';
 
 export default async function handler(req, res) {
+  // Get the webhook secret from environment variables
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   
+  if (!webhookSecret) {
+    return res.status(500).json({ error: 'Missing CLERK_WEBHOOK_SECRET environment variable' });
+  }
+
   // Verify webhook signature
   const payload = req.body;
   const headers = req.headers;
@@ -36,7 +41,7 @@ export default async function handler(req, res) {
           created_at: new Date().toISOString(),
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(first_name + ' ' + last_name)}&background=random`
         });
-
+        
       return res.status(200).json({ message: 'User synchronized successfully' });
     } catch (error) {
       console.error('Error synchronizing user:', error);
@@ -59,7 +64,7 @@ export default async function handler(req, res) {
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
-
+        
       return res.status(200).json({ message: 'User updated successfully' });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -74,7 +79,7 @@ export default async function handler(req, res) {
         .from('users_pf')
         .delete()
         .eq('id', data.id);
-
+        
       return res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
       console.error('Error deleting user:', error);
