@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import supabase from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import logDev from '../utils/logDev';
 
 const DataContext = createContext();
 
@@ -21,7 +22,7 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('DataProvider rendering, user:', user?.id);
+  logDev('DataProvider rendering, user:', user?.id);
 
   // Load data when user changes
   useEffect(() => {
@@ -34,7 +35,7 @@ export const DataProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching data from Supabase...');
+      logDev('Fetching data from Supabase...');
 
       // Fetch clients
       let { data: clientsData, error: clientsError } = await supabase
@@ -57,7 +58,7 @@ export const DataProvider = ({ children }) => {
         .eq('advisor_id', user.id);
       if (proposalsError) throw proposalsError;
 
-      console.log('Data fetched successfully:', {
+      logDev('Data fetched successfully:', {
         clients: clientsData.length,
         users: usersData.length,
         proposals: proposalsData.length

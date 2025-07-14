@@ -4,6 +4,7 @@ import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
+import logDev from '../utils/logDev';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiPhone, FiArrowLeft, FiUserPlus, FiBriefcase } = FiIcons;
@@ -35,7 +36,7 @@ const Signup = () => {
   const [verificationStep, setVerificationStep] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  console.log('Signup page rendering, Clerk isLoaded:', isLoaded);
+  logDev('Signup page rendering, Clerk isLoaded:', isLoaded);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;

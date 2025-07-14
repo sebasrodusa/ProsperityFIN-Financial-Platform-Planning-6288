@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
+import logDev from '../utils/logDev';
 import Navbar from '../components/layout/Navbar';
 import SafeIcon from '../common/SafeIcon';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -12,7 +13,7 @@ const { FiUsers, FiFileText, FiBarChart2 } = FiIcons;
 const Dashboard = () => {
   const { isLoaded, user } = useUser();
   
-  console.log('Dashboard rendering, Clerk user:', user?.id);
+  logDev('Dashboard rendering, Clerk user:', user?.id);
   
   if (!isLoaded) {
     return (

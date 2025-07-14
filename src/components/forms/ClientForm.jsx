@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
+import logDev from '../../utils/logDev';
 
 const { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiUsers, FiPlus, FiTrash2, FiSave, FiX } = FiIcons;
 
@@ -110,7 +111,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
     setIsSubmitting(true);
 
     try {
-      console.log('Preparing client data for Supabase:', formData);
+      logDev('Preparing client data for Supabase:', formData);
 
       // Prepare the client data for insertion with snake_case field names
       const clientData = {
@@ -144,7 +145,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         last_activity: new Date().toISOString()
       };
 
-      console.log('Submitting client data to Supabase:', clientData);
+      logDev('Submitting client data to Supabase:', clientData);
 
       if (isEditing && initialData?.id) {
         // For updates, don't include created_at and created_by
@@ -161,7 +162,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
 
         if (error) throw error;
 
-        console.log('Client updated successfully in Supabase:', data);
+        logDev('Client updated successfully in Supabase:', data);
         onSubmit(data[0] || updateData);
       } else {
         const { data, error } = await supabase
@@ -171,7 +172,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
 
         if (error) throw error;
 
-        console.log('Client added successfully to Supabase:', data);
+        logDev('Client added successfully to Supabase:', data);
         onSubmit(data[0] || clientData);
       }
     } catch (error) {

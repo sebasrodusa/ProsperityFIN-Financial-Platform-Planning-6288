@@ -1,4 +1,5 @@
 import React from 'react';
+import logDev from './utils/logDev';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth as useClerkAuth } from '@clerk/clerk-react';
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -29,7 +30,7 @@ import ProjectionsSettings from './pages/ProjectionsSettings';
 function App() {
   const { isLoaded, isSignedIn } = useClerkAuth();
   
-  console.log('App rendering, authentication state:', { isLoaded, isSignedIn });
+  logDev('App rendering, authentication state:', { isLoaded, isSignedIn });
   
   if (!isLoaded) {
     return (
