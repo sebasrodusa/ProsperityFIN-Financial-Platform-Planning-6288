@@ -17,7 +17,7 @@ const TEAM_IDS = [
 const ROLES = [
   { id: 'admin', name: 'Administrator', icon: FiShield },
   { id: 'manager', name: 'Manager', icon: FiUsers },
-  { id: 'financial_pro', name: 'Financial Professional', icon: FiBriefcase },
+  { id: 'financial_professional', name: 'Financial Professional', icon: FiBriefcase },
   { id: 'client', name: 'Client', icon: FiUser }
 ];
 
@@ -192,7 +192,7 @@ const UserRoleManager = ({ userId }) => {
           </select>
         </div>
         
-        {(formData.role === 'manager' || formData.role === 'financial_pro') && (
+        {(formData.role === 'manager' || formData.role === 'financial_professional') && (
           <div>
             <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
               Team

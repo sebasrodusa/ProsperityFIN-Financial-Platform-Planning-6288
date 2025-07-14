@@ -66,7 +66,7 @@ const Signup = () => {
       setError('Passwords do not match');
       return false;
     }
-    if (formData.role === 'financial_pro' && !formData.teamId) {
+    if (formData.role === 'financial_professional' && !formData.teamId) {
       setError('Please select a team');
       return false;
     }
@@ -94,7 +94,7 @@ const Signup = () => {
     try {
       // Generate agent code automatically for financial professionals
       let agentCode = '';
-      if (formData.role === 'financial_pro') {
+      if (formData.role === 'financial_professional') {
         agentCode = `FP${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       }
 
@@ -125,7 +125,7 @@ const Signup = () => {
         
         // Redirect based on role
         setTimeout(() => {
-          if (formData.role === 'financial_pro') {
+          if (formData.role === 'financial_professional') {
             navigate('/advisor/dashboard');
           } else {
             navigate('/client/dashboard');
@@ -151,7 +151,7 @@ const Signup = () => {
     );
   }
 
-  const isFinancialPro = formData.role === 'financial_pro';
+  const isFinancialPro = formData.role === 'financial_professional';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -229,7 +229,7 @@ const Signup = () => {
                   required
                 >
                   <option value="client">Client</option>
-                  <option value="financial_pro">Financial Professional</option>
+                  <option value="financial_professional">Financial Professional</option>
                 </select>
               </div>
 

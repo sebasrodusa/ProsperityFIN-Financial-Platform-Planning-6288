@@ -18,7 +18,7 @@ import ProjectionsSettings from '../pages/ProjectionsSettings';
 export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
-  FINANCIAL_PRO: 'financial_pro',
+  FINANCIAL_PRO: 'financial_professional',
   CLIENT: 'client'
 };
 
