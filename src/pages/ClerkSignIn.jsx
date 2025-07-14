@@ -33,10 +33,8 @@ const ClerkSignIn = () => {
           className="bg-white p-6 rounded-xl shadow-medium"
         >
           <SignIn 
-            path="/sign-in"
-            routing="path"
-            signUpUrl="/sign-up"
-            redirectUrl="/dashboard"
+            afterSignInUrl="#/dashboard"
+            signUpUrl="#/sign-up"
             appearance={{
               elements: {
                 formButtonPrimary: 'bg-primary-600 hover:bg-primary-700 text-white',

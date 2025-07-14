@@ -17,6 +17,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ClerkProvider 
       publishableKey={CLERK_PUBLISHABLE_KEY}
+      navigate={(to) => window.location.hash = to.replace('/', '')}
       appearance={{
         variables: {
           colorPrimary: '#0284c7',
