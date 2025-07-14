@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
-import supabase from '../lib/supabase';
 
 // Create the auth context
 const AuthContext = createContext();

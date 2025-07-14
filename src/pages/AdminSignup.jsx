@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
@@ -24,7 +24,6 @@ const ACCESS_CODES = {
 const AdminSignup = () => {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -38,7 +37,6 @@ const AdminSignup = () => {
     accessCode: '',
     agreeTerms: false
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [accessVerified, setAccessVerified] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -99,7 +97,6 @@ const AdminSignup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!isLoaded) {
       setError('Authentication system is not ready yet. Please try again.');
       return;
@@ -206,8 +203,8 @@ const AdminSignup = () => {
                 We've sent a verification email to <strong>{formData.email}</strong>. 
                 Please check your inbox and follow the instructions to verify your account.
               </p>
-              <button 
-                onClick={() => window.location.href = '/login'} 
+              <button
+                onClick={() => window.location.href = '/login'}
                 className="btn-secondary"
               >
                 Go to Login
@@ -290,10 +287,7 @@ const AdminSignup = () => {
             </div>
 
             <div className="text-center">
-              <Link
-                to="/login"
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
-              >
+              <Link to="/login" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
                 <SafeIcon icon={FiArrowLeft} className="mr-2 h-4 w-4" />
                 Back to login
               </Link>
@@ -520,10 +514,7 @@ const AdminSignup = () => {
             </div>
 
             <div className="text-center">
-              <Link
-                to="/login"
-                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
-              >
+              <Link to="/login" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
                 <SafeIcon icon={FiArrowLeft} className="mr-2 h-4 w-4" />
                 Back to login
               </Link>

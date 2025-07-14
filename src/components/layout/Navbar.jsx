@@ -5,10 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { 
-  FiHome, FiUsers, FiFileText, FiSettings, 
-  FiLogOut, FiChevronDown, FiUser 
-} = FiIcons;
+const { FiHome, FiUsers, FiFileText, FiSettings, FiLogOut, FiChevronDown, FiUser } = FiIcons;
 
 const Navbar = () => {
   const { user } = useUser();

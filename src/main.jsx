@@ -8,7 +8,6 @@ import './index.css';
 // Get Clerk publishable key from environment variable
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Check if Clerk key is available
 if (!CLERK_PUBLISHABLE_KEY) {
   console.error("Missing Clerk publishable key");
 }

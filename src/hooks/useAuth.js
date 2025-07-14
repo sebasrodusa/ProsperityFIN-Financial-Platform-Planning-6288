@@ -1,9 +1,16 @@
 import { useContext } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
-import { ROLES } from '../config/routes';
+import { useAuth as useAuthContext } from '../contexts/AuthContext';
+
+// Define role constants
+const ROLES = {
+  ADMIN: 'admin',
+  MANAGER: 'manager',
+  FINANCIAL_PRO: 'financial_pro',
+  CLIENT: 'client'
+};
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = useAuthContext();
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
