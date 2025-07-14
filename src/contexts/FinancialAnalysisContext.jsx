@@ -21,7 +21,171 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
   console.log('FinancialAnalysisProvider rendering, user:', user?.id);
 
-  // ... rest of the provider implementation ...
+  // Load analysis data for a specific client
+  const loadAnalysis = useCallback(async (clientId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: fetchError } = await supabase
+        .from('financial_analyses_pf')
+        .select('*')
+        .eq('client_id', clientId)
+        .eq('created_by', user.id)
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+
+      if (data) {
+        setAnalysis(data);
+      } else {
+        const newAnalysis = {
+          client_id: clientId,
+          created_by: user.id,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          income_sources_fa7: [],
+          expenses_fa7: [],
+          assets_fa7: [],
+          liabilities_fa7: [],
+          insurance_policies_fa7: [],
+          financial_goals_fa7: [],
+          estateChecklist: {
+            will: { completed: false, lastUpdated: '', notes: '' },
+            powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
+            healthcareDirective: { completed: false, lastUpdated: '', notes: '' },
+            trust: { completed: false, lastUpdated: '', notes: '' },
+            beneficiaryDesignations: { completed: false, lastUpdated: '', notes: '' },
+            guardianship: { completed: false, lastUpdated: '', notes: '' },
+            emergencyFund: { completed: false, lastUpdated: '', notes: '' },
+            taxPlanning: { completed: false, lastUpdated: '', notes: '' }
+          },
+          legacyWishes: ''
+        };
+
+        const { data: inserted, error: insertError } = await supabase
+          .from('financial_analyses_pf')
+          .insert(newAnalysis)
+          .select()
+          .maybeSingle();
+
+        if (insertError) throw insertError;
+        setAnalysis(inserted || { ...newAnalysis });
+      }
+    } catch (err) {
+      console.error('Error loading analysis:', err);
+      setError('Failed to load financial analysis data.');
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Save or update analysis data
+  const saveAnalysis = useCallback(async (data) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const payload = {
+        ...data,
+        created_by: user.id,
+        updated_at: new Date().toISOString()
+      };
+
+      let saved;
+      if (payload.id) {
+        const { data: updated, error } = await supabase
+          .from('financial_analyses_pf')
+          .update(payload)
+          .eq('id', payload.id)
+          .eq('created_by', user.id)
+          .select()
+          .maybeSingle();
+
+        if (error) throw error;
+        saved = updated || payload;
+      } else {
+        const { data: inserted, error } = await supabase
+          .from('financial_analyses_pf')
+          .insert(payload)
+          .select()
+          .maybeSingle();
+
+        if (error) throw error;
+        saved = inserted || payload;
+      }
+
+      setAnalysis(saved);
+      return saved;
+    } catch (err) {
+      console.error('Error saving analysis:', err);
+      setError('Failed to save analysis. Using local data only.');
+      setAnalysis(data);
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Update income sources only
+  const saveIncomeSources = useCallback(async (analysisId, sources) => {
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('financial_analyses_pf')
+        .update({
+          income_sources_fa7: sources,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', analysisId)
+        .eq('created_by', user.id)
+        .select()
+        .maybeSingle();
+
+      if (error) throw error;
+
+      setAnalysis((prev) => (prev ? { ...prev, income_sources_fa7: sources } : prev));
+      return { success: true, data };
+    } catch (err) {
+      console.error('Error saving income sources:', err);
+      setError('Failed to save income sources. Using local data only.');
+      setAnalysis((prev) => (prev ? { ...prev, income_sources_fa7: sources } : prev));
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  // Update expenses only
+  const saveExpenses = useCallback(async (analysisId, expenses) => {
+    try {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('financial_analyses_pf')
+        .update({
+          expenses_fa7: expenses,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', analysisId)
+        .eq('created_by', user.id)
+        .select()
+        .maybeSingle();
+
+      if (error) throw error;
+
+      setAnalysis((prev) => (prev ? { ...prev, expenses_fa7: expenses } : prev));
+      return { success: true, data };
+    } catch (err) {
+      console.error('Error saving expenses:', err);
+      setError('Failed to save expenses. Using local data only.');
+      setAnalysis((prev) => (prev ? { ...prev, expenses_fa7: expenses } : prev));
+      return { success: false, error: err.message };
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   const value = {
     analysis,
@@ -41,4 +205,4 @@ export const FinancialAnalysisProvider = ({ children }) => {
 };
 
 // Add default export
-export default FinancialAnalysisProvider;
+export default FinancialAnalysisProvider
