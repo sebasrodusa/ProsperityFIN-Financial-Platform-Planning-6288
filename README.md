@@ -1,6 +1,6 @@
 # ProsperityFIN Financial Platform
 
-This project is a React application that uses Supabase for authentication and data storage.
+This project is a React application that uses Clerk for authentication and Supabase for data storage.
 
 ## Setup
 
@@ -8,10 +8,11 @@ This project is a React application that uses Supabase for authentication and da
    ```bash
    npm install
    ```
-2. Copy `.env.example` to `.env` and provide your Supabase credentials:
+2. Copy `.env.example` to `.env` and provide your Supabase credentials along with your Clerk publishable and secret keys:
    ```bash
    cp .env.example .env
-   # Edit .env with your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
+   # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
+   # VITE_CLERK_PUBLISHABLE_KEY and VITE_CLERK_SECRET_KEY
    ```
 3. Start the development server:
    ```bash
@@ -26,4 +27,4 @@ This project is a React application that uses Supabase for authentication and da
    npm run preview
    ```
 
-Supabase powers both authentication and data storage for this project.
+Supabase serves as the data backend for this project, while Clerk handles authentication.
