@@ -12,6 +12,8 @@ const { FiUsers, FiFileText, FiBarChart2 } = FiIcons;
 const Dashboard = () => {
   const { isLoaded, user } = useUser();
   
+  console.log('Dashboard rendering, Clerk user:', user?.id);
+  
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">

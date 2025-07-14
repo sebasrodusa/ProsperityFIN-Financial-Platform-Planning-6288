@@ -31,6 +31,7 @@ export const CrmProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log('CrmProvider rendering, user:', user?.id);
 
   // Load client CRM data
   useEffect(() => {
@@ -116,7 +117,7 @@ export const CrmProvider = ({ children }) => {
   const updateClientStatus = async (clientId, newStatus, notes = '') => {
     try {
       const timestamp = new Date().toISOString();
-
+      
       const { data: statusData, error: statusError } = await supabase
         .from('crm_client_statuses_pf')
         .upsert({
@@ -155,13 +156,16 @@ export const CrmProvider = ({ children }) => {
 
       setStatusHistory(prev => ({
         ...prev,
-        [clientId]: [...(prev[clientId] || []), {
-          id: historyEntry.id,
-          clientId: historyEntry.client_id,
-          status: historyEntry.status,
-          notes: historyEntry.notes,
-          createdAt: historyEntry.created_at
-        }]
+        [clientId]: [
+          ...(prev[clientId] || []),
+          {
+            id: historyEntry.id,
+            clientId: historyEntry.client_id,
+            status: historyEntry.status,
+            notes: historyEntry.notes,
+            createdAt: historyEntry.created_at
+          }
+        ]
       }));
 
       return { success: true };
@@ -175,7 +179,7 @@ export const CrmProvider = ({ children }) => {
   const addClientTask = async (clientId, taskData) => {
     try {
       const timestamp = new Date().toISOString();
-
+      
       const { data: task, error } = await supabase
         .from('crm_client_tasks_pf')
         .insert({
@@ -195,16 +199,19 @@ export const CrmProvider = ({ children }) => {
 
       setClientTasks(prev => ({
         ...prev,
-        [clientId]: [...(prev[clientId] || []), {
-          id: task.id,
-          clientId: task.client_id,
-          taskName: task.task_name,
-          description: task.description,
-          dueDate: task.due_date,
-          completed: task.completed,
-          createdAt: task.created_at,
-          updatedAt: task.updated_at
-        }]
+        [clientId]: [
+          ...(prev[clientId] || []),
+          {
+            id: task.id,
+            clientId: task.client_id,
+            taskName: task.task_name,
+            description: task.description,
+            dueDate: task.due_date,
+            completed: task.completed,
+            createdAt: task.created_at,
+            updatedAt: task.updated_at
+          }
+        ]
       }));
 
       return { success: true, task };
@@ -218,10 +225,13 @@ export const CrmProvider = ({ children }) => {
   const updateClientTask = async (clientId, taskId, updates) => {
     try {
       const timestamp = new Date().toISOString();
-
+      
       const { data, error } = await supabase
         .from('crm_client_tasks_pf')
-        .update({ ...updates, updated_at: timestamp })
+        .update({
+          ...updates,
+          updated_at: timestamp
+        })
         .eq('id', taskId)
         .eq('client_id', clientId)
         .select()
@@ -231,19 +241,17 @@ export const CrmProvider = ({ children }) => {
 
       setClientTasks(prev => ({
         ...prev,
-        [clientId]: (prev[clientId] || []).map(task =>
-          task.id === taskId
-            ? {
-                id: data.id,
-                clientId: data.client_id,
-                taskName: data.task_name,
-                description: data.description,
-                dueDate: data.due_date,
-                completed: data.completed,
-                createdAt: data.created_at,
-                updatedAt: data.updated_at
-              }
-            : task
+        [clientId]: (prev[clientId] || []).map(task => 
+          task.id === taskId ? {
+            id: data.id,
+            clientId: data.client_id,
+            taskName: data.task_name,
+            description: data.description,
+            dueDate: data.due_date,
+            completed: data.completed,
+            createdAt: data.created_at,
+            updatedAt: data.updated_at
+          } : task
         )
       }));
 
@@ -279,10 +287,10 @@ export const CrmProvider = ({ children }) => {
 
   // Get client status
   const getClientStatus = (clientId) => {
-    return clientStatuses[clientId] || {
-      clientId,
-      status: 'initial_meeting_completed',
-      updatedAt: new Date().toISOString()
+    return clientStatuses[clientId] || { 
+      clientId, 
+      status: 'initial_meeting_completed', 
+      updatedAt: new Date().toISOString() 
     };
   };
 

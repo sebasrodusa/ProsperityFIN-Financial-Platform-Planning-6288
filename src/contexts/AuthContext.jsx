@@ -19,6 +19,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  console.log('AuthProvider rendering, Clerk user:', clerkUser?.id);
+
   // Update local user state when Clerk user changes
   useEffect(() => {
     if (isLoaded) {
@@ -32,7 +34,7 @@ export const AuthProvider = ({ children }) => {
           teamId: clerkUser.publicMetadata?.teamId,
           agentCode: clerkUser.unsafeMetadata?.agentCode,
           avatar: clerkUser.imageUrl,
-          phone: clerkUser.unsafeMetadata?.phone
+          phone: clerkUser.unsafeMetadata?.phone,
         };
         setUser(transformedUser);
       } else {

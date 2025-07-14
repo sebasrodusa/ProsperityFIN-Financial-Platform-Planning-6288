@@ -18,7 +18,6 @@ const TEAM_IDS = [
 const Signup = () => {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
-
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,12 +29,13 @@ const Signup = () => {
     teamId: '',
     agreeTerms: false
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [verificationStep, setVerificationStep] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  console.log('Signup page rendering, Clerk isLoaded:', isLoaded);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -79,7 +79,6 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!isLoaded) {
       setError('Authentication system is not ready yet. Please try again.');
       return;
@@ -188,8 +187,8 @@ const Signup = () => {
                 We've sent a verification email to <strong>{formData.email}</strong>. 
                 Please check your inbox and follow the instructions to verify your account.
               </p>
-              <button 
-                onClick={() => window.location.href = '/login'} 
+              <button
+                onClick={() => window.location.href = '/login'}
                 className="btn-secondary"
               >
                 Go to Login
@@ -233,7 +232,7 @@ const Signup = () => {
                   <option value="financial_pro">Financial Professional</option>
                 </select>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
@@ -420,15 +419,11 @@ const Signup = () => {
 
             <div className="text-center space-y-2">
               <div>
-                <Link
-                  to="/login"
-                  className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
-                >
+                <Link to="/login" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
                   <SafeIcon icon={FiArrowLeft} className="mr-2 h-4 w-4" />
                   Back to login
                 </Link>
               </div>
-              
               <div>
                 <p className="text-sm text-gray-600">
                   Are you an administrator?{' '}

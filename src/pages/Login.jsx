@@ -17,6 +17,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  console.log('Login page rendering, Clerk isLoaded:', isLoaded);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isLoaded) {
@@ -28,16 +30,19 @@ const Login = () => {
     setError('');
 
     try {
+      console.log('Attempting to sign in with:', email);
       const result = await signIn.create({
         identifier: email,
         password,
       });
 
       if (result.status === 'complete') {
+        console.log('Sign in complete, redirecting to dashboard');
         await setActive({ session: result.createdSessionId });
         navigate('/dashboard');
       } else {
         // Handle other statuses if needed
+        console.log('Sign in status:', result.status);
         setError('Authentication failed. Please check your credentials.');
       }
     } catch (err) {

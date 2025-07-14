@@ -18,13 +18,13 @@ export const FinancialAnalysisProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  console.log('FinancialAnalysisProvider rendering, user:', user?.id);
 
   // Load analysis data
   const loadAnalysis = useCallback(async (clientId) => {
     try {
       setLoading(true);
       setError(null);
-
       console.log('Loading financial analysis for client:', clientId);
 
       // Fetch from Supabase
@@ -41,7 +41,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
         setAnalysis(data);
       } else {
         console.log('No financial analysis found in Supabase, inserting new row');
-
         const newAnalysis = {
           client_id: clientId,
           created_by: user?.id,
@@ -73,7 +72,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
           .maybeSingle();
 
         if (insertError) throw insertError;
-
         setAnalysis(inserted || { ...newAnalysis });
       }
     } catch (err) {
@@ -90,9 +88,12 @@ export const FinancialAnalysisProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const payload = { ...data, updated_at: new Date().toISOString() };
-      let saved;
+      const payload = {
+        ...data,
+        updated_at: new Date().toISOString()
+      };
 
+      let saved;
       if (payload.id) {
         const { data: updated, error } = await supabase
           .from('financial_analyses_pf')
@@ -134,7 +135,10 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
-        .update({ income_sources_fa7: sources, updated_at: new Date().toISOString() })
+        .update({
+          income_sources_fa7: sources,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', analysisId)
         .select()
         .maybeSingle();
@@ -161,7 +165,10 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
-        .update({ expenses_fa7: expenses, updated_at: new Date().toISOString() })
+        .update({
+          expenses_fa7: expenses,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', analysisId)
         .select()
         .maybeSingle();

@@ -21,6 +21,8 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log('DataProvider rendering, user:', user?.id);
+
   // Load data when user changes
   useEffect(() => {
     if (user) {
@@ -31,7 +33,6 @@ export const DataProvider = ({ children }) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
-
     try {
       console.log('Fetching data from Supabase...');
 
@@ -40,31 +41,28 @@ export const DataProvider = ({ children }) => {
         .from('clients_pf')
         .select('*')
         .eq('advisor_id', user.id);
-      
       if (clientsError) throw clientsError;
-      
+
       // Fetch users
       let { data: usersData, error: usersError } = await supabase
         .from('users_pf')
         .select('*')
         .eq('advisor_id', user.id);
-      
       if (usersError) throw usersError;
-      
+
       // Fetch proposals
       let { data: proposalsData, error: proposalsError } = await supabase
         .from('projections_pf')
         .select('*')
         .eq('advisor_id', user.id);
-      
       if (proposalsError) throw proposalsError;
-      
+
       console.log('Data fetched successfully:', {
         clients: clientsData.length,
         users: usersData.length,
         proposals: proposalsData.length
       });
-      
+
       setClients(clientsData || []);
       setUsers(usersData || []);
       setProposals(proposalsData || []);
@@ -83,7 +81,6 @@ export const DataProvider = ({ children }) => {
         .from('clients_pf')
         .insert({ ...client, advisor_id: user.id })
         .select();
-
       if (error) throw error;
 
       const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: user.id };
@@ -102,7 +99,6 @@ export const DataProvider = ({ children }) => {
         .update(updates)
         .eq('id', id)
         .select();
-
       if (error) throw error;
 
       const updated = data && data.length > 0 ? data[0] : { id, ...updates };
@@ -120,7 +116,6 @@ export const DataProvider = ({ children }) => {
         .from('clients_pf')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
 
       setClients(prev => prev.filter(client => client.id !== id));
@@ -137,7 +132,6 @@ export const DataProvider = ({ children }) => {
         .from('users_pf')
         .insert({ ...userData, advisor_id: user.id })
         .select();
-
       if (error) throw error;
 
       const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.id };
@@ -156,7 +150,6 @@ export const DataProvider = ({ children }) => {
         .update(updates)
         .eq('id', id)
         .select();
-
       if (error) throw error;
 
       const updated = data && data.length > 0 ? data[0] : { id, ...updates };
@@ -174,7 +167,6 @@ export const DataProvider = ({ children }) => {
         .from('users_pf')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
 
       setUsers(prev => prev.filter(user => user.id !== id));
@@ -191,7 +183,6 @@ export const DataProvider = ({ children }) => {
         .from('projections_pf')
         .insert({ ...proposal, advisor_id: user.id })
         .select();
-
       if (error) throw error;
 
       const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.id };
@@ -210,7 +201,6 @@ export const DataProvider = ({ children }) => {
         .update(updates)
         .eq('id', id)
         .select();
-
       if (error) throw error;
 
       const updated = data && data.length > 0 ? data[0] : { id, ...updates };
@@ -228,7 +218,6 @@ export const DataProvider = ({ children }) => {
         .from('projections_pf')
         .delete()
         .eq('id', id);
-
       if (error) throw error;
 
       setProposals(prev => prev.filter(proposal => proposal.id !== id));
