@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import supabase from '../lib/supabase';
+import logDev from '../utils/logDev';
 
 // Status stages
 export const CLIENT_STATUSES = [
@@ -31,7 +32,7 @@ export const CrmProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('CrmProvider rendering, user:', user?.id);
+  logDev('CrmProvider rendering, user:', user?.id);
 
   // Load client CRM data
   useEffect(() => {

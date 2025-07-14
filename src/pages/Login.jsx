@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
+import logDev from '../utils/logDev';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn, FiArrowRight } = FiIcons;
@@ -17,7 +18,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  console.log('Login page rendering, Clerk isLoaded:', isLoaded);
+  logDev('Login page rendering, Clerk isLoaded:', isLoaded);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,19 +31,19 @@ const Login = () => {
     setError('');
 
     try {
-      console.log('Attempting to sign in with:', email);
+      logDev('Attempting to sign in with:', email);
       const result = await signIn.create({
         identifier: email,
         password,
       });
 
       if (result.status === 'complete') {
-        console.log('Sign in complete, redirecting to dashboard');
+        logDev('Sign in complete, redirecting to dashboard');
         await setActive({ session: result.createdSessionId });
         navigate('/dashboard');
       } else {
         // Handle other statuses if needed
-        console.log('Sign in status:', result.status);
+        logDev('Sign in status:', result.status);
         setError('Authentication failed. Please check your credentials.');
       }
     } catch (err) {

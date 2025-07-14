@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
+import logDev from '../utils/logDev';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -18,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  console.log('AuthProvider rendering, Clerk user:', clerkUser?.id);
+  logDev('AuthProvider rendering, Clerk user:', clerkUser?.id);
 
   // Update local user state when Clerk user changes
   useEffect(() => {

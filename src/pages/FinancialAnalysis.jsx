@@ -14,6 +14,7 @@ import FinancialGoalsSection from '../components/financial/FinancialGoalsSection
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import supabase from '../lib/supabase';
+import logDev from '../utils/logDev';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiDollarSign, FiTrendingUp, FiShield, FiFileText, FiTarget, FiSave, FiDownload, FiUser, FiArrowLeft } = FiIcons;
@@ -73,7 +74,7 @@ const FinancialAnalysis = () => {
 
     setIsSaving(true);
     try {
-      console.log('Saving financial analysis to Supabase:', analysis);
+      logDev('Saving financial analysis to Supabase:', analysis);
 
       // Prepare the analysis data with required fields
       const analysisData = {
@@ -94,7 +95,7 @@ const FinancialAnalysis = () => {
 
         if (error) throw error;
         
-        console.log('Financial analysis updated successfully in Supabase:', data);
+        logDev('Financial analysis updated successfully in Supabase:', data);
         
         // Update local context with the returned data
         if (data && data.length > 0) {
@@ -116,7 +117,7 @@ const FinancialAnalysis = () => {
 
         if (error) throw error;
         
-        console.log('Financial analysis created successfully in Supabase:', data);
+        logDev('Financial analysis created successfully in Supabase:', data);
         
         // Update local context with the returned data
         if (data && data.length > 0) {

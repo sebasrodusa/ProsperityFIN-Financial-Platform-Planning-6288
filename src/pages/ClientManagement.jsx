@@ -14,6 +14,7 @@ import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../lib/supabase';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import logDev from '../utils/logDev';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiMail, FiPhone, FiMapPin, FiCalendar, FiUser, FiUsers, FiBriefcase, FiFilter, FiList, FiArchive, FiDollarSign, FiToggleRight } = FiIcons;
 
@@ -63,7 +64,7 @@ const ClientManagement = () => {
   const filteredClients = getFilteredClients();
 
   const handleAddClient = useCallback(async (clientData) => {
-    console.log('Adding client to Supabase:', clientData);
+    logDev('Adding client to Supabase:', clientData);
     setIsSubmitting(true);
     
     try {
@@ -79,7 +80,7 @@ const ClientManagement = () => {
         
       if (error) throw error;
       
-      console.log('Client added successfully to Supabase:', data);
+      logDev('Client added successfully to Supabase:', data);
       
       // Update local state with the returned data
       if (data && data.length > 0) {
@@ -99,7 +100,7 @@ const ClientManagement = () => {
   }, [addClient, user]);
 
   const handleUpdateClient = useCallback(async (clientData) => {
-    console.log('Updating client in Supabase:', clientData);
+    logDev('Updating client in Supabase:', clientData);
     setIsSubmitting(true);
     
     try {
@@ -115,7 +116,7 @@ const ClientManagement = () => {
         
       if (error) throw error;
       
-      console.log('Client updated successfully in Supabase:', data);
+      logDev('Client updated successfully in Supabase:', data);
       
       // Update local state with the returned data
       if (data && data.length > 0) {
@@ -143,7 +144,7 @@ const ClientManagement = () => {
   const handleDelete = useCallback(async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        console.log('Deleting client from Supabase:', clientId);
+        logDev('Deleting client from Supabase:', clientId);
         
         // Delete the client from Supabase
         const { error } = await supabase
@@ -153,7 +154,7 @@ const ClientManagement = () => {
           
         if (error) throw error;
         
-        console.log('Client deleted successfully from Supabase');
+        logDev('Client deleted successfully from Supabase');
         
         // Update local state
         deleteClient(clientId);
@@ -166,7 +167,7 @@ const ClientManagement = () => {
 
   const handleTogglePortalAccess = useCallback(async (clientId, currentAccess) => {
     try {
-      console.log('Toggling portal access in Supabase:', clientId, !currentAccess);
+      logDev('Toggling portal access in Supabase:', clientId, !currentAccess);
       
       // Update the client in Supabase
       const { data, error } = await supabase
@@ -180,7 +181,7 @@ const ClientManagement = () => {
         
       if (error) throw error;
       
-      console.log('Portal access updated successfully in Supabase:', data);
+      logDev('Portal access updated successfully in Supabase:', data);
       
       // Update local state
       updateClient(clientId, { hasAccess: !currentAccess });
@@ -192,7 +193,7 @@ const ClientManagement = () => {
 
   const handleToggleArchive = useCallback(async (clientId, isArchived) => {
     try {
-      console.log('Toggling archive status in Supabase:', clientId, !isArchived);
+      logDev('Toggling archive status in Supabase:', clientId, !isArchived);
       
       // Update the client in Supabase
       const { data, error } = await supabase
@@ -207,7 +208,7 @@ const ClientManagement = () => {
         
       if (error) throw error;
       
-      console.log('Archive status updated successfully in Supabase:', data);
+      logDev('Archive status updated successfully in Supabase:', data);
       
       // Update local state
       updateClient(clientId, { 

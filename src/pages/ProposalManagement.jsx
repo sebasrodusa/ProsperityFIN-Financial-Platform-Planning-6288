@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import logDev from '../utils/logDev';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -204,7 +205,7 @@ const ProposalManagement = () => {
     setIsSubmitting(true);
     
     try {
-      console.log('Submitting proposal to Supabase:', formData);
+      logDev('Submitting proposal to Supabase:', formData);
       
       const proposalData = {
         ...formData,
@@ -226,7 +227,7 @@ const ProposalManagement = () => {
           
         if (error) throw error;
         
-        console.log('Proposal updated successfully in Supabase:', data);
+        logDev('Proposal updated successfully in Supabase:', data);
         
         // Update local state
         if (data && data.length > 0) {
@@ -245,7 +246,7 @@ const ProposalManagement = () => {
           
         if (error) throw error;
         
-        console.log('Proposal added successfully to Supabase:', data);
+        logDev('Proposal added successfully to Supabase:', data);
         
         // Update local state
         if (data && data.length > 0) {
@@ -322,7 +323,7 @@ const ProposalManagement = () => {
   const handleDelete = async (proposalId) => {
     if (window.confirm('Are you sure you want to delete this projection?')) {
       try {
-        console.log('Deleting proposal from Supabase:', proposalId);
+        logDev('Deleting proposal from Supabase:', proposalId);
         
         // Delete from Supabase
         const { error } = await supabase
@@ -332,7 +333,7 @@ const ProposalManagement = () => {
           
         if (error) throw error;
         
-        console.log('Proposal deleted successfully from Supabase');
+        logDev('Proposal deleted successfully from Supabase');
         
         // Update local state
         deleteProposal(proposalId);
@@ -345,7 +346,7 @@ const ProposalManagement = () => {
 
   const handleStatusChange = async (proposalId, newStatus) => {
     try {
-      console.log('Updating proposal status in Supabase:', proposalId, newStatus);
+      logDev('Updating proposal status in Supabase:', proposalId, newStatus);
       
       // Update in Supabase
       const { data, error } = await supabase
@@ -359,7 +360,7 @@ const ProposalManagement = () => {
         
       if (error) throw error;
       
-      console.log('Proposal status updated successfully in Supabase:', data);
+      logDev('Proposal status updated successfully in Supabase:', data);
       
       // Update local state
       if (data && data.length > 0) {

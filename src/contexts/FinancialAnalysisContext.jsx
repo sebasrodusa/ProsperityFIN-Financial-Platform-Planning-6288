@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import supabase from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import logDev from '../utils/logDev';
 
 const FinancialAnalysisContext = createContext();
 
@@ -19,7 +20,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  console.log('FinancialAnalysisProvider rendering, user:', user?.id);
+  logDev('FinancialAnalysisProvider rendering, user:', user?.id);
 
   // Load analysis data for a specific client
   const loadAnalysis = useCallback(async (clientId) => {
