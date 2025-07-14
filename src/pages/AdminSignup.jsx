@@ -128,15 +128,19 @@ const AdminSignup = () => {
           }
         }
       });
-      
+
       if (authError) throw authError;
-      
-      if (authData?.user) {
+
+      // Ensure we have the user's auth ID after signup
+      const { data: currentUser } = await supabase.auth.getUser();
+      const userId = currentUser?.user?.id || authData?.user?.id;
+
+      if (userId) {
         // 2. Create the user profile in the database with snake_case field names
         const { error: profileError } = await supabase
           .from('users_pf')
           .insert({
-            id: authData.user.id,
+            id: userId,
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
