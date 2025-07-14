@@ -1,30 +1,16 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import ClerkProviderWithRoutes from './components/auth/ClerkProviderWithRoutes';
+import PrivateRoute from './components/auth/PrivateRoute';
 import { DataProvider } from './contexts/DataContext';
 import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
 import { CrmProvider } from './contexts/CrmContext';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminSignup from './pages/AdminSignup';
-import Dashboard from './pages/Dashboard';
-import CRMDashboard from './pages/CRMDashboard';
-import ClientCRM from './pages/ClientCRM';
-import ClientManagement from './pages/ClientManagement';
-import ClientDetails from './pages/ClientDetails';
-import FinancialAnalysis from './pages/FinancialAnalysis';
-import ClientFinancialReport from './pages/ClientFinancialReport';
-import ProposalManagement from './pages/ProposalManagement';
-import UserManagement from './pages/UserManagement';
-import ClientPortal from './pages/ClientPortal';
-import ClientFinancialAnalysis from './pages/ClientFinancialAnalysis';
-import ProfileSettings from './pages/ProfileSettings';
-import ProjectionsSettings from './pages/ProjectionsSettings';
+import { routes } from './config/routes';
 import './App.css';
-
-const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -67,48 +53,37 @@ const AppRoutes = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Routes>
+        {/* Public Routes */}
         <Route path="/sign-in/*" element={<Login />} />
         <Route path="/sign-up/*" element={<Signup />} />
         <Route path="/admin-signup" element={<AdminSignup />} />
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        
+
+        {/* Protected Routes */}
+        {routes.map((route) => (
+          <Route
+            key={route.path}
+            path={route.path}
+            element={
+              route.requireAuth ? (
+                <SignedIn>
+                  <PrivateRoute allowedRoles={route.allowedRoles}>
+                    {route.element}
+                  </PrivateRoute>
+                </SignedIn>
+              ) : (
+                route.element
+              )
+            }
+          />
+        ))}
+
+        {/* Catch all route - redirect to sign in */}
         <Route
           path="*"
           element={
-            <>
-              <SignedIn>
-                <Routes>
-                  {/* Dashboard Routes */}
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  
-                  {/* CRM Routes */}
-                  <Route path="/crm" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><CRMDashboard /></ProtectedRoute>} />
-                  <Route path="/clients/:clientId/crm" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><ClientCRM /></ProtectedRoute>} />
-                  
-                  {/* Client Routes */}
-                  <Route path="/client-portal" element={<ProtectedRoute allowedRoles={['client']}><ClientPortal /></ProtectedRoute>} />
-                  <Route path="/client-financial-analysis" element={<ProtectedRoute allowedRoles={['client']}><ClientFinancialAnalysis /></ProtectedRoute>} />
-                  
-                  {/* Professional Routes */}
-                  <Route path="/clients" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><ClientManagement /></ProtectedRoute>} />
-                  <Route path="/clients/:clientId" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><ClientDetails /></ProtectedRoute>} />
-                  <Route path="/financial-analysis" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><FinancialAnalysis /></ProtectedRoute>} />
-                  <Route path="/financial-analysis/:clientId" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><FinancialAnalysis /></ProtectedRoute>} />
-                  <Route path="/clients/:clientId/report" element={<ClientFinancialReport />} />
-                  <Route path="/proposals" element={<ProtectedRoute allowedRoles={['admin', 'manager', 'financial_pro']}><ProposalManagement /></ProtectedRoute>} />
-                  <Route path="/users" element={<ProtectedRoute allowedRoles={['admin', 'manager']}><UserManagement /></ProtectedRoute>} />
-                  
-                  {/* Admin Routes */}
-                  <Route path="/projections-settings" element={<ProtectedRoute allowedRoles={['admin']}><ProjectionsSettings /></ProtectedRoute>} />
-                  
-                  {/* Settings */}
-                  <Route path="/profile-settings" element={<ProfileSettings />} />
-                </Routes>
-              </SignedIn>
-              <SignedOut>
-                <RedirectToSignIn />
-              </SignedOut>
-            </>
+            <SignedOut>
+              <RedirectToSignIn />
+            </SignedOut>
           }
         />
       </Routes>
@@ -119,8 +94,8 @@ const AppRoutes = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <ClerkProvider publishableKey={clerkPubKey}>
-        <Router>
+      <Router>
+        <ClerkProviderWithRoutes>
           <DataProvider>
             <CrmProvider>
               <FinancialAnalysisProvider>
@@ -128,8 +103,8 @@ function App() {
               </FinancialAnalysisProvider>
             </CrmProvider>
           </DataProvider>
-        </Router>
-      </ClerkProvider>
+        </ClerkProviderWithRoutes>
+      </Router>
     </ErrorBoundary>
   );
 }
