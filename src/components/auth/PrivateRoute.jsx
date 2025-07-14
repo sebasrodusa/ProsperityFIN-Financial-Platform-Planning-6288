@@ -18,7 +18,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
 
   // If auth is required and user isn't signed in, redirect to login
   if (requireAuth && !isSignedIn) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
   // If we have role restrictions
@@ -30,7 +30,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
       // Redirect to appropriate dashboard based on role
       if (userRole === 'admin' || userRole === 'manager') {
         return <Navigate to="/admin/dashboard" replace />;
-      } else if (userRole === 'financial_pro') {
+      } else if (userRole === 'financial_professional') {
         return <Navigate to="/advisor/dashboard" replace />;
       } else if (userRole === 'client') {
         return <Navigate to="/client/dashboard" replace />;
