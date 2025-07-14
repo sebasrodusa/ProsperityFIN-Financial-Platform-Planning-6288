@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useSignUp } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../lib/supabase';
 
 const { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiPhone, FiArrowLeft, FiShield, FiBriefcase } = FiIcons;
 
@@ -15,13 +15,19 @@ const TEAM_IDS = [
   { id: 'md_samaniego', name: 'MD Samaniego' }
 ];
 
-// This is the access code to create admin users
-// In a production environment, this would be stored securely, not in code
-const ADMIN_ACCESS_CODE = 'ProsperityAdmin2024';
+// Access code configuration (in a real app, these would be securely stored)
+const ACCESS_CODES = {
+  admin: 'ADM001',
+  manager: 'MGR001'
+};
 
 const AdminSignup = () => {
+  const navigate = useNavigate();
+  const { isLoaded, signUp, setActive } = useSignUp();
+
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -32,12 +38,13 @@ const AdminSignup = () => {
     accessCode: '',
     agreeTerms: false
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [accessVerified, setAccessVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verificationStep, setVerificationStep] = useState(null);
   const [success, setSuccess] = useState(false);
-  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -49,116 +56,102 @@ const AdminSignup = () => {
 
   // Verify access code
   const verifyAccessCode = () => {
-    if (formData.accessCode === ADMIN_ACCESS_CODE) {
+    const correctCode = ACCESS_CODES[formData.role];
+    if (formData.accessCode === correctCode) {
       setAccessVerified(true);
       setError('');
     } else {
-      setError('Invalid access code. Please try again.');
+      setError(`Invalid access code for ${formData.role === 'admin' ? 'Administrator' : 'Manager'} role. Please try again.`);
     }
   };
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      setError('Name is required');
+    if (!formData.firstName.trim() || !formData.lastName.trim()) {
+      setError('First and last name are required');
       return false;
     }
-    
     if (!formData.email.trim()) {
       setError('Email is required');
       return false;
     }
-    
     if (!/\S+@\S+\.\S+/.test(formData.email)) {
       setError('Email is invalid');
       return false;
     }
-    
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
       return false;
     }
-    
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
-
     if (!formData.teamId) {
       setError('Please select a team');
       return false;
     }
-    
     if (!formData.agreeTerms) {
       setError('You must agree to the Terms of Service and Privacy Policy');
       return false;
     }
-    
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    
+    if (!isLoaded) {
+      setError('Authentication system is not ready yet. Please try again.');
+      return;
+    }
     
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+    setError('');
+
     try {
       // Generate agent code if not provided
       let agentCode = formData.agentCode;
       if (!agentCode) {
-        const prefix = formData.role === 'admin' ? 'ADM' : formData.role === 'manager' ? 'MGR' : 'FP';
+        const prefix = formData.role === 'admin' ? 'ADM' : 'MGR';
         agentCode = `${prefix}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       }
-      
-      // 1. Register the user with Supabase Auth using snake_case for metadata
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
+
+      // Start the signup process with Clerk
+      const result = await signUp.create({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        emailAddress: formData.email,
         password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
-            phone: formData.phone,
-            role: formData.role,
-            team_id: formData.teamId, // Changed to snake_case
-            agent_code: agentCode    // Changed to snake_case
-          }
+      });
+
+      // Add user metadata
+      await result.update({
+        unsafeMetadata: {
+          phone: formData.phone,
+          agentCode: agentCode
+        },
+        publicMetadata: {
+          role: formData.role,
+          teamId: formData.teamId
         }
       });
 
-      if (authError) throw authError;
-
-      // Ensure we have the user's auth ID after signup
-      const { data: currentUser } = await supabase.auth.getUser();
-      const userId = currentUser?.user?.id || authData?.user?.id;
-
-      if (userId) {
-        // 2. Create the user profile in the database with snake_case field names
-        const { error: profileError } = await supabase
-          .from('users_pf')
-          .insert({
-            id: userId,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            role: formData.role,
-            team_id: formData.teamId,        // Changed to snake_case
-            agent_code: agentCode,          // Changed to snake_case
-            status: 'active',
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
-            created_at: new Date().toISOString()
-          });
-          
-        if (profileError) throw profileError;
-        
-        // Success
+      // Check if email needs verification
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
         setSuccess(true);
+        
+        // Redirect based on role
         setTimeout(() => {
-          navigate('/login');
-        }, 3000);
+          navigate('/admin/dashboard');
+        }, 2000);
+      } else {
+        // Email verification needed
+        setVerificationStep(result.status);
       }
     } catch (err) {
       console.error('Signup error:', err);
@@ -167,6 +160,14 @@ const AdminSignup = () => {
       setLoading(false);
     }
   };
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -182,16 +183,38 @@ const AdminSignup = () => {
           </div>
           <div className="flex items-center justify-center space-x-2">
             <h2 className="text-3xl font-heading font-bold text-gray-900">
-              Admin Signup
+              {formData.role === 'admin' ? 'Admin Signup' : 'Manager Signup'}
             </h2>
             <SafeIcon icon={FiShield} className="w-6 h-6 text-primary-600" />
           </div>
           <p className="mt-2 text-sm text-gray-600">
-            Create an administrator account for ProsperityFIN™
+            Create a {formData.role === 'admin' ? 'administrator' : 'manager'} account for ProsperityFIN™
           </p>
         </div>
 
-        {!accessVerified ? (
+        {verificationStep === 'needs_email_verification' ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-medium"
+          >
+            <div className="text-center">
+              <SafeIcon icon={FiMail} className="w-12 h-12 text-primary-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Verify your email</h3>
+              <p className="text-gray-600 mb-6">
+                We've sent a verification email to <strong>{formData.email}</strong>. 
+                Please check your inbox and follow the instructions to verify your account.
+              </p>
+              <button 
+                onClick={() => window.location.href = '/login'} 
+                className="btn-secondary"
+              >
+                Go to Login
+              </button>
+            </div>
+          </motion.div>
+        ) : !accessVerified ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -204,17 +227,34 @@ const AdminSignup = () => {
                   {error}
                 </div>
               )}
-              
+
               <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
                 <div className="flex items-center">
                   <SafeIcon icon={FiShield} className="w-5 h-5 mr-2" />
-                  <p>This page is protected. Please enter the admin access code to continue.</p>
+                  <p>This page is protected. Please select a role and enter the corresponding access code to continue.</p>
                 </div>
               </div>
-              
+
+              <div>
+                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+                  Role *
+                </label>
+                <select
+                  id="role"
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className="form-input"
+                  required
+                >
+                  <option value="admin">Administrator</option>
+                  <option value="manager">Manager</option>
+                </select>
+              </div>
+
               <div>
                 <label htmlFor="accessCode" className="block text-sm font-medium text-gray-700 mb-2">
-                  Admin Access Code *
+                  Access Code *
                 </label>
                 <div className="relative">
                   <SafeIcon icon={FiLock} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
@@ -226,7 +266,7 @@ const AdminSignup = () => {
                     value={formData.accessCode}
                     onChange={handleInputChange}
                     className="form-input pl-10 pr-10"
-                    placeholder="Enter admin access code"
+                    placeholder={`Enter ${formData.role} access code`}
                   />
                   <button
                     type="button"
@@ -236,8 +276,11 @@ const AdminSignup = () => {
                     <SafeIcon icon={showPassword ? FiEyeOff : FiEye} className="h-5 w-5" />
                   </button>
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Use <strong>{formData.role === 'admin' ? 'ADM001' : 'MGR001'}</strong> for testing.
+                </p>
               </div>
-              
+
               <button
                 onClick={verifyAccessCode}
                 className="btn-primary w-full flex items-center justify-center space-x-2"
@@ -245,9 +288,12 @@ const AdminSignup = () => {
                 <span>Verify Access</span>
               </button>
             </div>
-            
+
             <div className="text-center">
-              <Link to="/login" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+              <Link
+                to="/login"
+                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+              >
                 <SafeIcon icon={FiArrowLeft} className="mr-2 h-4 w-4" />
                 Back to login
               </Link>
@@ -266,29 +312,43 @@ const AdminSignup = () => {
                 {error}
               </div>
             )}
-            
+
             {success && (
               <div className="bg-success-50 border border-success-200 text-success-700 px-4 py-3 rounded-lg">
-                Admin account created successfully! Redirecting to login...
+                Account created successfully! Redirecting to your dashboard...
               </div>
             )}
 
             <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <div className="relative">
-                  <SafeIcon icon={FiUser} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                    First Name *
+                  </label>
                   <input
-                    id="name"
-                    name="name"
+                    id="firstName"
+                    name="firstName"
                     type="text"
                     required
-                    value={formData.name}
+                    value={formData.firstName}
                     onChange={handleInputChange}
-                    className="form-input pl-10"
-                    placeholder="Enter your full name"
+                    className="form-input"
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                    Last Name *
+                  </label>
+                  <input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
+                    required
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder="Last name"
                   />
                 </div>
               </div>
@@ -344,7 +404,7 @@ const AdminSignup = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     className="form-input pl-10 pr-10"
-                    placeholder="Create a password (min. 6 characters)"
+                    placeholder="Create a password (min. 8 characters)"
                   />
                   <button
                     type="button"
@@ -374,24 +434,7 @@ const AdminSignup = () => {
                   />
                 </div>
               </div>
-              
-              <div>
-                <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                  Role *
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  required
-                >
-                  <option value="admin">Administrator</option>
-                  <option value="manager">Manager</option>
-                </select>
-              </div>
-              
+
               <div>
                 <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
                   Team *
@@ -415,7 +458,7 @@ const AdminSignup = () => {
                   </select>
                 </div>
               </div>
-              
+
               <div>
                 <label htmlFor="agentCode" className="block text-sm font-medium text-gray-700 mb-2">
                   Agent Code (Optional)
@@ -445,6 +488,7 @@ const AdminSignup = () => {
                   checked={formData.agreeTerms}
                   onChange={handleInputChange}
                   className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                  required
                 />
                 <label htmlFor="agreeTerms" className="ml-2 block text-sm text-gray-700">
                   I agree to the{' '}
@@ -466,17 +510,20 @@ const AdminSignup = () => {
                 className="btn-primary w-full flex items-center justify-center space-x-2"
               >
                 {loading ? (
-                  <LoadingSpinner size="sm" />
+                  <><LoadingSpinner size="sm" /><span>Creating account...</span></>
                 ) : success ? (
                   'Account Created!'
                 ) : (
-                  'Create Admin Account'
+                  `Create ${formData.role === 'admin' ? 'Admin' : 'Manager'} Account`
                 )}
               </button>
             </div>
 
             <div className="text-center">
-              <Link to="/login" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+              <Link
+                to="/login"
+                className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+              >
                 <SafeIcon icon={FiArrowLeft} className="mr-2 h-4 w-4" />
                 Back to login
               </Link>

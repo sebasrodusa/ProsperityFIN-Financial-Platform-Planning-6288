@@ -34,8 +34,8 @@ class ErrorBoundary extends React.Component {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
             <p className="text-gray-600 mb-4">We're sorry, but there was an error loading the application.</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
             >
               Reload Page
@@ -54,8 +54,9 @@ const AppRoutes = () => {
     <div className="min-h-screen bg-gray-50">
       <Routes>
         {/* Public Routes */}
-        <Route path="/sign-in/*" element={<Login />} />
-        <Route path="/sign-up/*" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/sign-in" element={<Login />} />
+        <Route path="/sign-up" element={<Signup />} />
         <Route path="/admin-signup" element={<AdminSignup />} />
 
         {/* Protected Routes */}

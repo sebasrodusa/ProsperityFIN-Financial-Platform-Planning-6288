@@ -1,13 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
-const PrivateRoute = ({ 
-  children, 
-  allowedRoles = [],
-  requireAuth = true 
-}) => {
+const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
   const { user, isLoaded, isSignedIn } = useUser();
   const location = useLocation();
 
@@ -22,7 +18,7 @@ const PrivateRoute = ({
 
   // If auth is required and user isn't signed in, redirect to login
   if (requireAuth && !isSignedIn) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If we have role restrictions
@@ -31,11 +27,16 @@ const PrivateRoute = ({
     
     // If user has no role or unauthorized role
     if (!userRole || !allowedRoles.includes(userRole)) {
-      // Redirect client users to client portal
-      if (userRole === 'client') {
-        return <Navigate to="/client-portal" replace />;
+      // Redirect to appropriate dashboard based on role
+      if (userRole === 'admin' || userRole === 'manager') {
+        return <Navigate to="/admin/dashboard" replace />;
+      } else if (userRole === 'financial_pro') {
+        return <Navigate to="/advisor/dashboard" replace />;
+      } else if (userRole === 'client') {
+        return <Navigate to="/client/dashboard" replace />;
       }
-      // Redirect others to dashboard
+      
+      // Default fallback
       return <Navigate to="/dashboard" replace />;
     }
   }
