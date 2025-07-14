@@ -1,10 +1,24 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.jsx';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { HashRouter } from 'react-router-dom';
+import { ClerkProvider } from '@clerk/clerk-react';
+import App from './App';
 import './index.css';
 
-createRoot(document.getElementById('root')).render(
-<StrictMode>
-    <App />
-</StrictMode>
+// Get Clerk publishable key from environment variable
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+// Check if Clerk key is available
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error("Missing Clerk publishable key");
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+      <HashRouter>
+        <App />
+      </HashRouter>
+    </ClerkProvider>
+  </React.StrictMode>
 );

@@ -1,20 +1,27 @@
-import { useUser } from '@clerk/clerk-react';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 import { ROLES } from '../config/routes';
 
 export const useAuth = () => {
-  const { user, isLoaded, isSignedIn } = useUser();
-
-  const isAdmin = user?.publicMetadata?.role === ROLES.ADMIN;
-  const isManager = user?.publicMetadata?.role === ROLES.MANAGER;
-  const isFinancialPro = user?.publicMetadata?.role === ROLES.FINANCIAL_PRO;
-  const isClient = user?.publicMetadata?.role === ROLES.CLIENT;
-
-  const hasRole = (role) => user?.publicMetadata?.role === role;
-  const hasAnyRole = (roles) => roles.includes(user?.publicMetadata?.role);
-
+  const context = useContext(AuthContext);
+  
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  const { user, loading, isSignedIn } = context;
+  
+  const isAdmin = user?.role === ROLES.ADMIN;
+  const isManager = user?.role === ROLES.MANAGER;
+  const isFinancialPro = user?.role === ROLES.FINANCIAL_PRO;
+  const isClient = user?.role === ROLES.CLIENT;
+  
+  const hasRole = (role) => user?.role === role;
+  const hasAnyRole = (roles) => roles.includes(user?.role);
+  
   return {
     user,
-    isLoaded,
+    loading,
     isSignedIn,
     isAdmin,
     isManager,
@@ -22,7 +29,7 @@ export const useAuth = () => {
     isClient,
     hasRole,
     hasAnyRole,
-    role: user?.publicMetadata?.role
+    role: user?.role
   };
 };
 

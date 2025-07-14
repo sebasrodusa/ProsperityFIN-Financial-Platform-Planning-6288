@@ -16,33 +16,16 @@ body {
 
 #root {
   width: 100%;
-  height: 100%;
+  height: 100vh;
 }
 
-@media print {
-  .print-hidden, .print\:hidden {
-    display: none !important;
-  }
-  
-  .print\:border-0 {
-    border: 0 !important;
-  }
-  
-  .print\:shadow-none {
-    box-shadow: none !important;
-  }
-  
-  .print\:break-before-page {
-    break-before: page;
-  }
-  
-  .print\:break-after-page {
-    break-after: page;
-  }
-  
-  body {
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-    print-color-adjust: exact;
-  }
+/* Debug styles */
+.debug-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: yellow;
+  padding: 10px;
+  border: 1px solid black;
+  z-index: 9999;
 }

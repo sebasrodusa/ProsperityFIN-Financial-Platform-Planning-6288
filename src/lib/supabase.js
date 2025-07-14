@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
 // Retrieve Supabase credentials from environment
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://urzsjigszcdyhmzywvdx.supabase.co';

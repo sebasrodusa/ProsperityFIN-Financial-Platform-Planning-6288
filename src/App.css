@@ -99,23 +99,23 @@
   .print\:hidden {
     display: none !important;
   }
-
+  
   .print\:border-0 {
     border: 0 !important;
   }
-
+  
   .print\:shadow-none {
     box-shadow: none !important;
   }
-
+  
   .print\:break-before-page {
     break-before: page;
   }
-
+  
   .print\:break-after-page {
     break-after: page;
   }
-
+  
   body {
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
@@ -128,7 +128,7 @@
   .mobile-hidden {
     display: none !important;
   }
-
+  
   .mobile-full {
     width: 100% !important;
   }

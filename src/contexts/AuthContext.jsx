@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useUser } from '@clerk/clerk-react';
 import supabase from '../lib/supabase';
 
 // Create the auth context
@@ -14,82 +15,46 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const { user: clerkUser, isLoaded, isSignedIn } = useUser();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Register function
-  const register = async (email, password, userData) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData
-        }
-      });
-      
-      if (error) throw error;
-      
-      return data;
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
-    } finally {
+  // Update local user state when Clerk user changes
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn && clerkUser) {
+        // Transform Clerk user to our app's user format
+        const transformedUser = {
+          id: clerkUser.id,
+          name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+          email: clerkUser.primaryEmailAddress?.emailAddress,
+          role: clerkUser.publicMetadata?.role || 'client',
+          teamId: clerkUser.publicMetadata?.teamId,
+          agentCode: clerkUser.unsafeMetadata?.agentCode,
+          avatar: clerkUser.imageUrl,
+          phone: clerkUser.unsafeMetadata?.phone
+        };
+        setUser(transformedUser);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     }
-  };
-
-  // Login function
-  const login = async (email, password) => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) throw error;
-      
-      setUser(data.user);
-      return data.user;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [clerkUser, isLoaded, isSignedIn]);
 
   // Logout function
   const logout = async () => {
-    await supabase.auth.signOut();
+    // We don't need to call supabase.auth.signOut() as we're using Clerk
+    // Just update the local state
     setUser(null);
   };
-
-  // Load current session and subscribe to auth changes
-  useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
 
   // Provide the auth context value
   const value = {
     user,
-    loading,
-    login,
-    logout,
-    register
+    loading: loading || !isLoaded,
+    isSignedIn,
+    logout
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
