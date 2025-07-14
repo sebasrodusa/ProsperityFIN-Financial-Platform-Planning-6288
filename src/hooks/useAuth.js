@@ -5,7 +5,7 @@ import { useAuth as useAuthContext } from '../contexts/AuthContext';
 const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
-  FINANCIAL_PRO: 'financial_professional',
+  FINANCIAL_PROFESSIONAL: 'financial_professional',
   CLIENT: 'client'
 };
 
@@ -19,7 +19,7 @@ export const useAuth = () => {
 
   const isAdmin = user?.role === ROLES.ADMIN;
   const isManager = user?.role === ROLES.MANAGER;
-  const isFinancialPro = user?.role === ROLES.FINANCIAL_PRO;
+  const isFinancialProfessional = user?.role === ROLES.FINANCIAL_PROFESSIONAL;
   const isClient = user?.role === ROLES.CLIENT;
 
   const hasRole = (role) => user?.role === role;
@@ -31,7 +31,7 @@ export const useAuth = () => {
     isSignedIn,
     isAdmin,
     isManager,
-    isFinancialPro,
+    isFinancialProfessional,
     isClient,
     hasRole,
     hasAnyRole,
