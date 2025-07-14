@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUser, useClerk } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
@@ -11,6 +11,7 @@ const Navbar = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const navItems = [
@@ -20,8 +21,9 @@ const Navbar = () => {
     { path: '/proposals', label: 'Proposals', icon: FiFileText },
   ];
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/sign-in');
   };
 
   return (
@@ -89,7 +91,7 @@ const Navbar = () => {
                   className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-medium border border-gray-100 py-1 z-50"
                 >
                   <Link
-                    to="/profile"
+                    to="/profile-settings"
                     className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     onClick={() => setIsProfileOpen(false)}
                   >
@@ -106,10 +108,7 @@ const Navbar = () => {
                   </Link>
                   <div className="border-t border-gray-100 my-1"></div>
                   <button
-                    onClick={() => {
-                      setIsProfileOpen(false);
-                      handleLogout();
-                    }}
+                    onClick={handleLogout}
                     className="flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
                   >
                     <SafeIcon icon={FiLogOut} className="w-4 h-4" />
