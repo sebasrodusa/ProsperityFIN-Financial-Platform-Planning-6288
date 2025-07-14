@@ -114,7 +114,7 @@ const AdminSignup = () => {
         agentCode = `${prefix}${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       }
       
-      // 1. Register the user with Supabase Auth
+      // 1. Register the user with Supabase Auth using snake_case for metadata
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -123,8 +123,8 @@ const AdminSignup = () => {
             name: formData.name,
             phone: formData.phone,
             role: formData.role,
-            teamId: formData.teamId,
-            agentCode: agentCode
+            team_id: formData.teamId, // Changed to snake_case
+            agent_code: agentCode    // Changed to snake_case
           }
         }
       });
@@ -132,7 +132,7 @@ const AdminSignup = () => {
       if (authError) throw authError;
       
       if (authData?.user) {
-        // 2. Create the user profile in the database
+        // 2. Create the user profile in the database with snake_case field names
         const { error: profileError } = await supabase
           .from('users_pf')
           .insert({
@@ -141,8 +141,8 @@ const AdminSignup = () => {
             email: formData.email,
             phone: formData.phone,
             role: formData.role,
-            teamId: formData.teamId,
-            agentCode: agentCode,
+            team_id: formData.teamId,        // Changed to snake_case
+            agent_code: agentCode,          // Changed to snake_case
             status: 'active',
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`,
             created_at: new Date().toISOString()

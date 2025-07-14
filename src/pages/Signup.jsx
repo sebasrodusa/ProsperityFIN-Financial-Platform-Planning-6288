@@ -83,7 +83,8 @@ const Signup = () => {
         options: {
           data: {
             name: formData.name,
-            phone: formData.phone
+            phone: formData.phone,
+            role: 'client' // Default role for regular signup
           }
         }
       });
