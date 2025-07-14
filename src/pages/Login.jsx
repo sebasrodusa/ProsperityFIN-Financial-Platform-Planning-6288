@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiMail, FiLock, FiEye, FiEyeOff } = FiIcons;
+const { FiMail, FiLock, FiEye, FiEyeOff, FiUserPlus } = FiIcons;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -128,14 +128,13 @@ const Login = () => {
 
           <div className="text-center text-sm">
             <span className="text-gray-600">Don't have an account?</span>
-            <a
-              href="https://prosperityfin.com/signup"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 text-primary-600 hover:text-primary-700 font-medium"
+            <Link
+              to="/signup"
+              className="ml-2 text-primary-600 hover:text-primary-700 font-medium flex items-center justify-center mt-2"
             >
-              Sign up here
-            </a>
+              <SafeIcon icon={FiUserPlus} className="mr-2 h-4 w-4" />
+              Sign up for free
+            </Link>
           </div>
 
           <div className="text-center text-xs text-gray-500">
