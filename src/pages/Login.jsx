@@ -6,7 +6,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiMail, FiLock, FiEye, FiEyeOff, FiUserPlus } = FiIcons;
+const { FiMail, FiLock, FiEye, FiEyeOff, FiUserPlus, FiShield } = FiIcons;
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -135,6 +135,16 @@ const Login = () => {
               <SafeIcon icon={FiUserPlus} className="mr-2 h-4 w-4" />
               Sign up for free
             </Link>
+            
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <Link
+                to="/admin-signup"
+                className="text-secondary-600 hover:text-secondary-700 font-medium flex items-center justify-center"
+              >
+                <SafeIcon icon={FiShield} className="mr-2 h-4 w-4" />
+                Admin Signup
+              </Link>
+            </div>
           </div>
 
           <div className="text-center text-xs text-gray-500">
