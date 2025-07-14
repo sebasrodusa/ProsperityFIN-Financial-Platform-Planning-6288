@@ -18,7 +18,7 @@ import ProjectionsSettings from '../pages/ProjectionsSettings';
 export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
-  FINANCIAL_PRO: 'financial_professional',
+  FINANCIAL_PROFESSIONAL: 'financial_professional',
   CLIENT: 'client'
 };
 
@@ -38,13 +38,13 @@ export const routes = [
     path: '/crm',
     element: <CRMDashboard />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/clients/:clientId/crm',
     element: <ClientCRM />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/client-portal',
@@ -62,25 +62,25 @@ export const routes = [
     path: '/clients',
     element: <ClientManagement />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/clients/:clientId',
     element: <ClientDetails />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/financial-analysis',
     element: <FinancialAnalysis />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/financial-analysis/:clientId',
     element: <FinancialAnalysis />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/clients/:clientId/report',
@@ -91,7 +91,7 @@ export const routes = [
     path: '/proposals',
     element: <ProposalManagement />,
     requireAuth: true,
-    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PRO]
+    allowedRoles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.FINANCIAL_PROFESSIONAL]
   },
   {
     path: '/users',

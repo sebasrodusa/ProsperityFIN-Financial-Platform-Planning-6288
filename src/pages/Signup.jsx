@@ -151,7 +151,7 @@ const Signup = () => {
     );
   }
 
-  const isFinancialPro = formData.role === 'financial_professional';
+  const isFinancialProfessional = formData.role === 'financial_professional';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -349,7 +349,7 @@ const Signup = () => {
               </div>
 
               {/* Team selection only for financial professionals */}
-              {isFinancialPro && (
+              {isFinancialProfessional && (
                 <div>
                   <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
                     Team *
