@@ -1,8 +1,8 @@
 import { Webhook } from 'svix';
-import { supabase } from '../src/lib/supabase';
+import supabase from '../src/lib/supabase';
 
 export default async function handler(req, res) {
-  // Get the webhook secret from environment variables
+  // Webhook expects CLERK_WEBHOOK_SECRET in environment variables
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
   
   if (!webhookSecret) {
