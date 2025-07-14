@@ -1,26 +1,27 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import {HashRouter as Router, Routes, Route} from 'react-router-dom';
+import {SignedIn, SignedOut, RedirectToSignIn} from '@clerk/clerk-react';
 import ClerkProviderWithRoutes from './components/auth/ClerkProviderWithRoutes';
 import PrivateRoute from './components/auth/PrivateRoute';
-import { DataProvider } from './contexts/DataContext';
-import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
-import { CrmProvider } from './contexts/CrmContext';
+import {AuthProvider} from './contexts/AuthContext';
+import {DataProvider} from './contexts/DataContext';
+import {FinancialAnalysisProvider} from './contexts/FinancialAnalysisContext';
+import {CrmProvider} from './contexts/CrmContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import AdminSignup from './pages/AdminSignup';
-import { routes } from './config/routes';
+import {routes} from './config/routes';
 import './App.css';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {hasError: false, error: null};
   }
 
   static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+    return {hasError: true, error};
   }
 
   componentDidCatch(error, errorInfo) {
@@ -34,8 +35,8 @@ class ErrorBoundary extends React.Component {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
             <p className="text-gray-600 mb-4">We're sorry, but there was an error loading the application.</p>
-            <button
-              onClick={() => window.location.reload()}
+            <button 
+              onClick={() => window.location.reload()} 
               className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
             >
               Reload Page
@@ -97,13 +98,15 @@ function App() {
     <ErrorBoundary>
       <Router>
         <ClerkProviderWithRoutes>
-          <DataProvider>
-            <CrmProvider>
-              <FinancialAnalysisProvider>
-                <AppRoutes />
-              </FinancialAnalysisProvider>
-            </CrmProvider>
-          </DataProvider>
+          <AuthProvider>
+            <DataProvider>
+              <CrmProvider>
+                <FinancialAnalysisProvider>
+                  <AppRoutes />
+                </FinancialAnalysisProvider>
+              </CrmProvider>
+            </DataProvider>
+          </AuthProvider>
         </ClerkProviderWithRoutes>
       </Router>
     </ErrorBoundary>
