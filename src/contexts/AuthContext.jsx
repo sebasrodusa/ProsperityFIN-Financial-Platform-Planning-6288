@@ -6,10 +6,10 @@ import logDev from '../utils/logDev';
 const AuthContext = createContext();
 
 // Custom hook for using the auth context
-export const useAuth = () => {
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 };

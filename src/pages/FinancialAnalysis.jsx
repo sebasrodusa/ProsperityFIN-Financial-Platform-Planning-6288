@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
 import Navbar from '../components/layout/Navbar';

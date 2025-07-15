@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { useAuth as useAuthContext } from '../contexts/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 
 // Define role constants
 const ROLES = {

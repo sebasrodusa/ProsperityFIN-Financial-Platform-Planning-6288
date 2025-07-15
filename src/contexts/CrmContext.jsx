@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuthContext } from './AuthContext';
 import supabase from '../lib/supabase';
 import logDev from '../utils/logDev';
 
@@ -25,7 +25,7 @@ export const useCrm = () => {
 };
 
 export const CrmProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [clientStatuses, setClientStatuses] = useState({});
   const [statusHistory, setStatusHistory] = useState({});
   const [clientTasks, setClientTasks] = useState({});
