@@ -77,7 +77,7 @@ const StrategiesManager = () => {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const handleAddStrategy = () => {
     setFormData({
