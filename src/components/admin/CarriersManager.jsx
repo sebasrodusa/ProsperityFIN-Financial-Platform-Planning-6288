@@ -73,7 +73,7 @@ const CarriersManager = () => {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const handleAddCarrier = () => {
     setFormData({

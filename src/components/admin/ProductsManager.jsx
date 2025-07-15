@@ -76,7 +76,7 @@ const ProductsManager = () => {
     };
 
     fetchData();
-  }, []);
+  }, [isAdmin]);
 
   const handleAddProduct = () => {
     setFormData({
