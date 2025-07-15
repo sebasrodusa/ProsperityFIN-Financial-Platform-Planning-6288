@@ -38,6 +38,8 @@ export const AuthProvider = ({ children }) => {
         };
         logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
         logDev('Resolved user role:', transformedUser.role);
+        console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
+console.log('✅ Resolved user role:', transformedUser.role);
         setUser(transformedUser);
       } else {
         setUser(null);
