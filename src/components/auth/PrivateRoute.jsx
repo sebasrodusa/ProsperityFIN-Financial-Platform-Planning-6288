@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -24,6 +24,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
   // If we have role restrictions
   if (allowedRoles.length > 0) {
     const userRole = user?.publicMetadata?.role;
+    console.debug('PrivateRoute role:', userRole);
     
     // If user has no role or unauthorized role
     if (!userRole || !allowedRoles.includes(userRole)) {
