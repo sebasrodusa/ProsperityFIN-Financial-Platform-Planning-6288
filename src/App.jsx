@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import logDev from './utils/logDev';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth as useClerkAuth } from '@clerk/clerk-react';
@@ -29,8 +29,30 @@ import ProjectionsSettings from './pages/ProjectionsSettings';
 
 function App() {
   const { isLoaded, isSignedIn } = useClerkAuth();
+  const [authError, setAuthError] = useState(null);
+
+  useEffect(() => {
+    if (isLoaded || authError) return;
+    const timer = setTimeout(() => {
+      if (!isLoaded) {
+        setAuthError('Authentication failed to initialize. Please check your environment variables or domain configuration.');
+      }
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [isLoaded, authError]);
   
   logDev('App rendering, authentication state:', { isLoaded, isSignedIn });
+
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Authentication Error</h1>
+          <p className="text-gray-600">{authError}</p>
+        </div>
+      </div>
+    );
+  }
   
   if (!isLoaded) {
     return (
