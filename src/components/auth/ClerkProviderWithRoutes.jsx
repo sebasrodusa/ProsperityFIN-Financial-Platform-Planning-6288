@@ -10,6 +10,9 @@ const ClerkProviderWithRoutes = ({ children }) => {
   
   // Get Clerk configuration from environment variables
   const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+  const CLERK_FRONTEND_API = import.meta.env.VITE_CLERK_FRONTEND_API;
+  const CLERK_SIGN_IN_URL = import.meta.env.VITE_CLERK_SIGN_IN_URL;
+  const CLERK_SIGN_UP_URL = import.meta.env.VITE_CLERK_SIGN_UP_URL;
 
 
   useEffect(() => {
@@ -53,6 +56,9 @@ const ClerkProviderWithRoutes = ({ children }) => {
   return (
     <ClerkProvider
       publishableKey={CLERK_PUBLISHABLE_KEY}
+      frontendApi={CLERK_FRONTEND_API}
+      signInUrl={CLERK_SIGN_IN_URL}
+      signUpUrl={CLERK_SIGN_UP_URL}
       navigate={(to) => navigate(to)}
       onError={(err) => {
         console.error('Clerk initialization error:', err);
