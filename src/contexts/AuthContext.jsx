@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
           avatar: clerkUser.imageUrl,
           phone: clerkUser.unsafeMetadata?.phone,
         };
+        logDev('Resolved user role:', transformedUser.role);
         setUser(transformedUser);
       } else {
         setUser(null);
