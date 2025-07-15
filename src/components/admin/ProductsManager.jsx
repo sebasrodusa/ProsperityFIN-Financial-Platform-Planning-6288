@@ -5,6 +5,7 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch } = FiIcons;
 
@@ -18,6 +19,7 @@ const PRODUCT_TYPES = [
 ];
 
 const ProductsManager = () => {
+  const { isAdmin } = useAuth();
   const [products, setProducts] = useState([]);
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,7 @@ const ProductsManager = () => {
 
   // Fetch products and strategies
   useEffect(() => {
+    if (!isAdmin) return;
     const fetchData = async () => {
       setLoading(true);
       setError(null);
@@ -243,11 +246,15 @@ const ProductsManager = () => {
     }));
   };
 
-  const filteredProducts = products.filter(product => 
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (product.type && product.type.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (!isAdmin) {
+    return <p className="text-red-500">You do not have permission to manage products.</p>;
+  }
 
   const getTypeName = (typeId) => {
     const type = PRODUCT_TYPES.find(t => t.id === typeId);
