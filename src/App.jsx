@@ -26,6 +26,7 @@ import ClientPortal from './pages/ClientPortal';
 import ClientFinancialAnalysis from './pages/ClientFinancialAnalysis';
 import ProfileSettings from './pages/ProfileSettings';
 import ProjectionsSettings from './pages/ProjectionsSettings';
+import PrivateRoute from './components/auth/PrivateRoute';
 
 function App() {
   const { isLoaded, isSignedIn } = useClerkAuth();
@@ -82,19 +83,96 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/crm" element={<CRMDashboard />} />
-              <Route path="/clients/:clientId/crm" element={<ClientCRM />} />
-              <Route path="/clients" element={<ClientManagement />} />
-              <Route path="/clients/:clientId" element={<ClientDetails />} />
-              <Route path="/financial-analysis" element={<FinancialAnalysis />} />
-              <Route path="/financial-analysis/:clientId" element={<FinancialAnalysis />} />
+              <Route
+                path="/crm"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <CRMDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/clients/:clientId/crm"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <ClientCRM />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/clients"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <ClientManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/clients/:clientId"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <ClientDetails />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/financial-analysis"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <FinancialAnalysis />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/financial-analysis/:clientId"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <FinancialAnalysis />
+                  </PrivateRoute>
+                }
+              />
               <Route path="/clients/:clientId/report" element={<ClientFinancialReport />} />
-              <Route path="/proposals" element={<ProposalManagement />} />
-              <Route path="/users" element={<UserManagement />} />
-              <Route path="/client-portal" element={<ClientPortal />} />
-              <Route path="/client-financial-analysis" element={<ClientFinancialAnalysis />} />
+              <Route
+                path="/proposals"
+                element={
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                    <ProposalManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <PrivateRoute allowedRoles={['admin']}>
+                    <UserManagement />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/client-portal"
+                element={
+                  <PrivateRoute allowedRoles={['client']}>
+                    <ClientPortal />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/client-financial-analysis"
+                element={
+                  <PrivateRoute allowedRoles={['client']}>
+                    <ClientFinancialAnalysis />
+                  </PrivateRoute>
+                }
+              />
               <Route path="/profile-settings" element={<ProfileSettings />} />
-              <Route path="/projections-settings" element={<ProjectionsSettings />} />
+              <Route
+                path="/projections-settings"
+                element={
+                  <PrivateRoute allowedRoles={['admin']}>
+                    <ProjectionsSettings />
+                  </PrivateRoute>
+                }
+              />
               <Route path="/sign-in" element={<Navigate to="/dashboard" replace />} />
               <Route path="/sign-up" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
