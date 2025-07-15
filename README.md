@@ -8,12 +8,13 @@ This project is a React application that uses Clerk for authentication and Supab
    ```bash
    npm install
    ```
-2. Copy `.env.example` to `.env` and provide your Supabase credentials along with your Clerk publishable and secret keys:
+2. Copy `.env.example` to `.env` and fill in the required environment variables:
    ```bash
    cp .env.example .env
    # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
-   # VITE_CLERK_PUBLISHABLE_KEY and VITE_CLERK_SECRET_KEY
+   # VITE_CLERK_PUBLISHABLE_KEY and CLERK_WEBHOOK_SECRET
    ```
+   `VITE_CLERK_SECRET_KEY` and `VITE_CLERK_FRONTEND_API` are not used by this project.
 3. Start the development server:
    ```bash
    npm run dev
