@@ -5,6 +5,7 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch } = FiIcons;
 
@@ -19,6 +20,7 @@ const CATEGORIES = [
 ];
 
 const StrategiesManager = () => {
+  const { isAdmin } = useAuth();
   const [strategies, setStrategies] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ const StrategiesManager = () => {
 
   // Fetch strategies and products
   useEffect(() => {
+    if (!isAdmin) return;
     const fetchData = async () => {
       setLoading(true);
       setError(null);
@@ -244,10 +247,14 @@ const StrategiesManager = () => {
     }));
   };
 
-  const filteredStrategies = strategies.filter(strategy => 
+  const filteredStrategies = strategies.filter(strategy =>
     strategy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (strategy.description && strategy.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (!isAdmin) {
+    return <p className="text-red-500">You do not have permission to manage strategies.</p>;
+  }
 
   const getCategoryName = (categoryId) => {
     const category = CATEGORIES.find(cat => cat.id === categoryId);

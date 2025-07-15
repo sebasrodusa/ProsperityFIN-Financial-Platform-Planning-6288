@@ -5,12 +5,14 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
+import { useAuth } from '../../hooks/useAuth';
 
 const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch, FiUpload, FiLink } = FiIcons;
 
 const RATINGS = ['A++', 'A+', 'A', 'A-', 'B++', 'B+', 'B', 'B-', 'C++', 'C+', 'C', 'C-'];
 
 const CarriersManager = () => {
+  const { isAdmin } = useAuth();
   const [carriers, setCarriers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +35,7 @@ const CarriersManager = () => {
 
   // Fetch carriers and products
   useEffect(() => {
+    if (!isAdmin) return;
     const fetchData = async () => {
       setLoading(true);
       setError(null);
@@ -334,11 +337,15 @@ const CarriersManager = () => {
     }));
   };
 
-  const filteredCarriers = carriers.filter(carrier => 
+  const filteredCarriers = carriers.filter(carrier =>
     carrier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (carrier.rating && carrier.rating.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (carrier.established && carrier.established.includes(searchTerm))
   );
+
+  if (!isAdmin) {
+    return <p className="text-red-500">You do not have permission to manage carriers.</p>;
+  }
 
   if (loading) {
     return (
