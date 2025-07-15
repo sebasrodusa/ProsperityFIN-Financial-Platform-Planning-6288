@@ -14,6 +14,7 @@ This project is a React application that uses Clerk for authentication and Supab
    # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
    # VITE_CLERK_PUBLISHABLE_KEY and VITE_CLERK_SECRET_KEY
    ```
+   **Important:** these environment variables are required. If `VITE_SUPABASE_URL` or `VITE_SUPABASE_ANON_KEY` are missing the application will fail to start.
 3. Start the development server:
    ```bash
    npm run dev
