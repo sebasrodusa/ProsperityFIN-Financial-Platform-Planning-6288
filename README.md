@@ -30,3 +30,15 @@ This project is a React application that uses Clerk for authentication and Supab
    ```
 
 Supabase serves as the data backend for this project, while Clerk handles authentication.
+
+## Role Metadata
+
+The application reads each user's role from `user.publicMetadata.role`. To give
+your user administrative permissions during development:
+
+1. Open the **Users** page in the Clerk dashboard and select your account.
+2. Update the **Public Metadata** field to:
+   ```json
+   { "role": "admin" }
+   ```
+3. Save the changes, then sign out and sign back in so the new role is loaded.
