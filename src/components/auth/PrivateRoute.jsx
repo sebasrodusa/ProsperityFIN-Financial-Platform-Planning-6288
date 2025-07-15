@@ -27,16 +27,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
     
     // If user has no role or unauthorized role
     if (!userRole || !allowedRoles.includes(userRole)) {
-      // Redirect to appropriate dashboard based on role
-      if (userRole === 'admin' || userRole === 'manager') {
-        return <Navigate to="/admin/dashboard" replace />;
-      } else if (userRole === 'financial_professional') {
-        return <Navigate to="/advisor/dashboard" replace />;
-      } else if (userRole === 'client') {
-        return <Navigate to="/client/dashboard" replace />;
-      }
-      
-      // Default fallback
+      // Redirect all unauthorized roles to the main dashboard
       return <Navigate to="/dashboard" replace />;
     }
   }
