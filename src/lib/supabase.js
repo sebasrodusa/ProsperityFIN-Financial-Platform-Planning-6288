@@ -1,8 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
 // Retrieve Supabase credentials from environment
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://urzsjigszcdyhmzywvdx.supabase.co';
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVyenNqaWdzemNkeWhtenl3dmR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIyNTYwNzIsImV4cCI6MjA2NzgzMjA3Mn0.3P3unNJJnL9ee6q5UJ_fOwtjp1c65Yz8lhzxa6DY2x4';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error(
+    'Missing Supabase configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.'
+  )
+}
 
 // Create a Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -10,6 +16,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     persistSession: true,
     autoRefreshToken: true
   }
-});
+})
 
-export default supabase;
+export default supabase
