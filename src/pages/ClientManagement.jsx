@@ -12,7 +12,6 @@ import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../lib/supabase';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import logDev from '../utils/logDev';
 
@@ -64,72 +63,30 @@ const ClientManagement = () => {
   const filteredClients = getFilteredClients();
 
   const handleAddClient = useCallback(async (clientData) => {
-    logDev('Adding client to Supabase:', clientData);
+    logDev('Adding client:', clientData);
     setIsSubmitting(true);
-    
+
     try {
-      // Insert the client into Supabase
-      const { data, error } = await supabase
-        .from('clients_pf')
-        .insert({
-          ...clientData,
-          advisor_id: user.id,
-          created_by: user.id
-        })
-        .select();
-        
-      if (error) throw error;
-      
-      logDev('Client added successfully to Supabase:', data);
-      
-      // Update local state with the returned data
-      if (data && data.length > 0) {
-        addClient(data[0]);
-      } else {
-        // Fallback if no data returned
-        addClient(clientData);
-      }
-      
+      await addClient(clientData);
       setIsAddModalOpen(false);
     } catch (error) {
-      console.error('Error adding client to Supabase:', error);
+      console.error('Error adding client:', error);
       alert(`Failed to add client: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
-  }, [addClient, user]);
+  }, [addClient]);
 
   const handleUpdateClient = useCallback(async (clientData) => {
-    logDev('Updating client in Supabase:', clientData);
+    logDev('Updating client:', clientData);
     setIsSubmitting(true);
-    
+
     try {
-      // Update the client in Supabase
-      const { data, error } = await supabase
-        .from('clients_pf')
-        .update({
-          ...clientData,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', selectedClient.id)
-        .select();
-        
-      if (error) throw error;
-      
-      logDev('Client updated successfully in Supabase:', data);
-      
-      // Update local state with the returned data
-      if (data && data.length > 0) {
-        updateClient(selectedClient.id, data[0]);
-      } else {
-        // Fallback if no data returned
-        updateClient(selectedClient.id, clientData);
-      }
-      
+      await updateClient(selectedClient.id, clientData);
       setIsEditModalOpen(false);
       setSelectedClient(null);
     } catch (error) {
-      console.error('Error updating client in Supabase:', error);
+      console.error('Error updating client:', error);
       alert(`Failed to update client: ${error.message}`);
     } finally {
       setIsSubmitting(false);
@@ -144,22 +101,10 @@ const ClientManagement = () => {
   const handleDelete = useCallback(async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
       try {
-        logDev('Deleting client from Supabase:', clientId);
-        
-        // Delete the client from Supabase
-        const { error } = await supabase
-          .from('clients_pf')
-          .delete()
-          .eq('id', clientId);
-          
-        if (error) throw error;
-        
-        logDev('Client deleted successfully from Supabase');
-        
-        // Update local state
-        deleteClient(clientId);
+        logDev('Deleting client:', clientId);
+        await deleteClient(clientId);
       } catch (error) {
-        console.error('Error deleting client from Supabase:', error);
+        console.error('Error deleting client:', error);
         alert(`Failed to delete client: ${error.message}`);
       }
     }
@@ -167,56 +112,27 @@ const ClientManagement = () => {
 
   const handleTogglePortalAccess = useCallback(async (clientId, currentAccess) => {
     try {
-      logDev('Toggling portal access in Supabase:', clientId, !currentAccess);
-      
-      // Update the client in Supabase
-      const { data, error } = await supabase
-        .from('clients_pf')
-        .update({ 
-          hasAccess: !currentAccess,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', clientId)
-        .select();
-        
-      if (error) throw error;
-      
-      logDev('Portal access updated successfully in Supabase:', data);
-      
-      // Update local state
-      updateClient(clientId, { hasAccess: !currentAccess });
+      logDev('Toggling portal access:', clientId, !currentAccess);
+      await updateClient(clientId, {
+        hasAccess: !currentAccess,
+        updated_at: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('Error toggling portal access in Supabase:', error);
+      console.error('Error toggling portal access:', error);
       alert(`Failed to update portal access: ${error.message}`);
     }
   }, [updateClient]);
 
   const handleToggleArchive = useCallback(async (clientId, isArchived) => {
     try {
-      logDev('Toggling archive status in Supabase:', clientId, !isArchived);
-      
-      // Update the client in Supabase
-      const { data, error } = await supabase
-        .from('clients_pf')
-        .update({
-          isArchived: !isArchived,
-          lastActivity: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', clientId)
-        .select();
-        
-      if (error) throw error;
-      
-      logDev('Archive status updated successfully in Supabase:', data);
-      
-      // Update local state
-      updateClient(clientId, { 
+      logDev('Toggling archive status:', clientId, !isArchived);
+      await updateClient(clientId, {
         isArchived: !isArchived,
-        lastActivity: new Date().toISOString()
+        lastActivity: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       });
     } catch (error) {
-      console.error('Error toggling archive status in Supabase:', error);
+      console.error('Error toggling archive status:', error);
       alert(`Failed to update archive status: ${error.message}`);
     }
   }, [updateClient]);

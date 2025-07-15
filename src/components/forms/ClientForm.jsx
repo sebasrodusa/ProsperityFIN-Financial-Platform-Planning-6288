@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../../lib/supabase';
 import logDev from '../../utils/logDev';
 
 const { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiUsers, FiPlus, FiTrash2, FiSave, FiX } = FiIcons;
@@ -145,7 +144,7 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         last_activity: new Date().toISOString()
       };
 
-      logDev('Submitting client data to Supabase:', clientData);
+      let dataToSubmit = clientData;
 
       if (isEditing && initialData?.id) {
         // For updates, don't include created_at and created_by
@@ -153,30 +152,13 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         delete updateData.created_at;
         delete updateData.created_by;
         updateData.updated_at = new Date().toISOString();
-
-        const { data, error } = await supabase
-          .from('clients_pf')
-          .update(updateData)
-          .eq('id', initialData.id)
-          .select();
-
-        if (error) throw error;
-
-        logDev('Client updated successfully in Supabase:', data);
-        onSubmit(data[0] || updateData);
-      } else {
-        const { data, error } = await supabase
-          .from('clients_pf')
-          .insert(clientData)
-          .select();
-
-        if (error) throw error;
-
-        logDev('Client added successfully to Supabase:', data);
-        onSubmit(data[0] || clientData);
+        dataToSubmit = updateData;
       }
+
+      logDev('Client data prepared for submission:', dataToSubmit);
+      await onSubmit(dataToSubmit);
     } catch (error) {
-      console.error('Error saving client to Supabase:', error);
+      console.error('Error preparing client data:', error);
       alert(`Failed to save client: ${error.message}`);
     } finally {
       setIsSubmitting(false);
