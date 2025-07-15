@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';

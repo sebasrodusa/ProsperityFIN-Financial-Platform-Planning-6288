@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import Navbar from '../components/layout/Navbar';
 import StrategiesManager from '../components/admin/StrategiesManager';
 import ProductsManager from '../components/admin/ProductsManager';

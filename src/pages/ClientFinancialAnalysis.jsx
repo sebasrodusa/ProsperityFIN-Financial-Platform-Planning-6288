@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../hooks/useAuth';
 import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
 import Navbar from '../components/layout/Navbar';
 import CashflowSection from '../components/financial/CashflowSection';

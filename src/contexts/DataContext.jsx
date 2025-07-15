@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import supabase from '../lib/supabase';
-import { useAuth } from './AuthContext';
+import { useAuthContext } from './AuthContext';
 import logDev from '../utils/logDev';
 
 const DataContext = createContext();
@@ -15,7 +15,7 @@ export const useData = () => {
 };
 
 export const DataProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);
