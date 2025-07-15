@@ -14,6 +14,7 @@ This project is a React application that uses Clerk for authentication and Supab
    # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
    # VITE_CLERK_PUBLISHABLE_KEY and CLERK_WEBHOOK_SECRET
    ```
+   The app will fail to start without valid Supabase credentials.
    `VITE_CLERK_SECRET_KEY` and `VITE_CLERK_FRONTEND_API` are not used by this project.
 3. Start the development server:
    ```bash
