@@ -81,7 +81,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
       console.error('Error loading analysis:', err);
       setError('Failed to load financial analysis data.');
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   }, [user]);
 
