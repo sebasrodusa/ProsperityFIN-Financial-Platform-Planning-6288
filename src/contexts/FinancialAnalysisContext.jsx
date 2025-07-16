@@ -199,6 +199,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
     saveAnalysis,
     saveIncomeSources,
     saveExpenses,
+    setAnalysis,
   };
 
   return (
