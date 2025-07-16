@@ -6,6 +6,7 @@ import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import logDev from '../../utils/logDev';
 
 const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch } = FiIcons;
 
@@ -21,6 +22,7 @@ const CATEGORIES = [
 
 const StrategiesManager = () => {
   const { isAdmin } = useAuth();
+  logDev('StrategiesManager isAdmin:', isAdmin);
   const [strategies, setStrategies] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

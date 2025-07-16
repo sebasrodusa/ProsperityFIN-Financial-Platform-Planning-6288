@@ -10,11 +10,13 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../lib/supabase';
+import logDev from '../utils/logDev';
 
 const { FiSettings, FiShield, FiAlertTriangle } = FiIcons;
 
 const ProjectionsSettings = () => {
   const { user } = useAuth();
+  logDev('ProjectionsSettings user role:', user?.role);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('strategies');
   const [loading, setLoading] = useState(true);
