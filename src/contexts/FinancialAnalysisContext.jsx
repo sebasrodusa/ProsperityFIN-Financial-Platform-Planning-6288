@@ -18,6 +18,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
   const { user } = useAuthContext();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   logDev('FinancialAnalysisProvider rendering, user:', user?.id);
@@ -80,14 +81,14 @@ export const FinancialAnalysisProvider = ({ children }) => {
       console.error('Error loading analysis:', err);
       setError('Failed to load financial analysis data.');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }, [user]);
 
   // Save or update analysis data
   const saveAnalysis = useCallback(async (data) => {
     try {
-      setLoading(true);
+      setSaving(true);
       setError(null);
 
       const payload = {
@@ -127,14 +128,14 @@ export const FinancialAnalysisProvider = ({ children }) => {
       setAnalysis(data);
       return { success: false, error: err.message };
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }, [user]);
 
   // Update income sources only
   const saveIncomeSources = useCallback(async (analysisId, sources) => {
     try {
-      setLoading(true);
+      setSaving(true);
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
@@ -157,14 +158,14 @@ export const FinancialAnalysisProvider = ({ children }) => {
       setAnalysis((prev) => (prev ? { ...prev, income_sources: sources } : prev));
       return { success: false, error: err.message };
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }, [user]);
 
   // Update expenses only
   const saveExpenses = useCallback(async (analysisId, expenses) => {
     try {
-      setLoading(true);
+      setSaving(true);
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
@@ -187,18 +188,20 @@ export const FinancialAnalysisProvider = ({ children }) => {
       setAnalysis((prev) => (prev ? { ...prev, expenses: expenses } : prev));
       return { success: false, error: err.message };
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   }, [user]);
 
   const value = {
     analysis,
     loading,
+    saving,
     error,
     loadAnalysis,
     saveAnalysis,
     saveIncomeSources,
     saveExpenses,
+    setAnalysis,
   };
 
   return (
@@ -209,4 +212,4 @@ export const FinancialAnalysisProvider = ({ children }) => {
 };
 
 // Add default export
-export default FinancialAnalysisProvider
+export default FinancialAnalysisProvider;

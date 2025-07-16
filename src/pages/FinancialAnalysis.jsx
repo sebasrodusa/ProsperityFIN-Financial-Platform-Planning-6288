@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
+import useDebounce from '../hooks/useDebounce';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import CashflowSection from '../components/financial/CashflowSection';
@@ -24,13 +25,14 @@ const FinancialAnalysis = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { clients } = useData();
-  const { analysis, loadAnalysis, saveAnalysis, loading } = useFinancialAnalysis();
+  const { analysis, loadAnalysis, saveAnalysis, setAnalysis, loading } = useFinancialAnalysis();
   const [activeTab, setActiveTab] = useState('cashflow');
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const debouncedSave = useDebounce(saveAnalysis, 800);
 
   // Filter clients based on user role
   const availableClients = clients.filter(client => {
@@ -159,14 +161,10 @@ const FinancialAnalysis = () => {
   const handleDataChange = (section, data) => {
     if (!analysis) return;
 
-    // Create a copy of the analysis object
-    const updatedAnalysis = { ...analysis };
-    
-    // Update the specific section
-    updatedAnalysis[section] = data;
-    
-    // Update the analysis in the context
-    saveAnalysis(updatedAnalysis);
+    const updatedAnalysis = { ...analysis, [section]: data };
+
+    setAnalysis(updatedAnalysis);
+    debouncedSave(updatedAnalysis);
     setHasChanges(true);
   };
 
