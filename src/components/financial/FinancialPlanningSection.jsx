@@ -17,7 +17,7 @@ const FinancialPlanningSection = ({
     taxPlanning: { completed: false, lastUpdated: '', notes: '' }
   },
   onChecklistChange,
-  legacyWishes = '',
+  legacy_wishes = '',
   onLegacyWishesChange
 }) => {
   const [editingItem, setEditingItem] = useState(null);
@@ -174,7 +174,7 @@ const FinancialPlanningSection = ({
             Personal Messages, Charitable Giving, and Special Instructions
           </label>
           <textarea
-            value={legacyWishes}
+            value={legacy_wishes}
             onChange={(e) => onLegacyWishesChange(e.target.value)}
             className="form-input w-full h-32 resize-none"
             placeholder="Document any special wishes, charitable intentions, personal messages to family members, or specific instructions for your legacy..."

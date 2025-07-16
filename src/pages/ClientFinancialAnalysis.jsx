@@ -154,14 +154,14 @@ const ClientFinancialAnalysis = () => {
                 transition={{ duration: 0.3 }}
               >
                 <CashflowSection
-                  incomeSources={analysis.income_sources_fa7 || []}
-                  expenses={analysis.expenses_fa7 || []}
+                  incomeSources={analysis.income_sources || []}
+                  expenses={analysis.expenses || []}
                   onIncomeChange={(sources) => {
-                    analysis.income_sources_fa7 = sources;
+                    analysis.income_sources = sources;
                     setHasChanges(true);
                   }}
                   onExpenseChange={(expenses) => {
-                    analysis.expenses_fa7 = expenses;
+                    analysis.expenses = expenses;
                     setHasChanges(true);
                   }}
                 />
@@ -175,14 +175,14 @@ const ClientFinancialAnalysis = () => {
                 transition={{ duration: 0.3 }}
               >
                 <BalanceSheetSection
-                  assets={analysis.assets_fa7 || []}
-                  liabilities={analysis.liabilities_fa7 || []}
+                  assets={analysis.assets || []}
+                  liabilities={analysis.liabilities || []}
                   onAssetChange={(assets) => {
-                    analysis.assets_fa7 = assets;
+                    analysis.assets = assets;
                     setHasChanges(true);
                   }}
                   onLiabilityChange={(liabilities) => {
-                    analysis.liabilities_fa7 = liabilities;
+                    analysis.liabilities = liabilities;
                     setHasChanges(true);
                   }}
                 />
@@ -196,12 +196,12 @@ const ClientFinancialAnalysis = () => {
                 transition={{ duration: 0.3 }}
               >
                 <InsuranceSection
-                  policies={analysis.insurance_policies_fa7 || []}
+                  policies={analysis.insurance_policies || []}
                   onPoliciesChange={(policies) => {
-                    analysis.insurance_policies_fa7 = policies;
+                    analysis.insurance_policies = policies;
                     setHasChanges(true);
                   }}
-                  needsCalculator={analysis.insuranceCalculator || {
+                  needsCalculator={analysis.insurance_calculator || {
                     annualIncome: 0,
                     yearsToReplace: 20,
                     finalExpenses: 25000,
@@ -211,7 +211,7 @@ const ClientFinancialAnalysis = () => {
                     retirementAccounts: 0
                   }}
                   onNeedsCalculatorChange={(calculator) => {
-                    analysis.insuranceCalculator = calculator;
+                    analysis.insurance_calculator = calculator;
                     setHasChanges(true);
                   }}
                 />
@@ -225,9 +225,9 @@ const ClientFinancialAnalysis = () => {
                 transition={{ duration: 0.3 }}
               >
                 <FinancialGoalsSection
-                  goals={analysis.financial_goals_fa7 || []}
+                  goals={analysis.financial_goals || []}
                   onGoalsChange={(goals) => {
-                    analysis.financial_goals_fa7 = goals;
+                    analysis.financial_goals = goals;
                     setHasChanges(true);
                   }}
                 />
@@ -255,9 +255,9 @@ const ClientFinancialAnalysis = () => {
                     analysis.estate_checklist = checklist;
                     setHasChanges(true);
                   }}
-                  legacyWishes={analysis.legacyWishes || ''}
+                  legacy_wishes={analysis.legacy_wishes || ''}
                   onLegacyWishesChange={(wishes) => {
-                    analysis.legacyWishes = wishes;
+                    analysis.legacy_wishes = wishes;
                     setHasChanges(true);
                   }}
                 />

@@ -86,8 +86,8 @@ const ClientPortal = () => {
   // Calculate financial overview
   const calculateFinancialOverview = () => {
     // Use analysis data for financial overview
-    const totalAssets = analysis.assets_fa7?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
-    const totalLiabilities = analysis.liabilities_fa7?.reduce((sum, liability) => sum + parseFloat(liability.amount || 0), 0) || 0;
+    const totalAssets = analysis.assets?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
+    const totalLiabilities = analysis.liabilities?.reduce((sum, liability) => sum + parseFloat(liability.amount || 0), 0) || 0;
     const netWorth = totalAssets - totalLiabilities;
 
     return { totalAssets, totalLiabilities, netWorth };
@@ -265,7 +265,7 @@ const ClientPortal = () => {
                     <div>
                       <h5 className="font-medium text-gray-800 mb-3">Top Income Sources</h5>
                       <div className="space-y-2">
-                        {analysis.income_sources_fa7 && analysis.income_sources_fa7
+                        {analysis.income_sources && analysis.income_sources
                           .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
                           .slice(0, 3)
                           .map((income, index) => (
@@ -280,7 +280,7 @@ const ClientPortal = () => {
                     <div>
                       <h5 className="font-medium text-gray-800 mb-3">Top Expenses</h5>
                       <div className="space-y-2">
-                        {analysis.expenses_fa7 && analysis.expenses_fa7
+                        {analysis.expenses && analysis.expenses
                           .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
                           .slice(0, 3)
                           .map((expense, index) => (
@@ -366,7 +366,7 @@ const ClientPortal = () => {
                   <h3 className="text-lg font-semibold text-gray-900">Financial Goals</h3>
                 </div>
                 <div className="space-y-4">
-                  {analysis.financial_goals_fa7 && analysis.financial_goals_fa7.slice(0, 3).map((goal, index) => {
+                  {analysis.financial_goals && analysis.financial_goals.slice(0, 3).map((goal, index) => {
                     const progress = Math.min((parseFloat(goal.currentAmount || 0) / parseFloat(goal.targetAmount)) * 100, 100);
                     return (
                       <div key={index} className="p-3 bg-gray-50 rounded-lg">
@@ -397,16 +397,16 @@ const ClientPortal = () => {
                     );
                   })}
 
-                  {(!analysis.financial_goals_fa7 || analysis.financial_goals_fa7.length === 0) && (
+                  {(!analysis.financial_goals || analysis.financial_goals.length === 0) && (
                     <div className="p-4 text-center text-gray-500">
                       <p>No financial goals set</p>
                       <Link to="/client-financial-analysis" className="text-primary-600 hover:underline text-sm block mt-2">Add goals</Link>
                     </div>
                   )}
 
-                  {analysis.financial_goals_fa7 && analysis.financial_goals_fa7.length > 3 && (
+                  {analysis.financial_goals && analysis.financial_goals.length > 3 && (
                     <Link to="/client-financial-analysis" className="text-primary-600 hover:underline text-sm block text-center">
-                      View all {analysis.financial_goals_fa7.length} goals
+                      View all {analysis.financial_goals.length} goals
                     </Link>
                   )}
                 </div>

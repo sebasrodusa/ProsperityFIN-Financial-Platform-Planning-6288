@@ -1,0 +1,10 @@
+-- Rename FA7 columns to new snake_case names
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN "incomeSources_fa7" TO income_sources;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN expenses_fa7 TO expenses;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN assets_fa7 TO assets;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN liabilities_fa7 TO liabilities;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN "insurancePolicies_fa7" TO insurance_policies;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN financial_goals_fa7 TO financial_goals;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN estateChecklist TO estate_checklist;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN insuranceCalculator TO insurance_calculator;
+ALTER TABLE public.financial_analyses_pf RENAME COLUMN legacyWishes TO legacy_wishes;
