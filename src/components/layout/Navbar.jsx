@@ -3,14 +3,15 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useClerk } from '@clerk/clerk-react';
 import { useAuth } from '../../hooks/useAuth';
 import logDev from '../../utils/logDev';
+import menuByRole from '../../utils/menuByRole';
 import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiHome, FiUsers, FiFileText, FiSettings, FiLogOut, FiChevronDown, FiUser } = FiIcons;
+const { FiLogOut, FiChevronDown, FiUser, FiSettings } = FiIcons;
 
 const Navbar = () => {
-  const { user, role, loading, isAdmin, isManager, isClient } = useAuth();
+  const { user, role, loading } = useAuth();
   const { signOut } = useClerk();
   const location = useLocation();
   const navigate = useNavigate();
@@ -22,25 +23,7 @@ const Navbar = () => {
 
   logDev('Navbar role:', role);
 
-  const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: FiHome },
-  ];
-
-  if (!isClient) {
-    navItems.push(
-      { path: '/clients', label: 'Clients', icon: FiUsers },
-      { path: '/financial-analysis', label: 'Financial Analysis', icon: FiFileText },
-      { path: '/proposals', label: 'Proposals', icon: FiFileText }
-    );
-  }
-
-  if (isAdmin || isManager) {
-    navItems.push({ path: '/users', label: 'Users', icon: FiUsers });
-  }
-
-  if (isAdmin) {
-    navItems.push({ path: '/projections-settings', label: 'Projections', icon: FiSettings });
-  }
+  const navItems = menuByRole(role);
 
   const handleLogout = async () => {
     await signOut();
