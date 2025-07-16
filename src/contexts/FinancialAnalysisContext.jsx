@@ -33,6 +33,9 @@ export const FinancialAnalysisProvider = ({ children }) => {
         .select('*')
         .eq('client_id', clientId)
         .eq('created_by', user.id)
+        // Order newest first and limit to a single row to avoid PGRST116 when duplicates exist
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (fetchError) throw fetchError;
