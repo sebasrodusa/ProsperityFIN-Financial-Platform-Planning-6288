@@ -15,7 +15,9 @@ This project is a React application that uses Clerk for authentication and Supab
    # VITE_CLERK_PUBLISHABLE_KEY, VITE_CLERK_FRONTEND_API,
    # VITE_CLERK_SIGN_IN_URL, VITE_CLERK_SIGN_UP_URL and CLERK_WEBHOOK_SECRET
    ```
-   The app will fail to start without valid Supabase and Clerk credentials.
+   The app will fail to start without valid Supabase and Clerk credentials. The
+   Supabase URL and key must be provided via environment variables, otherwise the
+   application will throw an error during startup.
 3. Start the development server:
    ```bash
    npm run dev
