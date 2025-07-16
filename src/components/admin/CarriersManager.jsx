@@ -6,6 +6,7 @@ import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import supabase from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import logDev from '../../utils/logDev';
 
 const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch, FiUpload, FiLink } = FiIcons;
 
@@ -13,6 +14,7 @@ const RATINGS = ['A++', 'A+', 'A', 'A-', 'B++', 'B+', 'B', 'B-', 'C++', 'C+', 'C
 
 const CarriersManager = () => {
   const { isAdmin } = useAuth();
+  logDev('CarriersManager isAdmin:', isAdmin);
   const [carriers, setCarriers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
