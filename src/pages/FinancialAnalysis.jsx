@@ -288,10 +288,10 @@ const FinancialAnalysis = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <CashflowSection
-                      incomeSources={analysis.income_sources_fa7 || []}
-                      expenses={analysis.expenses_fa7 || []}
-                      onIncomeChange={(sources) => handleDataChange('income_sources_fa7', sources)}
-                      onExpenseChange={(expenses) => handleDataChange('expenses_fa7', expenses)}
+                      incomeSources={analysis.income_sources || []}
+                      expenses={analysis.expenses || []}
+                      onIncomeChange={(sources) => handleDataChange('income_sources', sources)}
+                      onExpenseChange={(expenses) => handleDataChange('expenses', expenses)}
                     />
                   </motion.div>
                 )}
@@ -303,10 +303,10 @@ const FinancialAnalysis = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <BalanceSheetSection
-                      assets={analysis.assets_fa7 || []}
-                      liabilities={analysis.liabilities_fa7 || []}
-                      onAssetChange={(assets) => handleDataChange('assets_fa7', assets)}
-                      onLiabilityChange={(liabilities) => handleDataChange('liabilities_fa7', liabilities)}
+                      assets={analysis.assets || []}
+                      liabilities={analysis.liabilities || []}
+                      onAssetChange={(assets) => handleDataChange('assets', assets)}
+                      onLiabilityChange={(liabilities) => handleDataChange('liabilities', liabilities)}
                     />
                   </motion.div>
                 )}
@@ -318,9 +318,9 @@ const FinancialAnalysis = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <InsuranceSection
-                      policies={analysis.insurance_policies_fa7 || []}
-                      onPoliciesChange={(policies) => handleDataChange('insurance_policies_fa7', policies)}
-                      needsCalculator={analysis.insuranceCalculator || {
+                      policies={analysis.insurance_policies || []}
+                      onPoliciesChange={(policies) => handleDataChange('insurance_policies', policies)}
+                      needsCalculator={analysis.insurance_calculator || {
                         annualIncome: 0,
                         yearsToReplace: 20,
                         finalExpenses: 25000,
@@ -329,7 +329,7 @@ const FinancialAnalysis = () => {
                         liquidAssets: 0,
                         retirementAccounts: 0
                       }}
-                      onNeedsCalculatorChange={(calculator) => handleDataChange('insuranceCalculator', calculator)}
+                      onNeedsCalculatorChange={(calculator) => handleDataChange('insurance_calculator', calculator)}
                     />
                   </motion.div>
                 )}
@@ -341,8 +341,8 @@ const FinancialAnalysis = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <FinancialGoalsSection
-                      goals={analysis.financial_goals_fa7 || []}
-                      onGoalsChange={(goals) => handleDataChange('financial_goals_fa7', goals)}
+                      goals={analysis.financial_goals || []}
+                      onGoalsChange={(goals) => handleDataChange('financial_goals', goals)}
                     />
                   </motion.div>
                 )}
@@ -365,8 +365,8 @@ const FinancialAnalysis = () => {
                         taxPlanning: { completed: false, lastUpdated: '', notes: '' }
                       }}
                       onChecklistChange={(checklist) => handleDataChange('estate_checklist', checklist)}
-                      legacyWishes={analysis.legacyWishes || ''}
-                      onLegacyWishesChange={(wishes) => handleDataChange('legacyWishes', wishes)}
+                      legacy_wishes={analysis.legacy_wishes || ''}
+                      onLegacyWishesChange={(wishes) => handleDataChange('legacy_wishes', wishes)}
                     />
                   </motion.div>
                 )}

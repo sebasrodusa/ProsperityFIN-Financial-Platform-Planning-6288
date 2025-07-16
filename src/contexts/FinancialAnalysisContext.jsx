@@ -45,12 +45,12 @@ export const FinancialAnalysisProvider = ({ children }) => {
           created_by: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          income_sources_fa7: [],
-          expenses_fa7: [],
-          assets_fa7: [],
-          liabilities_fa7: [],
-          insurance_policies_fa7: [],
-          financial_goals_fa7: [],
+          income_sources: [],
+          expenses: [],
+          assets: [],
+          liabilities: [],
+          insurance_policies: [],
+          financial_goals: [],
           estate_checklist: {
             will: { completed: false, lastUpdated: '', notes: '' },
             powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
@@ -61,7 +61,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
             emergencyFund: { completed: false, lastUpdated: '', notes: '' },
             taxPlanning: { completed: false, lastUpdated: '', notes: '' }
           },
-          legacyWishes: ''
+          legacy_wishes: ''
         };
 
         const { data: inserted, error: insertError } = await supabase
@@ -136,7 +136,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('financial_analyses_pf')
         .update({
-          income_sources_fa7: sources,
+          income_sources: sources,
           updated_at: new Date().toISOString()
         })
         .eq('id', analysisId)
@@ -146,12 +146,12 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       if (error) throw error;
 
-      setAnalysis((prev) => (prev ? { ...prev, income_sources_fa7: sources } : prev));
+      setAnalysis((prev) => (prev ? { ...prev, income_sources: sources } : prev));
       return { success: true, data };
     } catch (err) {
       console.error('Error saving income sources:', err);
       setError('Failed to save income sources. Using local data only.');
-      setAnalysis((prev) => (prev ? { ...prev, income_sources_fa7: sources } : prev));
+      setAnalysis((prev) => (prev ? { ...prev, income_sources: sources } : prev));
       return { success: false, error: err.message };
     } finally {
       setLoading(false);
@@ -166,7 +166,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
       const { data, error } = await supabase
         .from('financial_analyses_pf')
         .update({
-          expenses_fa7: expenses,
+          expenses: expenses,
           updated_at: new Date().toISOString()
         })
         .eq('id', analysisId)
@@ -176,12 +176,12 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       if (error) throw error;
 
-      setAnalysis((prev) => (prev ? { ...prev, expenses_fa7: expenses } : prev));
+      setAnalysis((prev) => (prev ? { ...prev, expenses: expenses } : prev));
       return { success: true, data };
     } catch (err) {
       console.error('Error saving expenses:', err);
       setError('Failed to save expenses. Using local data only.');
-      setAnalysis((prev) => (prev ? { ...prev, expenses_fa7: expenses } : prev));
+      setAnalysis((prev) => (prev ? { ...prev, expenses: expenses } : prev));
       return { success: false, error: err.message };
     } finally {
       setLoading(false);

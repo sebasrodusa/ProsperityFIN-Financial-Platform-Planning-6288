@@ -39,15 +39,15 @@ const ClientFinancialReport = () => {
       setAdvisorName(advisor ? advisor.name : 'Not Assigned');
 
       // Process financial data for the report
-      const totalIncome = analysis.income_sources_fa7?.reduce((sum, source) => sum + parseFloat(source.amount || 0), 0) || 0;
-      const totalExpenses = analysis.expenses_fa7?.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0) || 0;
+      const totalIncome = analysis.income_sources?.reduce((sum, source) => sum + parseFloat(source.amount || 0), 0) || 0;
+      const totalExpenses = analysis.expenses?.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0) || 0;
       const netIncome = totalIncome - totalExpenses;
       
-      const totalAssets = analysis.assets_fa7?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
-      const totalLiabilities = analysis.liabilities_fa7?.reduce((sum, liability) => sum + parseFloat(liability.amount || 0), 0) || 0;
+      const totalAssets = analysis.assets?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
+      const totalLiabilities = analysis.liabilities?.reduce((sum, liability) => sum + parseFloat(liability.amount || 0), 0) || 0;
       const netWorth = totalAssets - totalLiabilities;
       
-      const totalInsuranceCoverage = analysis.insurance_policies_fa7?.reduce((sum, policy) => sum + parseFloat(policy.coverageAmount || 0), 0) || 0;
+      const totalInsuranceCoverage = analysis.insurance_policies?.reduce((sum, policy) => sum + parseFloat(policy.coverageAmount || 0), 0) || 0;
 
       // Calculate FIN (Financial Independence Number)
       const financialIndependenceNumber = totalIncome * 25;
@@ -66,24 +66,24 @@ const ClientFinancialReport = () => {
           income: totalIncome,
           expenses: totalExpenses,
           netIncome: netIncome,
-          sources: analysis.income_sources_fa7 || [],
-          expenseCategories: analysis.expenses_fa7 || []
+          sources: analysis.income_sources || [],
+          expenseCategories: analysis.expenses || []
         },
         balanceSheet: {
           assets: totalAssets,
           liabilities: totalLiabilities,
           netWorth: netWorth,
-          assetDetails: analysis.assets_fa7 || [],
-          liabilityDetails: analysis.liabilities_fa7 || []
+          assetDetails: analysis.assets || [],
+          liabilityDetails: analysis.liabilities || []
         },
         insurance: {
-          policies: analysis.insurance_policies_fa7 || [],
+          policies: analysis.insurance_policies || [],
           totalCoverage: totalInsuranceCoverage,
-          calculator: analysis.insuranceCalculator || {}
+          calculator: analysis.insurance_calculator || {}
         },
-        goals: analysis.financial_goals_fa7 || [],
+        goals: analysis.financial_goals || [],
         estatePlanning: analysis.estate_checklist || {},
-        legacyWishes: analysis.legacyWishes || ''
+        legacy_wishes: analysis.legacy_wishes || ''
       });
     }
   }, [client, analysis, users]);
@@ -699,9 +699,9 @@ const ClientFinancialReport = () => {
                   
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Legacy Wishes & Special Instructions</h3>
-                    {reportData.legacyWishes ? (
+                    {reportData.legacy_wishes ? (
                       <div className="p-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-700 whitespace-pre-line">{reportData.legacyWishes}</p>
+                        <p className="text-gray-700 whitespace-pre-line">{reportData.legacy_wishes}</p>
                       </div>
                     ) : (
                       <div className="p-4 bg-gray-50 rounded-lg">
