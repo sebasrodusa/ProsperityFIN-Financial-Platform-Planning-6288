@@ -82,7 +82,7 @@ const ClientFinancialReport = () => {
           calculator: analysis.insuranceCalculator || {}
         },
         goals: analysis.financial_goals_fa7 || [],
-        estatePlanning: analysis.estateChecklist || {},
+        estatePlanning: analysis.estate_checklist || {},
         legacyWishes: analysis.legacyWishes || ''
       });
     }

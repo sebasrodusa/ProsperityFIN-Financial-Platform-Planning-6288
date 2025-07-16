@@ -51,7 +51,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
           liabilities_fa7: [],
           insurance_policies_fa7: [],
           financial_goals_fa7: [],
-          estateChecklist: {
+          estate_checklist: {
             will: { completed: false, lastUpdated: '', notes: '' },
             powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
             healthcareDirective: { completed: false, lastUpdated: '', notes: '' },

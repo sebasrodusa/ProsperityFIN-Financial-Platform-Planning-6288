@@ -241,7 +241,7 @@ const ClientFinancialAnalysis = () => {
                 transition={{ duration: 0.3 }}
               >
                 <FinancialPlanningSection
-                  checklist={analysis.estateChecklist || {
+                  checklist={analysis.estate_checklist || {
                     will: { completed: false, lastUpdated: '', notes: '' },
                     powerOfAttorney: { completed: false, lastUpdated: '', notes: '' },
                     healthcareDirective: { completed: false, lastUpdated: '', notes: '' },
@@ -252,7 +252,7 @@ const ClientFinancialAnalysis = () => {
                     taxPlanning: { completed: false, lastUpdated: '', notes: '' }
                   }}
                   onChecklistChange={(checklist) => {
-                    analysis.estateChecklist = checklist;
+                    analysis.estate_checklist = checklist;
                     setHasChanges(true);
                   }}
                   legacyWishes={analysis.legacyWishes || ''}
