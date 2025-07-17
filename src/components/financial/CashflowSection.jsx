@@ -124,10 +124,12 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
     }
 
     const categoryLabel = INCOME_CATEGORIES.find(cat => cat.id === newIncomeSource.category)?.label;
+    const parsedAmount = parseFloat(newIncomeSource.amount);
     const newIncomeSources = [
       ...incomeSources,
       {
         ...newIncomeSource,
+        amount: isNaN(parsedAmount) ? 0 : parsedAmount,
         id: Date.now().toString(),
         description: categoryLabel
       }
