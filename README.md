@@ -44,3 +44,13 @@ your user administrative permissions during development:
    { "role": "admin" }
    ```
 3. Save the changes, then sign out and sign back in so the new role is loaded.
+
+## Database Migrations
+
+Supabase schema changes live in `supabase/migrations`. Apply them to a local database with the Supabase CLI:
+
+```bash
+supabase db reset
+```
+
+Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along with optional `client_email` and `claimed_at` fields on the `financial_analyses_pf` table.
