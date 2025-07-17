@@ -29,8 +29,8 @@ const ClientPortal = () => {
   const [claimError, setClaimError] = useState('');
   const [claiming, setClaiming] = useState(false);
 
-  // Get client data (current user's data)
-  const clientData = clients.find(c => c.id === user?.id);
+  // With client scoped data, the first entry is the current user
+  const clientData = clients[0];
 
   useEffect(() => {
     // Load client's financial analysis data
