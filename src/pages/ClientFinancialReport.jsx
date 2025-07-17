@@ -27,7 +27,7 @@ const ClientFinancialReport = () => {
   // Load financial analysis data
   useEffect(() => {
     if (clientId) {
-      loadAnalysis(clientId);
+      loadAnalysis(clientId, false);
     }
   }, [clientId, loadAnalysis]);
 

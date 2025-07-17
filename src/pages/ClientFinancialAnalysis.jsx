@@ -23,7 +23,7 @@ const ClientFinancialAnalysis = () => {
   // Load the client's financial analysis data
   useEffect(() => {
     if (user?.id) {
-      loadAnalysis(user.id);
+      loadAnalysis(user.id, false);
     }
   }, [user?.id, loadAnalysis]);
 

@@ -24,7 +24,8 @@ export const FinancialAnalysisProvider = ({ children }) => {
   logDev('FinancialAnalysisProvider rendering, user:', user?.id);
 
   // Load analysis data for a specific client
-  const loadAnalysis = useCallback(async (clientId) => {
+  // If createIfMissing is false, do not insert a new record when none exists
+  const loadAnalysis = useCallback(async (clientId, createIfMissing = true) => {
     try {
       setLoading(true);
       setError(null);
@@ -48,7 +49,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       if (data) {
         setAnalysis(data);
-      } else {
+      } else if (createIfMissing) {
         const newAnalysis = {
           client_id: clientId,
           created_by: user.id,
@@ -81,6 +82,8 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
         if (insertError) throw insertError;
         setAnalysis(inserted || { ...newAnalysis });
+      } else {
+        setAnalysis(null);
       }
     } catch (err) {
       console.error('Error loading analysis:', err);

@@ -31,7 +31,7 @@ const ClientPortal = () => {
   useEffect(() => {
     // Load client's financial analysis data
     if (user?.id) {
-      loadAnalysis(user.id);
+      loadAnalysis(user.id, false);
     }
   }, [user?.id, loadAnalysis]);
 
