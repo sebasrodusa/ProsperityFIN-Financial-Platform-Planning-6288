@@ -10,6 +10,7 @@ import ClientForm from '../components/forms/ClientForm';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
+import supabase from '../lib/supabase';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiUser, FiEdit, FiBarChart2, FiActivity, FiFileText, FiMail, FiPhone, FiMapPin, FiCalendar, FiUsers, FiBriefcase, FiShield, FiStar, FiBuilding, FiDollarSign, FiTrendingUp, FiSettings } = FiIcons;
@@ -24,6 +25,9 @@ const ClientPortal = () => {
   const [latestProposal, setLatestProposal] = useState(null);
   const [advisor, setAdvisor] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [fnaCode, setFnaCode] = useState('');
+  const [claimError, setClaimError] = useState('');
+  const [claiming, setClaiming] = useState(false);
 
   // Get client data (current user's data)
   const clientData = clients.find(c => c.id === user?.id);
@@ -34,6 +38,73 @@ const ClientPortal = () => {
       loadAnalysis(user.id, false);
     }
   }, [user?.id, loadAnalysis]);
+
+  // Attempt to automatically claim an analysis code stored locally or by email
+  useEffect(() => {
+    const autoLink = async () => {
+      if (analysis || !user?.id) return;
+
+      const stored = localStorage.getItem('fna_code');
+      if (stored) {
+        await handleClaimCode(stored);
+        return;
+      }
+
+      if (user.email) {
+        const { data } = await supabase
+          .from('financial_analyses_pf')
+          .select('fna_code')
+          .eq('client_email', user.email)
+          .is('client_id', null)
+          .maybeSingle();
+        if (data?.fna_code) {
+          await handleClaimCode(data.fna_code);
+        }
+      }
+    };
+    autoLink();
+  }, [analysis, user]);
+
+  const handleClaimCode = async (code) => {
+    if (!code) return;
+    setClaiming(true);
+    setClaimError('');
+    try {
+      const { data, error } = await supabase
+        .from('financial_analyses_pf')
+        .select('*')
+        .eq('fna_code', code)
+        .maybeSingle();
+
+      if (error || !data) {
+        setClaimError('Invalid code.');
+        return;
+      }
+
+      if (data.client_id && data.client_id !== user.id) {
+        setClaimError('This code has already been claimed.');
+        return;
+      }
+
+      if (!data.client_id) {
+        const { error: updateError } = await supabase
+          .from('financial_analyses_pf')
+          .update({ client_id: user.id, claimed_at: new Date().toISOString() })
+          .eq('id', data.id);
+        if (updateError) {
+          setClaimError('Failed to claim code.');
+          return;
+        }
+      }
+
+      localStorage.setItem('fna_code', code);
+      await loadAnalysis(user.id, false);
+    } catch (err) {
+      setClaimError('Unable to claim code.');
+    } finally {
+      setClaiming(false);
+    }
+  };
 
   // Find advisor and latest proposal
   useEffect(() => {
@@ -69,7 +140,33 @@ const ClientPortal = () => {
     );
   }
 
-  if (!clientData || !analysis) {
+  if (!analysis) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="max-w-md mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold text-gray-900">Link Financial Analysis</h1>
+          <p className="text-gray-600 mt-2">Enter the code provided by your financial professional.</p>
+          <form onSubmit={(e) => { e.preventDefault(); handleClaimCode(fnaCode); }} className="mt-6 space-y-4">
+            <input
+              type="text"
+              value={fnaCode}
+              onChange={(e) => setFnaCode(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg p-2"
+              placeholder="FNA Code"
+              required
+            />
+            {claimError && <p className="text-danger-600 text-sm">{claimError}</p>}
+            <button type="submit" className="btn-primary w-full" disabled={claiming}>
+              {claiming ? 'Linking...' : 'Link Code'}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientData) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
