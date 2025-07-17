@@ -37,26 +37,60 @@ export const DataProvider = ({ children }) => {
     try {
       logDev('Fetching data from Supabase...');
 
-      // Fetch clients
-      let { data: clientsData, error: clientsError } = await supabase
-        .from('clients_pf')
-        .select('*')
-        .eq('advisor_id', user.id);
-      if (clientsError) throw clientsError;
+      let clientsData = [];
+      let usersData = [];
+      let proposalsData = [];
 
-      // Fetch users
-      let { data: usersData, error: usersError } = await supabase
-        .from('users_pf')
-        .select('*')
-        .eq('advisor_id', user.id);
-      if (usersError) throw usersError;
+      if (user.role === 'client') {
+        // Clients only need their own record and related advisor data
+        const { data: client, error: clientError } = await supabase
+          .from('clients_pf')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (clientError) throw clientError;
 
-      // Fetch proposals
-      let { data: proposalsData, error: proposalsError } = await supabase
-        .from('projections_pf')
-        .select('*')
-        .eq('advisor_id', user.id);
-      if (proposalsError) throw proposalsError;
+        const advisorId = client?.advisor_id || null;
+
+        const { data: uData, error: uError } = await supabase
+          .from('users_pf')
+          .select('*')
+          .eq('advisor_id', advisorId);
+        if (uError) throw uError;
+
+        const { data: pData, error: pError } = await supabase
+          .from('projections_pf')
+          .select('*')
+          .eq('advisor_id', advisorId);
+        if (pError) throw pError;
+
+        clientsData = client ? [client] : [];
+        usersData = uData || [];
+        proposalsData = pData || [];
+      } else {
+        // Advisors/managers/admins fetch by advisor id
+        const { data: cData, error: cError } = await supabase
+          .from('clients_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+        if (cError) throw cError;
+
+        const { data: uData, error: uError } = await supabase
+          .from('users_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+        if (uError) throw uError;
+
+        const { data: pData, error: pError } = await supabase
+          .from('projections_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+        if (pError) throw pError;
+
+        clientsData = cData || [];
+        usersData = uData || [];
+        proposalsData = pData || [];
+      }
 
       logDev('Data fetched successfully:', {
         clients: clientsData.length,
@@ -64,9 +98,9 @@ export const DataProvider = ({ children }) => {
         proposals: proposalsData.length
       });
 
-      setClients(clientsData || []);
-      setUsers(usersData || []);
-      setProposals(proposalsData || []);
+      setClients(clientsData);
+      setUsers(usersData);
+      setProposals(proposalsData);
     } catch (err) {
       console.error('Error fetching data from Supabase:', err);
       setError(err.message);
