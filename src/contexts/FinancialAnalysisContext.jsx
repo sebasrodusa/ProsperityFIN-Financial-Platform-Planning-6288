@@ -29,11 +29,16 @@ export const FinancialAnalysisProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await supabase
+      let query = supabase
         .from('financial_analyses_pf')
         .select('*')
-        .eq('client_id', clientId)
-        .eq('created_by', user.id)
+        .eq('client_id', clientId);
+
+      if (user.role !== 'client') {
+        query = query.eq('created_by', user.id);
+      }
+
+      const { data, error: fetchError } = await query
         // Order newest first and limit to a single row to avoid PGRST116 when duplicates exist
         .order('updated_at', { ascending: false })
         .limit(1)
@@ -93,26 +98,41 @@ export const FinancialAnalysisProvider = ({ children }) => {
 
       const payload = {
         ...data,
-        created_by: user.id,
         updated_at: new Date().toISOString()
       };
 
+      if (user.role !== 'client') {
+        payload.created_by = user.id;
+      }
+
       let saved;
       if (payload.id) {
-        const { data: updated, error } = await supabase
+        let updateQuery = supabase
           .from('financial_analyses_pf')
           .update(payload)
-          .eq('id', payload.id)
-          .eq('created_by', user.id)
+          .eq('id', payload.id);
+
+        if (user.role === 'client') {
+          updateQuery = updateQuery.eq('client_id', user.id);
+        } else {
+          updateQuery = updateQuery.eq('created_by', user.id);
+        }
+
+        const { data: updated, error } = await updateQuery
           .select()
           .maybeSingle();
 
         if (error) throw error;
         saved = updated || payload;
       } else {
+        const insertPayload = { ...payload };
+        if (user.role !== 'client') {
+          insertPayload.created_by = user.id;
+        }
+
         const { data: inserted, error } = await supabase
           .from('financial_analyses_pf')
-          .insert(payload)
+          .insert(insertPayload)
           .select()
           .maybeSingle();
 
