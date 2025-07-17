@@ -32,6 +32,7 @@ const FinancialAnalysis = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
   const debouncedSave = useDebounce(saveAnalysis, 800);
 
   // Filter clients based on user role
@@ -112,6 +113,10 @@ const FinancialAnalysis = () => {
           delete analysisData.id;
         }
 
+        // Generate a shareable code for the client portal
+        const fnaCode = crypto.randomUUID();
+        analysisData.fna_code = fnaCode;
+
         const { data, error } = await supabase
           .from('financial_analyses_pf')
           .insert(analysisData)
@@ -127,6 +132,9 @@ const FinancialAnalysis = () => {
         } else {
           await saveAnalysis(analysisData);
         }
+
+        // Store generated code so it can be displayed to the advisor
+        setGeneratedCode(fnaCode);
       }
 
       setHasChanges(false);
@@ -134,6 +142,7 @@ const FinancialAnalysis = () => {
       // Clear success message after 3 seconds
       setTimeout(() => {
         setSaveSuccess(false);
+        setGeneratedCode('');
       }, 3000);
     } catch (error) {
       console.error('Error saving financial analysis to Supabase:', error);
@@ -245,6 +254,11 @@ const FinancialAnalysis = () => {
               {saveSuccess && (
                 <span className="px-3 py-1 bg-success-100 text-success-800 rounded-lg text-sm">
                   Analysis saved successfully!
+                </span>
+              )}
+              {generatedCode && (
+                <span className="px-3 py-1 bg-primary-50 text-primary-800 rounded-lg text-sm">
+                  Share code with client: <strong>{generatedCode}</strong>
                 </span>
               )}
             </div>
