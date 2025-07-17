@@ -105,25 +105,39 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
     frequency: 'monthly'
   });
 
+  const [incomeErrors, setIncomeErrors] = useState({
+    category: false,
+    amount: false
+  });
+
   const totalIncome = incomeSources.reduce((sum, source) => sum + parseFloat(source.amount || 0), 0);
   const totalExpenses = expenses.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0);
   const netIncome = totalIncome - totalExpenses;
 
   const handleAddIncome = useCallback(() => {
-    if (newIncomeSource.category && newIncomeSource.amount) {
-      const categoryLabel = INCOME_CATEGORIES.find(cat => cat.id === newIncomeSource.category)?.label;
-      const newIncomeSources = [...incomeSources, {
+    const categoryError = !newIncomeSource.category;
+    const amountError = !newIncomeSource.amount;
+    setIncomeErrors({ category: categoryError, amount: amountError });
+
+    if (categoryError || amountError) {
+      return;
+    }
+
+    const categoryLabel = INCOME_CATEGORIES.find(cat => cat.id === newIncomeSource.category)?.label;
+    const newIncomeSources = [
+      ...incomeSources,
+      {
         ...newIncomeSource,
         id: Date.now().toString(),
         description: categoryLabel
-      }];
-      onIncomeChange(newIncomeSources);
-      setNewIncomeSource({
-        category: '',
-        amount: '',
-        frequency: 'monthly'
-      });
-    }
+      }
+    ];
+    onIncomeChange(newIncomeSources);
+    setNewIncomeSource({
+      category: '',
+      amount: '',
+      frequency: 'monthly'
+    });
   }, [newIncomeSource, incomeSources, onIncomeChange]);
 
   const handleExpenseChange = (categoryId, itemId, value) => {
@@ -223,8 +237,13 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
           <div className="flex items-center space-x-4">
             <select
               value={newIncomeSource.category}
-              onChange={(e) => setNewIncomeSource({...newIncomeSource, category: e.target.value})}
-              className="form-input flex-1"
+              onChange={(e) => {
+                setNewIncomeSource({ ...newIncomeSource, category: e.target.value });
+                if (incomeErrors.category && e.target.value) {
+                  setIncomeErrors(prev => ({ ...prev, category: false }));
+                }
+              }}
+              className={`form-input flex-1 ${incomeErrors.category ? 'border-danger-300' : ''}`}
             >
               <option value="">Select Income Type</option>
               {INCOME_CATEGORIES.map(category => (
@@ -236,8 +255,13 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
             <input
               type="number"
               value={newIncomeSource.amount}
-              onChange={(e) => setNewIncomeSource({...newIncomeSource, amount: e.target.value})}
-              className="form-input w-32"
+              onChange={(e) => {
+                setNewIncomeSource({ ...newIncomeSource, amount: e.target.value });
+                if (incomeErrors.amount && e.target.value) {
+                  setIncomeErrors(prev => ({ ...prev, amount: false }));
+                }
+              }}
+              className={`form-input w-32 ${incomeErrors.amount ? 'border-danger-300' : ''}`}
               placeholder="Amount"
             />
             <select
@@ -251,10 +275,14 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
             </select>
             <button
               onClick={handleAddIncome}
-              className="p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+              disabled={!newIncomeSource.category || !newIncomeSource.amount}
+              className={`p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors ${(!newIncomeSource.category || !newIncomeSource.amount) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <SafeIcon icon={FiPlus} className="w-4 h-4" />
             </button>
+            {(incomeErrors.category || incomeErrors.amount) && (
+              <p className="text-danger-700 text-sm ml-2">Both fields are required</p>
+            )}
           </div>
         </div>
       </div>
