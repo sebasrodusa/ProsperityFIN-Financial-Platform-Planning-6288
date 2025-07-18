@@ -77,8 +77,8 @@ function App() {
   // If signed in, wrap the app with our providers
   return (
     <AuthProvider>
-      <DataProvider>
-        <CrmProvider>
+      <CrmProvider>
+        <DataProvider>
           <FinancialAnalysisProvider>
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -178,8 +178,8 @@ function App() {
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </FinancialAnalysisProvider>
-        </CrmProvider>
-      </DataProvider>
+        </DataProvider>
+      </CrmProvider>
     </AuthProvider>
   );
 }

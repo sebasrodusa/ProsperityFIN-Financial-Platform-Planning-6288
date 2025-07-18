@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import supabase from '../lib/supabase';
 import { useAuthContext } from './AuthContext';
+import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
 
 const DataContext = createContext();
@@ -16,6 +17,7 @@ export const useData = () => {
 
 export const DataProvider = ({ children }) => {
   const { user } = useAuthContext();
+  const { initializeClientCrm } = useCrm();
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);
@@ -112,14 +114,29 @@ export const DataProvider = ({ children }) => {
   // CRUD operations for clients
   const addClient = async (client) => {
     try {
+      // Strip any CRM related fields before inserting. CRM records are managed
+      // separately via the CrmContext.
+      const {
+        crm_status,
+        crm_notes,
+        crm_tasks,
+        status_history,
+        last_activity,
+        ...cleanClient
+      } = client;
+
       const { data, error } = await supabase
         .from('clients_pf')
-        .insert({ ...client, advisor_id: user.id })
+        .insert({ ...cleanClient, advisor_id: user.id })
         .select();
       if (error) throw error;
 
       const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: user.id };
       setClients(prev => [...prev, newClient]);
+
+      // Initialize CRM records for the newly created client
+      initializeClientCrm(newClient.id);
+
       return newClient;
     } catch (error) {
       console.error('Error adding client:', error);
@@ -129,9 +146,19 @@ export const DataProvider = ({ children }) => {
 
   const updateClient = async (id, updates) => {
     try {
+      // Remove any CRM related fields from the update payload.
+      const {
+        crm_status,
+        crm_notes,
+        crm_tasks,
+        status_history,
+        last_activity,
+        ...cleanUpdates
+      } = updates;
+
       const { data, error } = await supabase
         .from('clients_pf')
-        .update(updates)
+        .update(cleanUpdates)
         .eq('id', id)
         .select();
       if (error) throw error;

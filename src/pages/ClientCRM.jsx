@@ -2,75 +2,71 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
+import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';
 import ClientStatusStepper, { FUNNEL_STAGES } from '../components/crm/ClientStatusStepper';
-import ClientNotes from '../components/crm/ClientNotes';
 import ClientTasks from '../components/crm/ClientTasks';
 import StatusHistory from '../components/crm/StatusHistory';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiEdit, FiFileText } = FiIcons;
+const { FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiFileText } = FiIcons;
 
 const ClientCRM = () => {
   const { clientId } = useParams();
   const navigate = useNavigate();
-  const { clients, updateClient } = useData();
+  const { clients } = useData();
+  const {
+    getClientStatus,
+    getClientHistory,
+    getClientTasks,
+    updateClientStatus,
+    addClientTask,
+    updateClientTask,
+    deleteClientTask
+  } = useCrm();
   const [activeTab, setActiveTab] = useState('overview');
-  
+
   const client = clients.find(c => c.id === clientId);
 
-  useEffect(() => {
-    // Initialize CRM data if it doesn't exist
-    if (client && !client.crm_status) {
-      updateClient(clientId, {
-        crm_status: 'initial_meeting',
-        crm_notes: [],
-        crm_tasks: [],
-        status_history: [{
-          id: Date.now().toString(),
-          fromStatus: null,
-          toStatus: 'initial_meeting',
-          changedAt: new Date().toISOString(),
-          notes: 'Initial status set'
-        }],
-        last_activity: new Date().toISOString()
-      });
+  const handleStatusChange = async (newStatus) => {
+    await updateClientStatus(clientId, newStatus);
+  };
+
+
+  const handleTasksChange = async (updatedTasks) => {
+    const existingTasks = getClientTasks(clientId);
+    const existingMap = Object.fromEntries(existingTasks.map(t => [t.id, t]));
+    const updatedMap = Object.fromEntries(updatedTasks.map(t => [t.id, t]));
+
+    for (const task of updatedTasks) {
+      const payload = {
+        taskName: task.name || task.taskName,
+        description: task.description || '',
+        dueDate: task.dueDate,
+        completed: task.completed
+      };
+
+      if (!existingMap[task.id]) {
+        await addClientTask(clientId, payload);
+      } else {
+        const prev = existingMap[task.id];
+        if (
+          prev.taskName !== payload.taskName ||
+          prev.dueDate !== payload.dueDate ||
+          prev.completed !== payload.completed ||
+          prev.description !== payload.description
+        ) {
+          await updateClientTask(clientId, task.id, payload);
+        }
+      }
     }
-  }, [client, clientId, updateClient]);
 
-  const handleStatusChange = (newStatus) => {
-    const oldStatus = client.crm_status;
-    
-    // Create status history entry
-    const statusHistoryEntry = {
-      id: Date.now().toString(),
-      fromStatus: oldStatus,
-      toStatus: newStatus,
-      changedAt: new Date().toISOString(),
-      notes: ''
-    };
-
-    // Update client
-    updateClient(clientId, {
-      crm_status: newStatus,
-      last_activity: new Date().toISOString(),
-      status_history: [statusHistoryEntry, ...(client.status_history || [])]
-    });
-  };
-
-  const handleNotesChange = (notes) => {
-    updateClient(clientId, {
-      crm_notes: notes,
-      last_activity: new Date().toISOString()
-    });
-  };
-
-  const handleTasksChange = (tasks) => {
-    updateClient(clientId, {
-      crm_tasks: tasks,
-      last_activity: new Date().toISOString()
-    });
+    for (const id of Object.keys(existingMap)) {
+      if (!updatedMap[id]) {
+        await deleteClientTask(clientId, id);
+      }
+    }
   };
 
   if (!client) {
@@ -89,15 +85,16 @@ const ClientCRM = () => {
     );
   }
 
-  const currentStage = FUNNEL_STAGES.find(stage => stage.id === client.crm_status) || FUNNEL_STAGES[0];
-  const pendingTasks = (client.crm_tasks || []).filter(task => !task.completed).length;
-  const overdueTasks = (client.crm_tasks || []).filter(task =>
+  const clientStatus = getClientStatus(clientId);
+  const tasks = getClientTasks(clientId);
+  const currentStage = FUNNEL_STAGES.find(stage => stage.id === clientStatus.status) || FUNNEL_STAGES[0];
+  const pendingTasks = tasks.filter(task => !task.completed).length;
+  const overdueTasks = tasks.filter(task =>
     !task.completed && task.dueDate && new Date(task.dueDate) < new Date()
   ).length;
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: FiUser },
-    { id: 'notes', label: 'Notes', icon: FiEdit, count: client.crm_notes?.length },
     { id: 'tasks', label: 'Tasks', icon: FiFileText, count: pendingTasks },
     { id: 'history', label: 'History', icon: FiCalendar }
   ];
@@ -166,7 +163,7 @@ const ClientCRM = () => {
               <h2 className="text-xl font-semibold text-gray-900">Sales Funnel Progress</h2>
             </div>
             <ClientStatusStepper
-              currentStatus={client.crm_status || 'initial_meeting'}
+              currentStatus={clientStatus.status || 'initial_meeting'}
               onStatusChange={handleStatusChange}
               showLabels={true}
               size="lg"
@@ -227,15 +224,10 @@ const ClientCRM = () => {
                       <div>
                         <p className="text-sm text-gray-600">Last Activity</p>
                         <p className="font-semibold text-gray-900">
-                          {client.last_activity
-                            ? new Date(client.last_activity).toLocaleDateString()
-                            : 'No recent activity'
-                          }
+                          {getClientHistory(clientId)[0]
+                            ? new Date(getClientHistory(clientId)[0].createdAt).toLocaleDateString()
+                            : 'No recent activity'}
                         </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-600">Total Notes</p>
-                        <p className="font-semibold text-gray-900">{client.crm_notes?.length || 0}</p>
                       </div>
                     </div>
                   </div>
@@ -294,7 +286,7 @@ const ClientCRM = () => {
                     <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
                   </div>
                   <div className="space-y-3">
-                    {client.status_history?.slice(0, 3).map((entry, index) => {
+                    {getClientHistory(clientId).slice(0, 3).map((entry, index) => {
                       const stage = FUNNEL_STAGES.find(s => s.id === entry.toStatus);
                       return (
                         <div key={entry.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -311,7 +303,7 @@ const ClientCRM = () => {
                       );
                     })}
                     
-                    {(!client.status_history || client.status_history.length === 0) && (
+                    {getClientHistory(clientId).length === 0 && (
                       <p className="text-gray-500 text-center py-4">No activity yet</p>
                     )}
                   </div>
@@ -319,19 +311,6 @@ const ClientCRM = () => {
               </motion.div>
             )}
 
-            {activeTab === 'notes' && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <ClientNotes
-                  notes={client.crm_notes || []}
-                  onNotesChange={handleNotesChange}
-                  clientName={client.name}
-                />
-              </motion.div>
-            )}
 
             {activeTab === 'tasks' && (
               <motion.div
@@ -340,7 +319,7 @@ const ClientCRM = () => {
                 transition={{ duration: 0.3 }}
               >
                 <ClientTasks
-                  tasks={client.crm_tasks || []}
+                  tasks={tasks}
                   onTasksChange={handleTasksChange}
                   clientName={client.name}
                 />
@@ -353,7 +332,7 @@ const ClientCRM = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                <StatusHistory history={client.status_history || []} />
+                <StatusHistory history={getClientHistory(clientId)} />
               </motion.div>
             )}
           </div>

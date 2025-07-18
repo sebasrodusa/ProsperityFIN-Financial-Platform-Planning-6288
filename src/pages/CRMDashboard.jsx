@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
+import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';
 import ClientStatusStepper, { FUNNEL_STAGES } from '../components/crm/ClientStatusStepper';
 import SafeIcon from '../common/SafeIcon';
@@ -12,7 +13,13 @@ const { FiSearch, FiFilter, FiUsers, FiTrendingUp, FiClock, FiTarget, FiEye, FiC
 
 const CRMDashboard = () => {
   const { user } = useAuth();
-  const { clients, updateClient } = useData();
+  const { clients } = useData();
+  const {
+    getClientStatus,
+    getClientHistory,
+    getClientTasks,
+    updateClientStatus
+  } = useCrm();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('name');
@@ -42,7 +49,7 @@ const CRMDashboard = () => {
 
     // Filter by status
     if (statusFilter !== 'all') {
-      clientList = clientList.filter(client => client.crm_status === statusFilter);
+      clientList = clientList.filter(client => getClientStatus(client.id).status === statusFilter);
     }
 
     // Sort clients
@@ -51,13 +58,17 @@ const CRMDashboard = () => {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'status':
-          const aIndex = FUNNEL_STAGES.findIndex(s => s.id === a.crm_status);
-          const bIndex = FUNNEL_STAGES.findIndex(s => s.id === b.crm_status);
+          const aIndex = FUNNEL_STAGES.findIndex(s => s.id === getClientStatus(a.id).status);
+          const bIndex = FUNNEL_STAGES.findIndex(s => s.id === getClientStatus(b.id).status);
           return aIndex - bIndex;
         case 'revenue':
           return (parseFloat(b.targetRevenue) || 0) - (parseFloat(a.targetRevenue) || 0);
         case 'lastActivity':
-          return new Date(b.last_activity || b.createdAt) - new Date(a.last_activity || a.createdAt);
+          const bHist = getClientHistory(b.id);
+          const aHist = getClientHistory(a.id);
+          const bDate = bHist[0]?.createdAt || b.createdAt;
+          const aDate = aHist[0]?.createdAt || a.createdAt;
+          return new Date(bDate) - new Date(aDate);
         default:
           return 0;
       }
@@ -72,7 +83,7 @@ const CRMDashboard = () => {
     let totalValue = 0;
 
     FUNNEL_STAGES.forEach(stage => {
-          const stageClients = filteredClients.filter(client => client.crm_status === stage.id);
+          const stageClients = filteredClients.filter(client => getClientStatus(client.id).status === stage.id);
       const count = stageClients.length;
       metrics[stage.id] = count;
       
@@ -87,31 +98,13 @@ const CRMDashboard = () => {
     return { ...metrics, totalValue };
   }, [filteredClients]);
 
-  const handleStatusChange = (clientId, newStatus) => {
-    const client = clients.find(c => c.id === clientId);
-    const oldStatus = client.crm_status;
-
-    // Create status history entry
-    const statusHistoryEntry = {
-      id: Date.now().toString(),
-      fromStatus: oldStatus,
-      toStatus: newStatus,
-      changedAt: new Date().toISOString(),
-      notes: ''
-    };
-
-    // Update client
-    updateClient(clientId, {
-      crm_status: newStatus,
-      last_activity: new Date().toISOString(),
-      status_history: [statusHistoryEntry, ...(client.status_history || [])]
-    });
+  const handleStatusChange = async (clientId, newStatus) => {
+    await updateClientStatus(clientId, newStatus);
   };
 
   const handleToggleArchive = (clientId, currentStatus) => {
     updateClient(clientId, {
-      is_archived: !currentStatus,
-      last_activity: new Date().toISOString()
+      is_archived: !currentStatus
     });
   };
 
@@ -120,9 +113,9 @@ const CRMDashboard = () => {
   };
 
   const getTasksDue = (client) => {
-    if (!client.crm_tasks) return 0;
+    const tasks = getClientTasks(client.id);
     const today = new Date();
-    return client.crm_tasks.filter(task =>
+    return tasks.filter(task =>
       !task.completed && task.dueDate && new Date(task.dueDate) <= today
     ).length;
   };
@@ -271,9 +264,9 @@ const CRMDashboard = () => {
           {/* Client List */}
           <div className="space-y-4">
             {filteredClients.map((client) => {
-              const stageInfo = getStageInfo(client.crm_status);
+              const status = getClientStatus(client.id);
+              const stageInfo = getStageInfo(status.status);
               const tasksDue = getTasksDue(client);
-              const hasNotes = client.crm_notes && client.crm_notes.length > 0;
               
               return (
                 <motion.div
@@ -303,21 +296,15 @@ const CRMDashboard = () => {
                           </p>
                         )}
                         <div className="flex items-center space-x-4 mt-1">
-                          {hasNotes && (
-                            <span className="text-xs text-primary-600 flex items-center space-x-1">
-                              <SafeIcon icon={FiCalendar} className="w-3 h-3" />
-                              <span>{client.crm_notes.length} notes</span>
-                            </span>
-                          )}
                           {tasksDue > 0 && (
                             <span className="text-xs text-orange-600 flex items-center space-x-1">
                               <SafeIcon icon={FiClock} className="w-3 h-3" />
                               <span>{tasksDue} tasks due</span>
                             </span>
                           )}
-                          {client.last_activity && (
+                          {getClientHistory(client.id)[0] && (
                             <span className="text-xs text-gray-500">
-                              Last activity: {new Date(client.last_activity).toLocaleDateString()}
+                              Last activity: {new Date(getClientHistory(client.id)[0].createdAt).toLocaleDateString()}
                             </span>
                           )}
                         </div>
@@ -327,7 +314,7 @@ const CRMDashboard = () => {
                     {/* Status Stepper */}
                     <div className="flex-1 lg:max-w-2xl">
                       <ClientStatusStepper
-                        currentStatus={client.crm_status || 'initial_meeting'}
+                        currentStatus={status.status || 'initial_meeting'}
                         onStatusChange={(newStatus) => handleStatusChange(client.id, newStatus)}
                         showLabels={false}
                         size="sm"

@@ -139,23 +139,13 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         };
         dataToSubmit = updateData;
       } else {
-        // For new clients include CRM defaults and creation metadata
+        // For new clients include creation metadata only. CRM data is handled
+        // separately via the CrmContext after the client record is created.
         dataToSubmit = {
           ...baseData,
           advisor_id: user?.id,
           created_by: user?.id,
-          created_at: new Date().toISOString(),
-          crm_status: 'initial_meeting',
-          crm_notes: [],
-          crm_tasks: [],
-          status_history: [{
-            id: Date.now().toString(),
-            from_status: null,
-            to_status: 'initial_meeting',
-            changed_at: new Date().toISOString(),
-            notes: 'Initial status set'
-          }],
-          last_activity: new Date().toISOString()
+          created_at: new Date().toISOString()
         };
       }
 
