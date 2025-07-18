@@ -61,6 +61,13 @@ const FinancialAnalysis = () => {
     }
   }, [selectedClient, loadAnalysis, clientId]);
 
+  // When analysis data loads with an existing share code, populate it
+  useEffect(() => {
+    if (analysis?.fna_code) {
+      setGeneratedCode(analysis.fna_code);
+    }
+  }, [analysis?.fna_code]);
+
   const tabs = [
     { id: 'cashflow', name: 'Cashflow', icon: FiDollarSign },
     { id: 'balance', name: 'Balance Sheet', icon: FiTrendingUp },
