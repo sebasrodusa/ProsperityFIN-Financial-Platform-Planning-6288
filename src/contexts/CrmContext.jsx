@@ -29,6 +29,7 @@ export const CrmProvider = ({ children }) => {
   const [clientStatuses, setClientStatuses] = useState({});
   const [statusHistory, setStatusHistory] = useState({});
   const [clientTasks, setClientTasks] = useState({});
+  const [clientNotes, setClientNotes] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -98,9 +99,29 @@ export const CrmProvider = ({ children }) => {
           });
         });
 
+        const { data: notesData, error: notesError } = await supabase
+          .from('crm_client_notes_pf')
+          .select('*')
+          .eq('advisor_id', user.id);
+
+        if (notesError) throw notesError;
+
+        const notes = {};
+        (notesData || []).forEach(note => {
+          if (!notes[note.client_id]) notes[note.client_id] = [];
+          notes[note.client_id].push({
+            id: note.id,
+            clientId: note.client_id,
+            content: note.content,
+            createdAt: note.created_at,
+            updatedAt: note.updated_at
+          });
+        });
+
         setClientStatuses(statuses);
         setStatusHistory(history);
         setClientTasks(tasks);
+        setClientNotes(notes);
       } catch (err) {
         console.error('Error loading CRM data:', err);
         setError('Failed to load CRM data');
@@ -311,6 +332,111 @@ export const CrmProvider = ({ children }) => {
     return clientTasks[clientId] || [];
   };
 
+  // Get client notes
+  const getClientNotes = (clientId) => {
+    return clientNotes[clientId] || [];
+  };
+
+  // Add note
+  const addClientNote = async (clientId, content) => {
+    try {
+      const timestamp = new Date().toISOString();
+
+      const { data: note, error } = await supabase
+        .from('crm_client_notes_pf')
+        .insert({
+          client_id: clientId,
+          content,
+          created_at: timestamp,
+          updated_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClientNotes(prev => ({
+        ...prev,
+        [clientId]: [
+          {
+            id: note.id,
+            clientId: note.client_id,
+            content: note.content,
+            createdAt: note.created_at,
+            updatedAt: note.updated_at
+          },
+          ...(prev[clientId] || [])
+        ]
+      }));
+
+      return { success: true, note };
+    } catch (err) {
+      console.error('Error adding client note:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Update note
+  const updateClientNote = async (clientId, noteId, content) => {
+    try {
+      const timestamp = new Date().toISOString();
+
+      const { data, error } = await supabase
+        .from('crm_client_notes_pf')
+        .update({ content, updated_at: timestamp })
+        .eq('id', noteId)
+        .eq('client_id', clientId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setClientNotes(prev => ({
+        ...prev,
+        [clientId]: (prev[clientId] || []).map(note =>
+          note.id === noteId
+            ? {
+                id: data.id,
+                clientId: data.client_id,
+                content: data.content,
+                createdAt: data.created_at,
+                updatedAt: data.updated_at
+              }
+            : note
+        )
+      }));
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error updating client note:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  // Delete note
+  const deleteClientNote = async (clientId, noteId) => {
+    try {
+      const { error } = await supabase
+        .from('crm_client_notes_pf')
+        .delete()
+        .eq('id', noteId)
+        .eq('client_id', clientId);
+
+      if (error) throw error;
+
+      setClientNotes(prev => ({
+        ...prev,
+        [clientId]: (prev[clientId] || []).filter(note => note.id !== noteId)
+      }));
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error deleting client note:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
   // Initialize CRM records for a newly created client
   const initializeClientCrm = async (clientId) => {
     try {
@@ -366,6 +492,7 @@ export const CrmProvider = ({ children }) => {
       }));
 
       setClientTasks(prev => ({ ...prev, [clientId]: [] }));
+      setClientNotes(prev => ({ ...prev, [clientId]: [] }));
 
       return { success: true };
     } catch (err) {
@@ -381,6 +508,10 @@ export const CrmProvider = ({ children }) => {
     addClientTask,
     updateClientTask,
     deleteClientTask,
+    getClientNotes,
+    addClientNote,
+    updateClientNote,
+    deleteClientNote,
     getClientStatus,
     getClientHistory,
     getClientTasks,
