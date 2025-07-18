@@ -6,11 +6,12 @@ import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';
 import ClientStatusStepper, { FUNNEL_STAGES } from '../components/crm/ClientStatusStepper';
 import ClientTasks from '../components/crm/ClientTasks';
+import ClientNotes from '../components/crm/ClientNotes';
 import StatusHistory from '../components/crm/StatusHistory';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiFileText } = FiIcons;
+const { FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiMessageSquare } = FiIcons;
 
 const ClientCRM = () => {
   const { clientId } = useParams();
@@ -20,10 +21,14 @@ const ClientCRM = () => {
     getClientStatus,
     getClientHistory,
     getClientTasks,
+    getClientNotes,
     updateClientStatus,
     addClientTask,
     updateClientTask,
-    deleteClientTask
+    deleteClientTask,
+    addClientNote,
+    updateClientNote,
+    deleteClientNote
   } = useCrm();
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -69,6 +74,26 @@ const ClientCRM = () => {
     }
   };
 
+  const handleNotesChange = async (updatedNotes) => {
+    const existingNotes = getClientNotes(clientId);
+    const existingMap = Object.fromEntries(existingNotes.map(n => [n.id, n]));
+    const updatedMap = Object.fromEntries(updatedNotes.map(n => [n.id, n]));
+
+    for (const note of updatedNotes) {
+      if (!existingMap[note.id]) {
+        await addClientNote(clientId, note.content);
+      } else if (existingMap[note.id].content !== note.content) {
+        await updateClientNote(clientId, note.id, note.content);
+      }
+    }
+
+    for (const id of Object.keys(existingMap)) {
+      if (!updatedMap[id]) {
+        await deleteClientNote(clientId, id);
+      }
+    }
+  };
+
   if (!client) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -87,6 +112,7 @@ const ClientCRM = () => {
 
   const clientStatus = getClientStatus(clientId);
   const tasks = getClientTasks(clientId);
+  const notes = getClientNotes(clientId);
   const currentStage = FUNNEL_STAGES.find(stage => stage.id === clientStatus.status) || FUNNEL_STAGES[0];
   const pendingTasks = tasks.filter(task => !task.completed).length;
   const overdueTasks = tasks.filter(task =>
@@ -96,6 +122,7 @@ const ClientCRM = () => {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: FiUser },
     { id: 'tasks', label: 'Tasks', icon: FiFileText, count: pendingTasks },
+    { id: 'notes', label: 'Notes', icon: FiMessageSquare },
     { id: 'history', label: 'History', icon: FiCalendar }
   ];
 
@@ -321,6 +348,20 @@ const ClientCRM = () => {
                 <ClientTasks
                   tasks={tasks}
                   onTasksChange={handleTasksChange}
+                  clientName={client.name}
+                />
+              </motion.div>
+            )}
+
+            {activeTab === 'notes' && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ClientNotes
+                  notes={notes}
+                  onNotesChange={handleNotesChange}
                   clientName={client.name}
                 />
               </motion.div>
