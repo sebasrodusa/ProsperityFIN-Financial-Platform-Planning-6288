@@ -11,6 +11,11 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
   const [newTask, setNewTask] = useState({ name: '', dueDate: '', priority: 'medium' });
   const [editTask, setEditTask] = useState({ name: '', dueDate: '', priority: 'medium' });
 
+  const normalizedTasks = tasks.map(t => ({
+    ...t,
+    name: t.name ?? t.taskName,
+  }));
+
   const handleAddTask = () => {
     if (newTask.name.trim()) {
       const task = {
@@ -28,7 +33,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
   };
 
   const handleEditTask = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
+    const task = normalizedTasks.find(t => t.id === taskId);
     setEditTask({
       name: task.name,
       dueDate: task.dueDate,
@@ -39,10 +44,10 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
 
   const handleSaveEdit = () => {
     if (editTask.name.trim()) {
-      const updatedTasks = tasks.map(task =>
+      const updatedTasks = normalizedTasks.map(task =>
         task.id === editingTaskId
-          ? { 
-              ...task, 
+          ? {
+              ...task,
               name: editTask.name.trim(),
               dueDate: editTask.dueDate,
               priority: editTask.priority,
@@ -57,7 +62,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
   };
 
   const handleToggleComplete = (taskId) => {
-    const updatedTasks = tasks.map(task =>
+    const updatedTasks = normalizedTasks.map(task =>
       task.id === taskId
         ? { ...task, completed: !task.completed, completedAt: !task.completed ? new Date().toISOString() : null }
         : task
@@ -67,7 +72,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
 
   const handleDeleteTask = (taskId) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
-      onTasksChange(tasks.filter(task => task.id !== taskId));
+      onTasksChange(normalizedTasks.filter(task => task.id !== taskId));
     }
   };
 
@@ -100,7 +105,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
   };
 
   // Sort tasks: incomplete first, then by due date, then by priority
-  const sortedTasks = [...tasks].sort((a, b) => {
+  const sortedTasks = [...normalizedTasks].sort((a, b) => {
     if (a.completed !== b.completed) {
       return a.completed ? 1 : -1;
     }
@@ -124,7 +129,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
           <SafeIcon icon={FiCheckSquare} className="w-5 h-5" />
           <span>Tasks</span>
           <span className="text-sm font-normal text-gray-500">
-            ({tasks.filter(t => !t.completed).length} pending)
+            ({normalizedTasks.filter(t => !t.completed).length} pending)
           </span>
         </h3>
         <button
@@ -350,7 +355,7 @@ const ClientTasks = ({ tasks = [], onTasksChange, clientName }) => {
         </AnimatePresence>
       </div>
 
-      {tasks.length === 0 && !isAddingTask && (
+      {normalizedTasks.length === 0 && !isAddingTask && (
         <div className="text-center py-8 text-gray-500">
           <SafeIcon icon={FiCheckSquare} className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p>No tasks yet</p>
