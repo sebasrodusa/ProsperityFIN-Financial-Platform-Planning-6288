@@ -57,4 +57,10 @@ Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along wi
 
 ## FNA Codes
 
-When creating a new financial analysis, the application automatically generates a unique **FNA code**. After the analysis is saved, this code is displayed on the Financial Analysis page beside the save confirmation banner. Share this code with your client so they can claim the analysis in the Client Portal. On the portal, clients can enter the FNA code to link the analysis to their account.
+Each financial analysis receives a unique **FNA code**. This code is automatically generated when the analysis is created and appears on the Financial Analysis page next to the save confirmation banner. Share the FNA code with your client so they can claim the analysis in the Client Portal.
+
+**How it works**
+
+* The application generates the FNA code automatically when a new analysis is saved.
+* The code is shown on the Financial Analysis page right beside the save confirmation.
+* Clients can enter this code in the portal to claim the analysis and link it to their account.
