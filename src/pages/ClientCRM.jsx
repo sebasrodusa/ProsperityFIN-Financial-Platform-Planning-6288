@@ -24,17 +24,17 @@ const ClientCRM = () => {
     // Initialize CRM data if it doesn't exist
     if (client && !client.crmStatus) {
       updateClient(clientId, {
-        crmStatus: 'initial_meeting',
-        crmNotes: [],
-        crmTasks: [],
-        statusHistory: [{
+        crm_status: 'initial_meeting',
+        crm_notes: [],
+        crm_tasks: [],
+        status_history: [{
           id: Date.now().toString(),
           fromStatus: null,
           toStatus: 'initial_meeting',
           changedAt: new Date().toISOString(),
           notes: 'Initial status set'
         }],
-        lastActivity: new Date().toISOString()
+        last_activity: new Date().toISOString()
       });
     }
   }, [client, clientId, updateClient]);
@@ -53,23 +53,23 @@ const ClientCRM = () => {
 
     // Update client
     updateClient(clientId, {
-      crmStatus: newStatus,
-      lastActivity: new Date().toISOString(),
-      statusHistory: [statusHistoryEntry, ...(client.statusHistory || [])]
+      crm_status: newStatus,
+      last_activity: new Date().toISOString(),
+      status_history: [statusHistoryEntry, ...(client.statusHistory || [])]
     });
   };
 
   const handleNotesChange = (notes) => {
     updateClient(clientId, {
-      crmNotes: notes,
-      lastActivity: new Date().toISOString()
+      crm_notes: notes,
+      last_activity: new Date().toISOString()
     });
   };
 
   const handleTasksChange = (tasks) => {
     updateClient(clientId, {
-      crmTasks: tasks,
-      lastActivity: new Date().toISOString()
+      crm_tasks: tasks,
+      last_activity: new Date().toISOString()
     });
   };
 

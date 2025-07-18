@@ -114,7 +114,7 @@ const ClientManagement = () => {
     try {
       logDev('Toggling portal access:', clientId, !currentAccess);
       await updateClient(clientId, {
-        hasAccess: !currentAccess,
+        has_access: !currentAccess,
         updated_at: new Date().toISOString()
       });
     } catch (error) {
@@ -127,8 +127,8 @@ const ClientManagement = () => {
     try {
       logDev('Toggling archive status:', clientId, !isArchived);
       await updateClient(clientId, {
-        isArchived: !isArchived,
-        lastActivity: new Date().toISOString(),
+        is_archived: !isArchived,
+        last_activity: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       });
     } catch (error) {

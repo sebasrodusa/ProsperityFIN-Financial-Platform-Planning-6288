@@ -102,16 +102,16 @@ const CRMDashboard = () => {
 
     // Update client
     updateClient(clientId, {
-      crmStatus: newStatus,
-      lastActivity: new Date().toISOString(),
-      statusHistory: [statusHistoryEntry, ...(client.statusHistory || [])]
+      crm_status: newStatus,
+      last_activity: new Date().toISOString(),
+      status_history: [statusHistoryEntry, ...(client.statusHistory || [])]
     });
   };
 
   const handleToggleArchive = (clientId, currentStatus) => {
     updateClient(clientId, {
-      isArchived: !currentStatus,
-      lastActivity: new Date().toISOString()
+      is_archived: !currentStatus,
+      last_activity: new Date().toISOString()
     });
   };
 
