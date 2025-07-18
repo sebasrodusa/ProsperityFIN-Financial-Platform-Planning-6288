@@ -33,6 +33,7 @@ const FinancialAnalysis = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
+  const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const debouncedSave = useDebounce(saveAnalysis, 800);
 
   // Filter clients based on user role
@@ -142,6 +143,7 @@ const FinancialAnalysis = () => {
 
         // Store generated code so it can be displayed to the advisor
         setGeneratedCode(fnaCode);
+        setIsCodeModalOpen(true);
       }
 
       setHasChanges(false);
@@ -165,6 +167,11 @@ const FinancialAnalysis = () => {
     }
     // Navigate to the financial report page
     navigate(`/clients/${selectedClient.id}/report`);
+  };
+
+  const handleCopyCode = () => {
+    if (!generatedCode) return;
+    navigator.clipboard.writeText(generatedCode);
   };
 
   const handleClientSelect = (client) => {
@@ -440,6 +447,25 @@ const FinancialAnalysis = () => {
               <p className="text-gray-500">No clients available</p>
             </div>
           )}
+        </div>
+      </Modal>
+
+      {/* FNA Code Modal */}
+      <Modal
+        isOpen={isCodeModalOpen}
+        onClose={() => setIsCodeModalOpen(false)}
+        title="Share Code"
+        size="sm"
+      >
+        <div className="space-y-4 text-center">
+          <p className="text-gray-700">Provide this code to your client:</p>
+          <div className="font-mono text-lg p-2 bg-gray-100 rounded-lg break-all">
+            {generatedCode}
+          </div>
+          <div className="flex justify-center space-x-4">
+            <button onClick={handleCopyCode} className="btn-primary">Copy</button>
+            <button onClick={() => setIsCodeModalOpen(false)} className="btn-secondary">Close</button>
+          </div>
         </div>
       </Modal>
     </div>
