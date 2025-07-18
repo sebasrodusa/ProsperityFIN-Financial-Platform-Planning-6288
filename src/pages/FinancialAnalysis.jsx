@@ -139,10 +139,9 @@ const FinancialAnalysis = () => {
 
       setHasChanges(false);
       setSaveSuccess(true);
-      // Clear success message after 3 seconds
+      // Clear success message after 3 seconds but keep generated code
       setTimeout(() => {
         setSaveSuccess(false);
-        setGeneratedCode('');
       }, 3000);
     } catch (error) {
       console.error('Error saving financial analysis to Supabase:', error);
