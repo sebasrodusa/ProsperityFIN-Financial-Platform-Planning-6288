@@ -305,6 +305,69 @@ export const CrmProvider = ({ children }) => {
     return clientTasks[clientId] || [];
   };
 
+  // Initialize CRM records for a newly created client
+  const initializeClientCrm = async (clientId) => {
+    try {
+      const timestamp = new Date().toISOString();
+
+      const { data: statusData, error: statusError } = await supabase
+        .from('crm_client_statuses_pf')
+        .insert({
+          client_id: clientId,
+          status: 'initial_meeting',
+          updated_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
+
+      if (statusError) throw statusError;
+
+      const { data: historyEntry, error: historyError } = await supabase
+        .from('crm_status_history_pf')
+        .insert({
+          client_id: clientId,
+          status: 'initial_meeting',
+          notes: 'Initial status set',
+          created_at: timestamp,
+          advisor_id: user.id
+        })
+        .select()
+        .single();
+
+      if (historyError) throw historyError;
+
+      setClientStatuses(prev => ({
+        ...prev,
+        [clientId]: {
+          clientId: statusData.client_id,
+          status: statusData.status,
+          updatedAt: statusData.updated_at
+        }
+      }));
+
+      setStatusHistory(prev => ({
+        ...prev,
+        [clientId]: [
+          {
+            id: historyEntry.id,
+            clientId: historyEntry.client_id,
+            status: historyEntry.status,
+            notes: historyEntry.notes,
+            createdAt: historyEntry.created_at
+          }
+        ]
+      }));
+
+      setClientTasks(prev => ({ ...prev, [clientId]: [] }));
+
+      return { success: true };
+    } catch (err) {
+      console.error('Error initializing client CRM data:', err);
+      return { success: false, error: err.message };
+    }
+  };
+
   const value = {
     loading,
     error,
@@ -314,7 +377,8 @@ export const CrmProvider = ({ children }) => {
     deleteClientTask,
     getClientStatus,
     getClientHistory,
-    getClientTasks
+    getClientTasks,
+    initializeClientCrm
   };
 
   return (
