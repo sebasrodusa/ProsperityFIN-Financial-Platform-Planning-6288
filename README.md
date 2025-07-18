@@ -54,3 +54,7 @@ supabase db reset
 ```
 
 Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along with optional `client_email` and `claimed_at` fields on the `financial_analyses_pf` table.
+
+## FNA Codes
+
+When creating a new financial analysis, the application automatically generates a unique **FNA code**. After the analysis is saved, this code is displayed on the Financial Analysis page beside the save confirmation banner. Share this code with your client so they can claim the analysis in the Client Portal. On the portal, clients can enter the FNA code to link the analysis to their account.
