@@ -89,7 +89,11 @@ const ClientPortal = () => {
       if (!data.client_id) {
         const { error: updateError } = await supabase
           .from('financial_analyses_pf')
-          .update({ client_id: user.id, claimed_at: new Date().toISOString() })
+          .update({
+            client_id: user.id,
+            claimed_at: new Date().toISOString(),
+            fna_code: null,
+          })
           .eq('id', data.id);
         if (updateError) {
           setClaimError('Failed to claim code.');
