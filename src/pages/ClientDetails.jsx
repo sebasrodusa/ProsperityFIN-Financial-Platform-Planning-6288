@@ -53,12 +53,12 @@ const ClientDetails = () => {
   };
 
   const handleTogglePortalAccess = () => {
-    updateClient(clientId, { has_access: !client.hasAccess });
+    updateClient(clientId, { has_access: !client.has_access });
   };
 
   const handleToggleArchive = () => {
     updateClient(clientId, {
-      is_archived: !client.isArchived,
+      is_archived: !client.is_archived,
       last_activity: new Date().toISOString()
     });
   };
