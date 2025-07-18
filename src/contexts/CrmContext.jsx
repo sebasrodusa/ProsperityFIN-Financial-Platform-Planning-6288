@@ -226,13 +226,19 @@ export const CrmProvider = ({ children }) => {
   const updateClientTask = async (clientId, taskId, updates) => {
     try {
       const timestamp = new Date().toISOString();
-      
+
+      const { taskName, dueDate, ...otherUpdates } = updates || {};
+
+      const payload = {
+        ...otherUpdates,
+        ...(taskName !== undefined && { task_name: taskName }),
+        ...(dueDate !== undefined && { due_date: dueDate }),
+        updated_at: timestamp
+      };
+
       const { data, error } = await supabase
         .from('crm_client_tasks_pf')
-        .update({
-          ...updates,
-          updated_at: timestamp
-        })
+        .update(payload)
         .eq('id', taskId)
         .eq('client_id', clientId)
         .select()
