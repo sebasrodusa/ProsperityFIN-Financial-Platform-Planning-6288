@@ -112,8 +112,8 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
     try {
       logDev('Preparing client data for Supabase:', formData);
 
-      // Prepare the client data for insertion with snake_case field names
-      const clientData = {
+      // Base client data without any CRM fields or metadata
+      const baseData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone || null,
@@ -126,33 +126,37 @@ const ClientForm = ({ initialData, onSubmit, onCancel, isEditing }) => {
         is_archived: formData.is_archived || false,
         target_revenue: formData.target_revenue ? parseFloat(formData.target_revenue) : null,
         spouse_info: formData.spouse_info || null,
-        children_info: formData.children_info || null,
-        advisor_id: user?.id,
-        created_by: user?.id,
-        created_at: new Date().toISOString(),
-        // CRM fields with snake_case
-        crm_status: 'initial_meeting',
-        crm_notes: [],
-        crm_tasks: [],
-        status_history: [{
-          id: Date.now().toString(),
-          from_status: null,
-          to_status: 'initial_meeting',
-          changed_at: new Date().toISOString(),
-          notes: 'Initial status set'
-        }],
-        last_activity: new Date().toISOString()
+        children_info: formData.children_info || null
       };
 
-      let dataToSubmit = clientData;
+      let dataToSubmit;
 
       if (isEditing && initialData?.id) {
-        // For updates, don't include created_at and created_by
-        const updateData = { ...clientData };
-        delete updateData.created_at;
-        delete updateData.created_by;
-        updateData.updated_at = new Date().toISOString();
+        // For updates only send the base data and updated timestamp
+        const updateData = {
+          ...baseData,
+          updated_at: new Date().toISOString()
+        };
         dataToSubmit = updateData;
+      } else {
+        // For new clients include CRM defaults and creation metadata
+        dataToSubmit = {
+          ...baseData,
+          advisor_id: user?.id,
+          created_by: user?.id,
+          created_at: new Date().toISOString(),
+          crm_status: 'initial_meeting',
+          crm_notes: [],
+          crm_tasks: [],
+          status_history: [{
+            id: Date.now().toString(),
+            from_status: null,
+            to_status: 'initial_meeting',
+            changed_at: new Date().toISOString(),
+            notes: 'Initial status set'
+          }],
+          last_activity: new Date().toISOString()
+        };
       }
 
       logDev('Client data prepared for submission:', dataToSubmit);
