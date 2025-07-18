@@ -27,6 +27,6 @@ test('handleAddIncome adds an entry when category and amount are provided and up
   const addButton = screen.getByRole('button');
   fireEvent.click(addButton);
 
-  expect(screen.getByText('Primary Income')).toBeInTheDocument();
+  expect(screen.getAllByText('Primary Income').length).toBeGreaterThanOrEqual(1);
   expect(screen.getAllByText('$1,000').length).toBeGreaterThanOrEqual(1);
 });

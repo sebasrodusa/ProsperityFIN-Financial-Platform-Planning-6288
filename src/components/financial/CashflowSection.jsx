@@ -238,6 +238,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
           {/* Add new income source */}
           <div className="flex items-center space-x-4">
             <select
+              aria-label="Select Income Type"
               value={newIncomeSource.category}
               onChange={(e) => {
                 setNewIncomeSource({ ...newIncomeSource, category: e.target.value });
