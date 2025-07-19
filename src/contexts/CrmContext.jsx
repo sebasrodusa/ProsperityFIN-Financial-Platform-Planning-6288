@@ -107,14 +107,14 @@ export const CrmProvider = ({ children }) => {
         if (notesError) throw notesError;
 
         const notes = {};
-        (notesData || []).forEach(note => {
-          if (!notes[note.client_id]) notes[note.client_id] = [];
-          notes[note.client_id].push({
-            id: note.id,
-            clientId: note.client_id,
-            content: note.content,
-            createdAt: note.created_at,
-            updatedAt: note.updated_at
+        (notesData || []).forEach(noteRow => {
+          if (!notes[noteRow.client_id]) notes[noteRow.client_id] = [];
+          notes[noteRow.client_id].push({
+            id: noteRow.id,
+            clientId: noteRow.client_id,
+            note: noteRow.note,
+            createdAt: noteRow.created_at,
+            updatedAt: noteRow.updated_at
           });
         });
 
@@ -338,7 +338,7 @@ export const CrmProvider = ({ children }) => {
   };
 
   // Add note
-  const addClientNote = async (clientId, content) => {
+  const addClientNote = async (clientId, noteText) => {
     try {
       const timestamp = new Date().toISOString();
 
@@ -346,7 +346,7 @@ export const CrmProvider = ({ children }) => {
         .from('crm_client_notes_pf')
         .insert({
           client_id: clientId,
-          content,
+          note: noteText,
           created_at: timestamp,
           updated_at: timestamp,
           advisor_id: user.id
@@ -362,7 +362,7 @@ export const CrmProvider = ({ children }) => {
           {
             id: note.id,
             clientId: note.client_id,
-            content: note.content,
+            note: note.note,
             createdAt: note.created_at,
             updatedAt: note.updated_at
           },
@@ -378,13 +378,13 @@ export const CrmProvider = ({ children }) => {
   };
 
   // Update note
-  const updateClientNote = async (clientId, noteId, content) => {
+  const updateClientNote = async (clientId, noteId, noteText) => {
     try {
       const timestamp = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('crm_client_notes_pf')
-        .update({ content, updated_at: timestamp })
+        .update({ note: noteText, updated_at: timestamp })
         .eq('id', noteId)
         .eq('client_id', clientId)
         .select()
@@ -394,16 +394,16 @@ export const CrmProvider = ({ children }) => {
 
       setClientNotes(prev => ({
         ...prev,
-        [clientId]: (prev[clientId] || []).map(note =>
-          note.id === noteId
+        [clientId]: (prev[clientId] || []).map(noteItem =>
+          noteItem.id === noteId
             ? {
                 id: data.id,
                 clientId: data.client_id,
-                content: data.content,
+                note: data.note,
                 createdAt: data.created_at,
                 updatedAt: data.updated_at
               }
-            : note
+            : noteItem
         )
       }));
 

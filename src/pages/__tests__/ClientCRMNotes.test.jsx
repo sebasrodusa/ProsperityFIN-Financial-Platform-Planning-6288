@@ -4,6 +4,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
+// Mock Navbar to avoid AuthProvider dependency
+vi.mock('../../components/layout/Navbar', () => ({
+  default: () => <div />
+}));
+
 vi.mock('../../contexts/DataContext', () => ({
   useData: () => ({
     clients: [{ id: 'c1', name: 'Client One', avatar: '', email: 'c@example.com', phone: '123', createdAt: new Date().toISOString() }]
@@ -15,7 +20,7 @@ vi.mock('../../contexts/CrmContext', () => ({
     getClientStatus: () => ({ status: 'initial_meeting' }),
     getClientHistory: () => [],
     getClientTasks: () => [],
-    getClientNotes: () => [{ id: 'n1', content: 'note', createdAt: '', updatedAt: '' }],
+    getClientNotes: () => [{ id: 'n1', note: 'note', createdAt: '', updatedAt: '' }],
     updateClientStatus: vi.fn(),
     addClientTask: vi.fn(),
     updateClientTask: vi.fn(),

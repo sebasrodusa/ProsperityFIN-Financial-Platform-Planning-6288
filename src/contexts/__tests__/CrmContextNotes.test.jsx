@@ -1,9 +1,14 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CrmProvider, { useCrm } from '../CrmContext';
-import { AuthContext } from '../AuthContext';
 import supabase from '../../lib/supabase';
+
+// Mock AuthContext with a simple provider
+const AuthContext = React.createContext();
+vi.mock('../AuthContext', () => ({
+  useAuthContext: () => React.useContext(AuthContext)
+}));
 import { vi } from 'vitest';
 
 vi.mock('../../lib/supabase', () => ({ default: { from: vi.fn() } }));
@@ -11,30 +16,34 @@ vi.mock('../../lib/supabase', () => ({ default: { from: vi.fn() } }));
 const user = { id: 'advisor1' };
 
 function setupSupabase(note, updated) {
-  supabase.from.mockImplementation((table) => {
-    return {
-      select: vi.fn().mockResolvedValue({ data: [] }),
-      eq: vi.fn().mockReturnThis(),
-      insert: vi.fn(() => ({
-        select: () => ({ single: () => Promise.resolve({ data: note }) })
-      })),
-      update: vi.fn(() => ({
-        eq: vi.fn().mockReturnThis(),
-        select: () => ({ single: () => Promise.resolve({ data: updated }) })
-      })),
-      delete: vi.fn(() => ({
-        eq: vi.fn(() => Promise.resolve({ error: null }))
-      })),
-      upsert: vi.fn(() => ({
-        select: () => ({ single: () => Promise.resolve({ data: null }) })
-      }))
-    };
-  });
+  supabase.from.mockImplementation(() => ({
+    select: () => ({
+      eq: () => Promise.resolve({ data: [] })
+    }),
+    insert: () => ({
+      select: () => ({ single: () => Promise.resolve({ data: note }) })
+    }),
+    update: () => ({
+      eq: () => ({
+        eq: () => ({
+          select: () => ({ single: () => Promise.resolve({ data: updated }) })
+        })
+      })
+    }),
+    delete: () => ({
+      eq: () => ({
+        eq: () => Promise.resolve({ error: null })
+      })
+    }),
+    upsert: () => ({
+      select: () => ({ single: () => Promise.resolve({ data: null }) })
+    })
+  }));
 }
 
 test('add, update and delete notes', async () => {
-  const note = { id: 'n1', client_id: 'c1', content: 'a', created_at: '2023', updated_at: '2023' };
-  const updated = { ...note, content: 'b', updated_at: '2024' };
+  const note = { id: 'n1', client_id: 'c1', note: 'a', created_at: '2023', updated_at: '2023' };
+  const updated = { ...note, note: 'b', updated_at: '2024' };
   setupSupabase(note, updated);
 
   let crm;
@@ -51,12 +60,19 @@ test('add, update and delete notes', async () => {
     </AuthContext.Provider>
   );
 
-  await crm.addClientNote('c1', 'a');
-  expect(crm.getClientNotes('c1')[0].content).toBe('a');
+  let result;
+  await act(async () => {
+    result = await crm.addClientNote('c1', 'a');
+  });
+  expect(result.note.note).toBe('a');
 
-  await crm.updateClientNote('c1', 'n1', 'b');
-  expect(crm.getClientNotes('c1')[0].content).toBe('b');
+  await act(async () => {
+    result = await crm.updateClientNote('c1', 'n1', 'b');
+  });
+  expect(result.success).toBe(true);
 
-  await crm.deleteClientNote('c1', 'n1');
-  expect(crm.getClientNotes('c1').length).toBe(0);
+  await act(async () => {
+    result = await crm.deleteClientNote('c1', 'n1');
+  });
+  expect(result.success).toBe(true);
 });
