@@ -1,5 +1,11 @@
 import { Webhook } from 'svix';
-import supabase from '../src/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize an admin Supabase client using service role credentials
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   // Webhook expects CLERK_WEBHOOK_SECRET in environment variables
