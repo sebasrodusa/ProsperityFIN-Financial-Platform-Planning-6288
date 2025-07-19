@@ -19,6 +19,9 @@ This project is a React application that uses Clerk for authentication and Supab
    The app will fail to start without valid Supabase and Clerk credentials. The
    Supabase URL and key must be provided via environment variables, otherwise the
    application will throw an error during startup.
+
+   * `CLERK_JWT_KEY` can be found in the **Clerk dashboard** under **API Keys → JWT Verification Key**. Copy the entire PEM string into your `.env` file.
+   * `SUPABASE_SERVICE_ROLE_KEY` lives in the **Supabase dashboard** under **Settings → API → Service Role**. Keep this key private as it bypasses RLS.
 3. Start the development server:
    ```bash
    npm run dev
@@ -32,7 +35,7 @@ This project is a React application that uses Clerk for authentication and Supab
    npm run preview
    ```
 
-Supabase serves as the data backend for this project, while Clerk handles authentication.
+Supabase serves as the data backend for this project, while Clerk handles authentication and issues the JWTs used to authorize access to Supabase.
 
 ## Role Metadata
 
@@ -54,6 +57,13 @@ Supabase schema changes live in `supabase/migrations`. Apply them to a local dat
 supabase db reset
 ```
 Migration `006_enable_rls.sql` turns on row level security for the core tables. Run `supabase db reset` after pulling to apply it locally.
+
+### Enabling RLS
+
+The `006_enable_rls.sql` migration enables row level security policies for all
+core tables. Apply the migration to your Supabase project with `supabase db push`
+or through the dashboard. After the SQL is applied, open each table in the
+Supabase dashboard and verify that **Enable RLS** is turned on.
 
 Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along with optional `client_email` and `claimed_at` fields on the `financial_analyses_pf` table.
 
