@@ -13,7 +13,8 @@ This project is a React application that uses Clerk for authentication and Supab
    cp .env.example .env
    # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
    # VITE_CLERK_PUBLISHABLE_KEY, VITE_CLERK_FRONTEND_API,
-   # VITE_CLERK_SIGN_IN_URL, VITE_CLERK_SIGN_UP_URL and CLERK_WEBHOOK_SECRET
+   # VITE_CLERK_SIGN_IN_URL, VITE_CLERK_SIGN_UP_URL,
+   # CLERK_WEBHOOK_SECRET, CLERK_JWT_KEY and SUPABASE_SERVICE_ROLE_KEY
    ```
    The app will fail to start without valid Supabase and Clerk credentials. The
    Supabase URL and key must be provided via environment variables, otherwise the
