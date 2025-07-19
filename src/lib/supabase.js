@@ -8,12 +8,17 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create a Supabase client
+// Create a Supabase client. The anon key is only used for the initial
+// connection; the authenticated token is set separately after login.
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
     autoRefreshToken: true
   }
 });
+
+export function setAuthToken(token) {
+  supabase.auth.setAuth(token);
+}
 
 export default supabase;
