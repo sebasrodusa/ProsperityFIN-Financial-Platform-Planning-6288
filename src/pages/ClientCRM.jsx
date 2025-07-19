@@ -81,9 +81,9 @@ const ClientCRM = () => {
 
     for (const note of updatedNotes) {
       if (!existingMap[note.id]) {
-        await addClientNote(clientId, note.content);
-      } else if (existingMap[note.id].content !== note.content) {
-        await updateClientNote(clientId, note.id, note.content);
+        await addClientNote(clientId, note.note);
+      } else if (existingMap[note.id].note !== note.note) {
+        await updateClientNote(clientId, note.id, note.note);
       }
     }
 

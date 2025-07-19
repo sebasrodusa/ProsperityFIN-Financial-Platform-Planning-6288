@@ -15,7 +15,7 @@ const ClientNotes = ({ notes = [], onNotesChange, clientName }) => {
     if (newNote.trim()) {
       const note = {
         id: Date.now().toString(),
-        content: newNote.trim(),
+        note: newNote.trim(),
         createdAt: new Date().toISOString(),
         type: 'note'
       };
@@ -27,16 +27,16 @@ const ClientNotes = ({ notes = [], onNotesChange, clientName }) => {
 
   const handleEditNote = (noteId) => {
     const note = notes.find(n => n.id === noteId);
-    setEditNote(note.content);
+    setEditNote(note.note);
     setEditingNoteId(noteId);
   };
 
   const handleSaveEdit = () => {
     if (editNote.trim()) {
-      const updatedNotes = notes.map(note =>
-        note.id === editingNoteId
-          ? { ...note, content: editNote.trim(), updatedAt: new Date().toISOString() }
-          : note
+      const updatedNotes = notes.map(noteItem =>
+        noteItem.id === editingNoteId
+          ? { ...noteItem, note: editNote.trim(), updatedAt: new Date().toISOString() }
+          : noteItem
       );
       onNotesChange(updatedNotes);
       setEditingNoteId(null);
@@ -176,7 +176,7 @@ const ClientNotes = ({ notes = [], onNotesChange, clientName }) => {
                 </div>
               ) : (
                 <div className="text-gray-700 whitespace-pre-wrap">
-                  {note.content}
+                  {note.note}
                 </div>
               )}
             </motion.div>
