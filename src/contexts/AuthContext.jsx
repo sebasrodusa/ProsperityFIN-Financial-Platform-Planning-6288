@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
 import { setAuthToken } from '../lib/supabase';
 
@@ -16,7 +16,8 @@ export const useAuthContext = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const { user: clerkUser, isLoaded, isSignedIn } = useUser();
+  const { user: clerkUser } = useUser();
+  const { isLoaded, isSignedIn, getToken } = useAuth();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     const syncAuth = async () => {
       if (isLoaded) {
         if (isSignedIn && clerkUser) {
-          const token = await clerkUser.getToken();
+          const token = await getToken({ template: 'supabase' });
           setAuthToken(token);
           // Transform Clerk user to our app's user format
           const transformedUser = {
