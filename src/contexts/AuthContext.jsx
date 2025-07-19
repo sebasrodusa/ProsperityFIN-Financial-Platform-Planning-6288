@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
+import { setAuthToken } from '../lib/supabase';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -23,29 +24,35 @@ export const AuthProvider = ({ children }) => {
 
   // Update local user state when Clerk user changes
   useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn && clerkUser) {
-        // Transform Clerk user to our app's user format
-        const transformedUser = {
-          id: clerkUser.id,
-          name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
-          email: clerkUser.primaryEmailAddress?.emailAddress,
-          role: clerkUser.publicMetadata?.role || 'client',
-          teamId: clerkUser.publicMetadata?.teamId,
-          agentCode: clerkUser.unsafeMetadata?.agentCode,
-          avatar: clerkUser.imageUrl,
-          phone: clerkUser.unsafeMetadata?.phone,
-        };
-        logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
-        logDev('Resolved user role:', transformedUser.role);
-        console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
+    const syncAuth = async () => {
+      if (isLoaded) {
+        if (isSignedIn && clerkUser) {
+          const token = await clerkUser.getToken();
+          setAuthToken(token);
+          // Transform Clerk user to our app's user format
+          const transformedUser = {
+            id: clerkUser.id,
+            name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+            email: clerkUser.primaryEmailAddress?.emailAddress,
+            role: clerkUser.publicMetadata?.role || 'client',
+            teamId: clerkUser.publicMetadata?.teamId,
+            agentCode: clerkUser.unsafeMetadata?.agentCode,
+            avatar: clerkUser.imageUrl,
+            phone: clerkUser.unsafeMetadata?.phone,
+          };
+          logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
+          logDev('Resolved user role:', transformedUser.role);
+          console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
 console.log('✅ Resolved user role:', transformedUser.role);
-        setUser(transformedUser);
-      } else {
-        setUser(null);
+          setUser(transformedUser);
+        } else {
+          setAuthToken(null);
+          setUser(null);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    }
+    };
+    syncAuth();
   }, [clerkUser, isLoaded, isSignedIn]);
 
   // Logout function
@@ -53,6 +60,7 @@ console.log('✅ Resolved user role:', transformedUser.role);
     // We don't need to call supabase.auth.signOut() as we're using Clerk
     // Just update the local state
     setUser(null);
+    setAuthToken(null);
   };
 
   // Provide the auth context value
