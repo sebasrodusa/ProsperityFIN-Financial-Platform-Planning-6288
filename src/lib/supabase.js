@@ -17,8 +17,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   }
 });
 
-export function setAuthToken(token) {
-  supabase.auth.setAuth(token);
+export async function setAuthToken(token) {
+  if (token) {
+    await supabase.auth.signInWithIdToken({ provider: 'clerk', token });
+  } else {
+    await supabase.auth.signOut();
+  }
 }
 
 export default supabase;
