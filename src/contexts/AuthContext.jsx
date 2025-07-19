@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
       if (isLoaded) {
         if (isSignedIn && clerkUser) {
           const token = await getToken({ template: 'supabase' });
-          setAuthToken(token);
+          await setAuthToken(token);
           // Transform Clerk user to our app's user format
           const transformedUser = {
             id: clerkUser.id,
@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
 console.log('✅ Resolved user role:', transformedUser.role);
           setUser(transformedUser);
         } else {
-          setAuthToken(null);
+          await setAuthToken(null);
           setUser(null);
         }
         setLoading(false);
@@ -61,7 +61,7 @@ console.log('✅ Resolved user role:', transformedUser.role);
     // We don't need to call supabase.auth.signOut() as we're using Clerk
     // Just update the local state
     setUser(null);
-    setAuthToken(null);
+    await setAuthToken(null);
   };
 
   // Provide the auth context value
