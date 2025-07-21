@@ -14,7 +14,7 @@ import ProductConfiguration from '../components/proposals/ProductConfiguration';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../lib/supabaseClient';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiSend, FiCalendar, FiUser, FiDownload, FiPrinter } = FiIcons;
 
@@ -144,7 +144,7 @@ const DEFAULT_CARRIERS = [
 
 const ProposalManagement = () => {
   const { user } = useAuth();
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const { proposals, clients, users, addProposal, updateProposal, deleteProposal } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -204,6 +204,8 @@ const ProposalManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    const supabase = await getSupabaseClient();
     
     try {
       logDev('Submitting proposal to Supabase:', formData);
@@ -325,6 +327,8 @@ const ProposalManagement = () => {
     if (window.confirm('Are you sure you want to delete this projection?')) {
       try {
         logDev('Deleting proposal from Supabase:', proposalId);
+
+        const supabase = await getSupabaseClient();
         
         // Delete from Supabase
         const { error } = await supabase
@@ -348,6 +352,8 @@ const ProposalManagement = () => {
   const handleStatusChange = async (proposalId, newStatus) => {
     try {
       logDev('Updating proposal status in Supabase:', proposalId, newStatus);
+
+      const supabase = await getSupabaseClient();
       
       // Update in Supabase
       const { data, error } = await supabase

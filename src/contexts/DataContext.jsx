@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
@@ -18,7 +18,7 @@ export const useData = () => {
 export const DataProvider = ({ children }) => {
   const { user } = useAuthContext();
   const { initializeClientCrm } = useCrm();
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);
@@ -37,6 +37,7 @@ export const DataProvider = ({ children }) => {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+    const supabase = await getSupabaseClient();
     try {
       logDev('Fetching data from Supabase...');
 
@@ -115,6 +116,7 @@ export const DataProvider = ({ children }) => {
   // CRUD operations for clients
   const addClient = async (client) => {
     try {
+      const supabase = await getSupabaseClient();
       // Strip any CRM related fields before inserting. CRM records are managed
       // separately via the CrmContext.
       const {
@@ -147,6 +149,7 @@ export const DataProvider = ({ children }) => {
 
   const updateClient = async (id, updates) => {
     try {
+      const supabase = await getSupabaseClient();
       // Remove any CRM related fields from the update payload.
       const {
         crm_status,
@@ -175,6 +178,7 @@ export const DataProvider = ({ children }) => {
 
   const deleteClient = async (id) => {
     try {
+      const supabase = await getSupabaseClient();
       const { error } = await supabase
         .from('clients_pf')
         .delete()
@@ -191,6 +195,7 @@ export const DataProvider = ({ children }) => {
   // CRUD operations for users
   const addUser = async (userData) => {
     try {
+      const supabase = await getSupabaseClient();
       const { data, error } = await supabase
         .from('users_pf')
         .insert({ ...userData, advisor_id: user.supabaseId })
@@ -208,6 +213,7 @@ export const DataProvider = ({ children }) => {
 
   const updateUser = async (id, updates) => {
     try {
+      const supabase = await getSupabaseClient();
       const { data, error } = await supabase
         .from('users_pf')
         .update(updates)
@@ -226,6 +232,7 @@ export const DataProvider = ({ children }) => {
 
   const deleteUser = async (id) => {
     try {
+      const supabase = await getSupabaseClient();
       const { error } = await supabase
         .from('users_pf')
         .delete()
@@ -242,6 +249,7 @@ export const DataProvider = ({ children }) => {
   // CRUD operations for proposals
   const addProposal = async (proposal) => {
     try {
+      const supabase = await getSupabaseClient();
       const { data, error } = await supabase
         .from('projections_pf')
         .insert({ ...proposal, advisor_id: user.supabaseId })
@@ -259,6 +267,7 @@ export const DataProvider = ({ children }) => {
 
   const updateProposal = async (id, updates) => {
     try {
+      const supabase = await getSupabaseClient();
       const { data, error } = await supabase
         .from('projections_pf')
         .update(updates)
@@ -277,6 +286,7 @@ export const DataProvider = ({ children }) => {
 
   const deleteProposal = async (id) => {
     try {
+      const supabase = await getSupabaseClient();
       const { error } = await supabase
         .from('projections_pf')
         .delete()

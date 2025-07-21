@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
-import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../lib/supabaseClient';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -18,7 +18,7 @@ export const useAuthContext = () => {
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser } = useUser();
   const { isLoaded, isSignedIn } = useAuth();
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const syncAuth = async () => {
       if (isLoaded) {
+        const supabase = await getSupabaseClient();
         if (isSignedIn && clerkUser) {
           await supabase.auth.getSession();
           // Retrieve the Supabase authenticated user to get its ID
@@ -70,6 +71,7 @@ const logout = async () => {
   // Just update the local state
   setUser(null);
   try {
+    const supabase = await getSupabaseClient();
     await supabase.auth.signOut();
   } catch (err) {
     console.error('Error signing out of Supabase:', err);
