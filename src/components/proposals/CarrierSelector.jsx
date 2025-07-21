@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import useSupabaseClientWithClerk from '../../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../../lib/supabaseClient';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const { FiCheck, FiAlertTriangle } = FiIcons;
@@ -10,7 +10,7 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
   const [carriers, setCarriers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
 
   // Fetch carriers that offer the selected product
   useEffect(() => {
@@ -23,6 +23,7 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
 
       setLoading(true);
       setError(null);
+      const supabase = await getSupabaseClient();
 
       try {
         // Get carriers that offer the selected product through the junction table

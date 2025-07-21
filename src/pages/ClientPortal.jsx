@@ -10,14 +10,14 @@ import ClientForm from '../components/forms/ClientForm';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
-import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../lib/supabaseClient';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiUser, FiEdit, FiBarChart2, FiActivity, FiFileText, FiMail, FiPhone, FiMapPin, FiCalendar, FiUsers, FiBriefcase, FiShield, FiStar, FiBuilding, FiDollarSign, FiTrendingUp, FiSettings } = FiIcons;
 
 const ClientPortal = () => {
   const { user } = useAuth();
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const { clients, proposals, users, updateClient } = useData();
   const { analysis, loadAnalysis, loading: analysisLoading } = useFinancialAnalysis();
   
@@ -45,6 +45,8 @@ const ClientPortal = () => {
     const autoLink = async () => {
       if (analysis || !user?.id) return;
 
+      const supabase = await getSupabaseClient();
+
       const stored = localStorage.getItem('fna_code');
       if (stored) {
         await handleClaimCode(stored);
@@ -70,6 +72,7 @@ const ClientPortal = () => {
     if (!code) return;
     setClaiming(true);
     setClaimError('');
+    const supabase = await getSupabaseClient();
     try {
       const { data, error } = await supabase
         .from('financial_analyses_pf')

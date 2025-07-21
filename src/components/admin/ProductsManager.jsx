@@ -4,7 +4,7 @@ import Modal from '../ui/Modal';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import useSupabaseClientWithClerk from '../../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../../lib/supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import logDev from '../../utils/logDev';
 
@@ -22,7 +22,7 @@ const PRODUCT_TYPES = [
 const ProductsManager = () => {
   const { isAdmin } = useAuth();
   logDev('ProductsManager isAdmin:', isAdmin);
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const [products, setProducts] = useState([]);
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +45,7 @@ const ProductsManager = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
+      const supabase = await getSupabaseClient();
 
       try {
         // Fetch products with strategy associations
@@ -110,6 +111,7 @@ const ProductsManager = () => {
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
+        const supabase = await getSupabaseClient();
         const { error } = await supabase
           .from('products_pf')
           .delete()
@@ -129,6 +131,8 @@ const ProductsManager = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    const supabase = await getSupabaseClient();
 
     try {
       if (selectedProduct) {

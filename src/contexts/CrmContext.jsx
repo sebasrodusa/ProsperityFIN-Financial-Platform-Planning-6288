@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuthContext } from './AuthContext';
-import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
+import { useSupabaseWithClerk } from '../lib/supabaseClient';
 import logDev from '../utils/logDev';
 
 // Status stages
@@ -26,7 +26,7 @@ export const useCrm = () => {
 
 export const CrmProvider = ({ children }) => {
   const { user } = useAuthContext();
-  const supabase = useSupabaseClientWithClerk();
+  const { getSupabaseClient } = useSupabaseWithClerk();
   const [clientStatuses, setClientStatuses] = useState({});
   const [statusHistory, setStatusHistory] = useState({});
   const [clientTasks, setClientTasks] = useState({});
@@ -42,6 +42,7 @@ export const CrmProvider = ({ children }) => {
       try {
         setLoading(true);
         setError(null);
+        const supabase = await getSupabaseClient();
 
         const { data: statusData, error: statusError } = await supabase
           .from('crm_client_statuses_pf')
@@ -140,6 +141,7 @@ export const CrmProvider = ({ children }) => {
   const updateClientStatus = async (clientId, newStatus, notes = '') => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
       
       const { data: statusData, error: statusError } = await supabase
         .from('crm_client_statuses_pf')
@@ -202,6 +204,7 @@ export const CrmProvider = ({ children }) => {
   const addClientTask = async (clientId, taskData) => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
       
       const { data: task, error } = await supabase
         .from('crm_client_tasks_pf')
@@ -248,6 +251,7 @@ export const CrmProvider = ({ children }) => {
   const updateClientTask = async (clientId, taskId, updates) => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
 
       const { taskName, dueDate, ...otherUpdates } = updates || {};
 
@@ -294,6 +298,7 @@ export const CrmProvider = ({ children }) => {
   // Delete task
   const deleteClientTask = async (clientId, taskId) => {
     try {
+      const supabase = await getSupabaseClient();
       const { error } = await supabase
         .from('crm_client_tasks_pf')
         .delete()
@@ -342,6 +347,7 @@ export const CrmProvider = ({ children }) => {
   const addClientNote = async (clientId, noteText) => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
 
       const { data: note, error } = await supabase
         .from('crm_client_notes_pf')
@@ -382,6 +388,7 @@ export const CrmProvider = ({ children }) => {
   const updateClientNote = async (clientId, noteId, noteText) => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
 
       const { data, error } = await supabase
         .from('crm_client_notes_pf')
@@ -418,6 +425,7 @@ export const CrmProvider = ({ children }) => {
   // Delete note
   const deleteClientNote = async (clientId, noteId) => {
     try {
+      const supabase = await getSupabaseClient();
       const { error } = await supabase
         .from('crm_client_notes_pf')
         .delete()
@@ -442,6 +450,7 @@ export const CrmProvider = ({ children }) => {
   const initializeClientCrm = async (clientId) => {
     try {
       const timestamp = new Date().toISOString();
+      const supabase = await getSupabaseClient();
 
       const { data: statusData, error: statusError } = await supabase
         .from('crm_client_statuses_pf')
