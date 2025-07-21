@@ -4,7 +4,7 @@ import Modal from '../ui/Modal';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../../lib/supabase';
+import useSupabaseClientWithClerk from '../../hooks/useSupabaseClientWithClerk';
 import { useAuth } from '../../hooks/useAuth';
 import logDev from '../../utils/logDev';
 
@@ -23,6 +23,7 @@ const CATEGORIES = [
 const StrategiesManager = () => {
   const { isAdmin } = useAuth();
   logDev('StrategiesManager isAdmin:', isAdmin);
+  const supabase = useSupabaseClientWithClerk();
   const [strategies, setStrategies] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
