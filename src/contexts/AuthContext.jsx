@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
-import { setAuthToken } from '../lib/supabase';
+import supabase, { setAuthToken } from '../lib/supabase';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -30,9 +30,13 @@ export const AuthProvider = ({ children }) => {
         if (isSignedIn && clerkUser) {
           const token = await getToken({ template: 'supabase' });
           await setAuthToken(token);
+          // Retrieve the Supabase authenticated user to get its ID
+          const { data: supaData } = await supabase.auth.getUser();
+          const supabaseId = supaData?.user?.id;
           // Transform Clerk user to our app's user format
           const transformedUser = {
             id: clerkUser.id,
+            supabaseId,
             name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
             email: clerkUser.primaryEmailAddress?.emailAddress,
             role: clerkUser.publicMetadata?.role || 'client',

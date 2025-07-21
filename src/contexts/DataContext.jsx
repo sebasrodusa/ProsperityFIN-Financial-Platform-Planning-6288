@@ -71,22 +71,22 @@ export const DataProvider = ({ children }) => {
         proposalsData = pData || [];
       } else {
         // Advisors/managers/admins fetch by advisor id
-        const { data: cData, error: cError } = await supabase
-          .from('clients_pf')
-          .select('*')
-          .eq('advisor_id', user.id);
+          const { data: cData, error: cError } = await supabase
+            .from('clients_pf')
+            .select('*')
+            .eq('advisor_id', user.supabaseId);
         if (cError) throw cError;
 
-        const { data: uData, error: uError } = await supabase
-          .from('users_pf')
-          .select('*')
-          .eq('advisor_id', user.id);
+          const { data: uData, error: uError } = await supabase
+            .from('users_pf')
+            .select('*')
+            .eq('advisor_id', user.supabaseId);
         if (uError) throw uError;
 
-        const { data: pData, error: pError } = await supabase
-          .from('projections_pf')
-          .select('*')
-          .eq('advisor_id', user.id);
+          const { data: pData, error: pError } = await supabase
+            .from('projections_pf')
+            .select('*')
+            .eq('advisor_id', user.supabaseId);
         if (pError) throw pError;
 
         clientsData = cData || [];
@@ -127,11 +127,11 @@ export const DataProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from('clients_pf')
-        .insert({ ...cleanClient, advisor_id: user.id })
+        .insert({ ...cleanClient, advisor_id: user.supabaseId })
         .select();
       if (error) throw error;
 
-      const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: user.id };
+      const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: user.supabaseId };
       setClients(prev => [...prev, newClient]);
 
       // Initialize CRM records for the newly created client
@@ -192,11 +192,11 @@ export const DataProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('users_pf')
-        .insert({ ...userData, advisor_id: user.id })
+        .insert({ ...userData, advisor_id: user.supabaseId })
         .select();
       if (error) throw error;
 
-      const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.id };
+      const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.supabaseId };
       setUsers(prev => [...prev, newUser]);
       return newUser;
     } catch (error) {
@@ -243,11 +243,11 @@ export const DataProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('projections_pf')
-        .insert({ ...proposal, advisor_id: user.id })
+        .insert({ ...proposal, advisor_id: user.supabaseId })
         .select();
       if (error) throw error;
 
-      const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.id };
+      const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.supabaseId };
       setProposals(prev => [...prev, newProposal]);
       return newProposal;
     } catch (error) {
