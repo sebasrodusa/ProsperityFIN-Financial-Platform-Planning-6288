@@ -1,3 +1,4 @@
+// src/supabaseClient.js
 import { createClient } from '@supabase/supabase-js';
 import { useAuth } from '@clerk/clerk-react';
 
@@ -8,34 +9,25 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing Supabase environment variables');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+// ✅ This default Supabase client should only be used when no auth is needed.
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-export default supabase;
-
+// ✅ This hook returns an **authenticated** Supabase client using Clerk's token
 export function useSupabaseWithClerk() {
-  let getToken;
-  try {
-    ({ getToken } = useAuth());
-  } catch {
-    getToken = async () => null;
-  }
+  const { getToken } = useAuth();
 
   const getSupabaseClient = async () => {
     const token = await getToken({ template: 'supabase' });
+
+    if (!token) {
+      console.warn('No Clerk token available for Supabase auth.');
+    }
+
     return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: {
         headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          Authorization: `Bearer ${token}`,
         },
-      },
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
       },
     });
   };
