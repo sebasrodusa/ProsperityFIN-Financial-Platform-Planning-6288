@@ -4,9 +4,33 @@
 BEGIN;
 
 -- Drop foreign keys referencing users_pf and clients_pf
+ALTER TABLE IF EXISTS public.clients_pf
+  DROP CONSTRAINT IF EXISTS clients_pf_advisor_id_fkey;
+
 ALTER TABLE IF EXISTS public.crm_client_notes_pf
   DROP CONSTRAINT IF EXISTS crm_client_notes_pf_client_id_fkey,
   DROP CONSTRAINT IF EXISTS crm_client_notes_pf_advisor_id_fkey;
+
+ALTER TABLE IF EXISTS public.crm_client_statuses_pf
+  DROP CONSTRAINT IF EXISTS crm_client_statuses_pf_client_id_fkey,
+  DROP CONSTRAINT IF EXISTS crm_client_statuses_pf_advisor_id_fkey;
+
+ALTER TABLE IF EXISTS public.crm_client_tasks_pf
+  DROP CONSTRAINT IF EXISTS crm_client_tasks_pf_client_id_fkey,
+  DROP CONSTRAINT IF EXISTS crm_client_tasks_pf_advisor_id_fkey;
+
+ALTER TABLE IF EXISTS public.crm_status_history_pf
+  DROP CONSTRAINT IF EXISTS crm_status_history_pf_client_id_fkey,
+  DROP CONSTRAINT IF EXISTS crm_status_history_pf_advisor_id_fkey;
+
+ALTER TABLE IF EXISTS public.financial_analyses_pf
+  DROP CONSTRAINT IF EXISTS financial_analyses_pf_client_id_fkey,
+  DROP CONSTRAINT IF EXISTS financial_analyses_pf_created_by_fkey;
+
+ALTER TABLE IF EXISTS public.projections_pf
+  DROP CONSTRAINT IF EXISTS projections_pf_client_id_fkey,
+  DROP CONSTRAINT IF EXISTS projections_pf_advisor_id_fkey,
+  DROP CONSTRAINT IF EXISTS projections_pf_created_by_fkey;
 
 -- Convert columns on users_pf and clients_pf
 ALTER TABLE IF EXISTS public.users_pf
@@ -51,5 +75,42 @@ ALTER TABLE IF EXISTS public.projections_pf
   ALTER COLUMN client_id TYPE text USING client_id::text,
   ALTER COLUMN advisor_id TYPE text USING advisor_id::text,
   ALTER COLUMN created_by TYPE text USING created_by::text;
+
+-- Recreate foreign keys for updated tables
+ALTER TABLE IF EXISTS public.clients_pf
+  ADD CONSTRAINT clients_pf_advisor_id_fkey FOREIGN KEY (advisor_id)
+    REFERENCES public.users_pf(id);
+
+ALTER TABLE IF EXISTS public.crm_client_statuses_pf
+  ADD CONSTRAINT crm_client_statuses_pf_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT crm_client_statuses_pf_advisor_id_fkey FOREIGN KEY (advisor_id)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS public.crm_client_tasks_pf
+  ADD CONSTRAINT crm_client_tasks_pf_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT crm_client_tasks_pf_advisor_id_fkey FOREIGN KEY (advisor_id)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS public.crm_status_history_pf
+  ADD CONSTRAINT crm_status_history_pf_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT crm_status_history_pf_advisor_id_fkey FOREIGN KEY (advisor_id)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS public.financial_analyses_pf
+  ADD CONSTRAINT financial_analyses_pf_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT financial_analyses_pf_created_by_fkey FOREIGN KEY (created_by)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE;
+
+ALTER TABLE IF EXISTS public.projections_pf
+  ADD CONSTRAINT projections_pf_client_id_fkey FOREIGN KEY (client_id)
+    REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT projections_pf_advisor_id_fkey FOREIGN KEY (advisor_id)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  ADD CONSTRAINT projections_pf_created_by_fkey FOREIGN KEY (created_by)
+    REFERENCES public.users_pf(id) ON DELETE CASCADE;
 
 COMMIT;
