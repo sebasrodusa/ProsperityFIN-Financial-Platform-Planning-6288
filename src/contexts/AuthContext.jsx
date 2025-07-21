@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
-import supabase, { setAuthToken } from '../lib/supabase';
+import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -17,7 +17,8 @@ export const useAuthContext = () => {
 
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser } = useUser();
-  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const { isLoaded, isSignedIn } = useAuth();
+  const supabase = useSupabaseClientWithClerk();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,17 +29,7 @@ export const AuthProvider = ({ children }) => {
     const syncAuth = async () => {
       if (isLoaded) {
         if (isSignedIn && clerkUser) {
-          const token = await getToken({ template: 'supabase' });
-          try {
-            const signInData = await setAuthToken(token);
-            if (!signInData?.user) {
-              throw new Error('Supabase sign-in did not return a user');
-            }
-          } catch (err) {
-            console.error('Failed to authenticate with Supabase:', err);
-            setLoading(false);
-            return;
-          }
+          await supabase.auth.getSession();
           // Retrieve the Supabase authenticated user to get its ID
           const { data: supaData } = await supabase.auth.getUser();
           const supabaseId = supaData?.user?.id;
@@ -61,7 +52,7 @@ console.log('✅ Resolved user role:', transformedUser.role);
           setUser(transformedUser);
         } else {
           try {
-            await setAuthToken(null);
+            await supabase.auth.signOut();
           } catch (err) {
             console.error('Error signing out of Supabase:', err);
           }
@@ -79,7 +70,7 @@ const logout = async () => {
   // Just update the local state
   setUser(null);
   try {
-    await setAuthToken(null);
+    await supabase.auth.signOut();
   } catch (err) {
     console.error('Error signing out of Supabase:', err);
   }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../../lib/supabase';
+import useSupabaseClientWithClerk from '../../hooks/useSupabaseClientWithClerk';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const { FiShield, FiTrendingUp, FiDollarSign, FiHeart, FiUsers, FiAward, FiAlertTriangle } = FiIcons;
@@ -11,6 +11,7 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
   const [availableProducts, setAvailableProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const supabase = useSupabaseClientWithClerk();
 
   // Fetch strategies from Supabase
   useEffect(() => {

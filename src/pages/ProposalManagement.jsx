@@ -14,7 +14,7 @@ import ProductConfiguration from '../components/proposals/ProductConfiguration';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import supabase from '../lib/supabase';
+import useSupabaseClientWithClerk from '../hooks/useSupabaseClientWithClerk';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiSend, FiCalendar, FiUser, FiDownload, FiPrinter } = FiIcons;
 
@@ -144,6 +144,7 @@ const DEFAULT_CARRIERS = [
 
 const ProposalManagement = () => {
   const { user } = useAuth();
+  const supabase = useSupabaseClientWithClerk();
   const { proposals, clients, users, addProposal, updateProposal, deleteProposal } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
