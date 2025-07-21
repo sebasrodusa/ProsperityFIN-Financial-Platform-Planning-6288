@@ -19,9 +19,18 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 
 export async function setAuthToken(token) {
   if (token) {
-    await supabase.auth.signInWithIdToken({ provider: 'clerk', token });
-  } else {
-    await supabase.auth.signOut();
+    const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'clerk', token });
+    if (error) {
+      console.error('Error signing in with ID token:', error);
+      throw error;
+    }
+    return data;
+  }
+
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    console.error('Error signing out:', error);
+    throw error;
   }
 }
 

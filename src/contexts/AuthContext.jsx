@@ -29,7 +29,16 @@ export const AuthProvider = ({ children }) => {
       if (isLoaded) {
         if (isSignedIn && clerkUser) {
           const token = await getToken({ template: 'supabase' });
-          await setAuthToken(token);
+          try {
+            const signInData = await setAuthToken(token);
+            if (!signInData?.user) {
+              throw new Error('Supabase sign-in did not return a user');
+            }
+          } catch (err) {
+            console.error('Failed to authenticate with Supabase:', err);
+            setLoading(false);
+            return;
+          }
           // Retrieve the Supabase authenticated user to get its ID
           const { data: supaData } = await supabase.auth.getUser();
           const supabaseId = supaData?.user?.id;
@@ -51,7 +60,11 @@ export const AuthProvider = ({ children }) => {
 console.log('✅ Resolved user role:', transformedUser.role);
           setUser(transformedUser);
         } else {
-          await setAuthToken(null);
+          try {
+            await setAuthToken(null);
+          } catch (err) {
+            console.error('Error signing out of Supabase:', err);
+          }
           setUser(null);
         }
         setLoading(false);
@@ -61,12 +74,16 @@ console.log('✅ Resolved user role:', transformedUser.role);
   }, [clerkUser, isLoaded, isSignedIn]);
 
   // Logout function
-  const logout = async () => {
-    // We don't need to call supabase.auth.signOut() as we're using Clerk
-    // Just update the local state
-    setUser(null);
+const logout = async () => {
+  // We don't need to call supabase.auth.signOut() as we're using Clerk
+  // Just update the local state
+  setUser(null);
+  try {
     await setAuthToken(null);
-  };
+  } catch (err) {
+    console.error('Error signing out of Supabase:', err);
+  }
+};
 
   // Provide the auth context value
   const value = {
