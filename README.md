@@ -2,6 +2,8 @@
 
 This project is a React application that uses Clerk for authentication and Supabase for data storage.
 
+Row level security (**RLS**) is enabled across all user data tables to ensure records are only accessible to their owner and advisor.
+
 ## Setup
 
 1. Install dependencies:
@@ -20,8 +22,10 @@ This project is a React application that uses Clerk for authentication and Supab
    Supabase URL and key must be provided via environment variables, otherwise the
    application will throw an error during startup.
 
-   * `CLERK_JWT_KEY` can be found in the **Clerk dashboard** under **API Keys → JWT Verification Key**. Copy the entire PEM string into your `.env` file.
-   * `SUPABASE_SERVICE_ROLE_KEY` lives in the **Supabase dashboard** under **Settings → API → Service Role**. Keep this key private as it bypasses RLS.
+  * `CLERK_JWT_KEY` can be found in the **Clerk dashboard** under **API Keys → JWT Verification Key**. Copy the entire PEM string into your `.env` file. This key allows the backend to validate Clerk-issued JWTs.
+  * `SUPABASE_SERVICE_ROLE_KEY` lives in the **Supabase dashboard** under **Settings → API → Service Role**. Keep this key private as it bypasses RLS and is required for service-role operations such as migrations and seeding data.
+
+Both variables are required for JWT authentication and service-role database access.
 3. Start the development server:
    ```bash
    npm run dev
@@ -56,14 +60,11 @@ Supabase schema changes live in `supabase/migrations`. Apply them to a local dat
 ```bash
 supabase db reset
 ```
-Migration `006_enable_rls.sql` turns on row level security for the core tables. Run `supabase db reset` after pulling to apply it locally.
+Migration `006_enable_rls.sql` turns on row level security for the core tables. `007_enable_rls.sql` extends the policies to CRM and proposal tables. Run `supabase db reset` after pulling to apply them locally.
 
 ### Enabling RLS
 
-The `006_enable_rls.sql` migration enables row level security policies for all
-core tables. Apply the migration to your Supabase project with `supabase db push`
-or through the dashboard. After the SQL is applied, open each table in the
-Supabase dashboard and verify that **Enable RLS** is turned on.
+The `006_enable_rls.sql` and `007_enable_rls.sql` migrations enable row level security policies for all tables that hold user data. Each policy checks that `auth.uid()` matches columns such as `created_by`, `advisor_id` or `client_id` before allowing reads or writes. Apply the migrations to your Supabase project with `supabase db push` or through the dashboard. After the SQL is applied, open each table in the Supabase dashboard and verify that **Enable RLS** is turned on.
 
 Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along with optional `client_email` and `claimed_at` fields on the `financial_analyses_pf` table.
 
