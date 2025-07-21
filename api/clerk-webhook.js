@@ -7,6 +7,19 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
+async function getSupabaseIdByEmail(email) {
+  const { data, error } = await supabase
+    .from('auth.users')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle();
+  if (error) {
+    console.error('Failed to fetch Supabase user ID:', error);
+    return null;
+  }
+  return data?.id || null;
+}
+
 export default async function handler(req, res) {
   // Webhook expects CLERK_WEBHOOK_SECRET in environment variables
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
@@ -33,13 +46,15 @@ export default async function handler(req, res) {
   // Handle user creation
   if (eventType === 'user.created') {
     try {
-      const { id, email_addresses, first_name, last_name, public_metadata } = data;
+      const { email_addresses, first_name, last_name, public_metadata } = data;
       const primaryEmail = email_addresses.find(email => email.id === data.primary_email_address_id);
-      
+
+      const supabaseId = await getSupabaseIdByEmail(primaryEmail.email_address);
+
       await supabase
         .from('users_pf')
         .insert({
-          id: id,
+          id: supabaseId,
           email: primaryEmail.email_address,
           name: `${first_name || ''} ${last_name || ''}`.trim(),
           role: public_metadata.role || 'client',
@@ -58,8 +73,10 @@ export default async function handler(req, res) {
   // Handle user updates
   if (eventType === 'user.updated') {
     try {
-      const { id, email_addresses, first_name, last_name, public_metadata } = data;
+      const { email_addresses, first_name, last_name, public_metadata } = data;
       const primaryEmail = email_addresses.find(email => email.id === data.primary_email_address_id);
+
+      const supabaseId = await getSupabaseIdByEmail(primaryEmail.email_address);
       
       await supabase
         .from('users_pf')
@@ -69,7 +86,7 @@ export default async function handler(req, res) {
           role: public_metadata.role || 'client',
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', supabaseId);
         
       return res.status(200).json({ message: 'User updated successfully' });
     } catch (error) {
@@ -81,10 +98,15 @@ export default async function handler(req, res) {
   // Handle user deletion
   if (eventType === 'user.deleted') {
     try {
+      let supabaseId = null;
+      if (data.email_addresses && data.email_addresses.length > 0) {
+        const primary = data.email_addresses[0].email_address;
+        supabaseId = await getSupabaseIdByEmail(primary);
+      }
       await supabase
         .from('users_pf')
         .delete()
-        .eq('id', data.id);
+        .eq('id', supabaseId || data.id);
         
       return res.status(200).json({ message: 'User deleted successfully' });
     } catch (error) {
