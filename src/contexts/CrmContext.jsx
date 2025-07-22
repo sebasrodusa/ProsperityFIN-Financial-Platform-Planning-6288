@@ -46,7 +46,7 @@ export const CrmProvider = ({ children }) => {
         const { data: statusData, error: statusError } = await supabase
           .from('crm_client_statuses_pf')
           .select('*')
-          .eq('advisor_id', user.id);
+          .eq('advisor_id', user.supabaseId);
 
         if (statusError) throw statusError;
 
@@ -62,7 +62,7 @@ export const CrmProvider = ({ children }) => {
         const { data: historyData, error: historyError } = await supabase
           .from('crm_status_history_pf')
           .select('*')
-          .eq('advisor_id', user.id);
+          .eq('advisor_id', user.supabaseId);
 
         if (historyError) throw historyError;
 
@@ -81,7 +81,7 @@ export const CrmProvider = ({ children }) => {
         const { data: tasksData, error: tasksError } = await supabase
           .from('crm_client_tasks_pf')
           .select('*')
-          .eq('advisor_id', user.id);
+          .eq('advisor_id', user.supabaseId);
 
         if (tasksError) throw tasksError;
 
@@ -103,7 +103,7 @@ export const CrmProvider = ({ children }) => {
         const { data: notesData, error: notesError } = await supabase
           .from('crm_client_notes_pf')
           .select('*')
-          .eq('advisor_id', user.id);
+          .eq('advisor_id', user.supabaseId);
 
         if (notesError) throw notesError;
 
@@ -147,7 +147,7 @@ export const CrmProvider = ({ children }) => {
           client_id: clientId,
           status: newStatus,
           updated_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
@@ -170,7 +170,7 @@ export const CrmProvider = ({ children }) => {
           status: newStatus,
           notes,
           created_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
@@ -213,7 +213,7 @@ export const CrmProvider = ({ children }) => {
           completed: false,
           created_at: timestamp,
           updated_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
@@ -350,7 +350,7 @@ export const CrmProvider = ({ children }) => {
           note: noteText,
           created_at: timestamp,
           updated_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
@@ -449,7 +449,7 @@ export const CrmProvider = ({ children }) => {
           client_id: clientId,
           status: 'initial_meeting',
           updated_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
@@ -463,7 +463,7 @@ export const CrmProvider = ({ children }) => {
           status: 'initial_meeting',
           notes: 'Initial status set',
           created_at: timestamp,
-          advisor_id: user.id
+          advisor_id: user.supabaseId
         })
         .select()
         .single();
