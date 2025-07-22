@@ -22,7 +22,7 @@ const PRODUCT_TYPES = [
 const ProductsManager = () => {
   const { isAdmin } = useAuth();
   logDev('ProductsManager isAdmin:', isAdmin);
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const [products, setProducts] = useState([]);
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,6 @@ const ProductsManager = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       try {
         // Fetch products with strategy associations
@@ -111,7 +110,6 @@ const ProductsManager = () => {
   const handleDeleteProduct = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        const supabase = await getSupabaseClient();
         const { error } = await supabase
           .from('products_pf')
           .delete()
@@ -131,8 +129,6 @@ const ProductsManager = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-
-    const supabase = await getSupabaseClient();
 
     try {
       if (selectedProduct) {

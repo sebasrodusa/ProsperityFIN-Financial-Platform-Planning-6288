@@ -23,7 +23,7 @@ const CATEGORIES = [
 const StrategiesManager = () => {
   const { isAdmin } = useAuth();
   logDev('StrategiesManager isAdmin:', isAdmin);
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const [strategies, setStrategies] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,6 @@ const StrategiesManager = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       try {
         // Fetch strategies
@@ -112,7 +111,6 @@ const StrategiesManager = () => {
   const handleDeleteStrategy = async (id) => {
     if (window.confirm('Are you sure you want to delete this strategy?')) {
       try {
-        const supabase = await getSupabaseClient();
         const { error } = await supabase
           .from('strategies_pf')
           .delete()
@@ -132,8 +130,6 @@ const StrategiesManager = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-
-    const supabase = await getSupabaseClient();
 
     try {
       if (selectedStrategy) {

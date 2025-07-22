@@ -17,7 +17,7 @@ const { FiUser, FiEdit, FiBarChart2, FiActivity, FiFileText, FiMail, FiPhone, Fi
 
 const ClientPortal = () => {
   const { user } = useAuth();
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const { clients, proposals, users, updateClient } = useData();
   const { analysis, loadAnalysis, loading: analysisLoading } = useFinancialAnalysis();
   
@@ -45,8 +45,6 @@ const ClientPortal = () => {
     const autoLink = async () => {
       if (analysis || !user?.id) return;
 
-      const supabase = await getSupabaseClient();
-
       const stored = localStorage.getItem('fna_code');
       if (stored) {
         await handleClaimCode(stored);
@@ -72,7 +70,6 @@ const ClientPortal = () => {
     if (!code) return;
     setClaiming(true);
     setClaimError('');
-    const supabase = await getSupabaseClient();
     try {
       const { data, error } = await supabase
         .from('financial_analyses_pf')

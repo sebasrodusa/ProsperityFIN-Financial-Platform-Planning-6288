@@ -16,7 +16,7 @@ export const useFinancialAnalysis = () => {
 // Export the provider component directly
 export const FinancialAnalysisProvider = ({ children }) => {
   const { user } = useAuthContext();
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -30,7 +30,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       let query = supabase
         .from('financial_analyses_pf')
@@ -100,7 +99,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
     try {
       setSaving(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       const payload = {
         ...data,
@@ -162,7 +160,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
   const saveIncomeSources = useCallback(async (analysisId, sources) => {
     try {
       setSaving(true);
-      const supabase = await getSupabaseClient();
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
@@ -193,7 +190,6 @@ export const FinancialAnalysisProvider = ({ children }) => {
   const saveExpenses = useCallback(async (analysisId, expenses) => {
     try {
       setSaving(true);
-      const supabase = await getSupabaseClient();
 
       const { data, error } = await supabase
         .from('financial_analyses_pf')
