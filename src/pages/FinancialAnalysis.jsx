@@ -24,7 +24,7 @@ const FinancialAnalysis = () => {
   const { clientId } = useParams(); // Optional - if accessed from client details
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const { clients } = useData();
   const { analysis, loadAnalysis, saveAnalysis, setAnalysis, loading } = useFinancialAnalysis();
   const [activeTab, setActiveTab] = useState('cashflow');
@@ -85,7 +85,6 @@ const FinancialAnalysis = () => {
     }
 
     setIsSaving(true);
-    const supabase = await getSupabaseClient();
     try {
       logDev('Saving financial analysis to Supabase:', analysis);
 

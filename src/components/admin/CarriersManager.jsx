@@ -15,7 +15,7 @@ const RATINGS = ['A++', 'A+', 'A', 'A-', 'B++', 'B+', 'B', 'B-', 'C++', 'C+', 'C
 const CarriersManager = () => {
   const { isAdmin } = useAuth();
   logDev('CarriersManager isAdmin:', isAdmin);
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   const [carriers, setCarriers] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +42,6 @@ const CarriersManager = () => {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       try {
         // Fetch carriers with product associations
@@ -114,7 +113,6 @@ const CarriersManager = () => {
   const handleDeleteCarrier = async (id) => {
     if (window.confirm('Are you sure you want to delete this carrier?')) {
       try {
-        const supabase = await getSupabaseClient();
         // Delete the carrier logo from storage if it exists
         const carrier = carriers.find(c => c.id === id);
         if (carrier && carrier.logo_url && carrier.logo_url.includes('storage.googleapis.com')) {
@@ -162,7 +160,6 @@ const CarriersManager = () => {
 
   const uploadLogo = async (file, carrierId) => {
     if (!file) return formData.logo_url; // Return existing URL if no new file
-    const supabase = await getSupabaseClient();
 
     try {
       // Generate a unique file name to prevent conflicts
@@ -200,8 +197,6 @@ const CarriersManager = () => {
     e.preventDefault();
     setSaving(true);
     setUploadProgress(0);
-
-    const supabase = await getSupabaseClient();
 
     try {
       let logoUrl = formData.logo_url;

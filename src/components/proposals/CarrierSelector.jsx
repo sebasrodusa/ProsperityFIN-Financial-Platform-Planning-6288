@@ -10,7 +10,7 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
   const [carriers, setCarriers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
 
   // Fetch carriers that offer the selected product
   useEffect(() => {
@@ -23,7 +23,6 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
 
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
 
       try {
         // Get carriers that offer the selected product through the junction table

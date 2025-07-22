@@ -11,14 +11,13 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
   const [availableProducts, setAvailableProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
 
   // Fetch strategies from Supabase
   useEffect(() => {
     const fetchStrategies = async () => {
       setLoading(true);
       setError(null);
-      const supabase = await getSupabaseClient();
       
       try {
         const { data: strategiesData, error: strategiesError } = await supabase

@@ -16,7 +16,7 @@ const { FiSettings, FiShield, FiAlertTriangle } = FiIcons;
 
 const ProjectionsSettings = () => {
   const { user } = useAuth();
-  const { getSupabaseClient } = useSupabaseWithClerk();
+  const supabase = useSupabaseWithClerk();
   logDev('ProjectionsSettings user role:', user?.role);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('strategies');
