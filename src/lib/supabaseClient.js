@@ -1,4 +1,7 @@
 // src/supabaseClient.js
+//
+// Centralized Supabase client used across the app. All modules should import
+// this instance rather than creating their own clients.
 import { createClient } from '@supabase/supabase-js';
 import { useAuth } from '@clerk/clerk-react';
 import { useCallback, useEffect } from 'react';
