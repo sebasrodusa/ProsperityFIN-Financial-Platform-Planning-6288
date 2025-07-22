@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CrmProvider, { useCrm } from '../CrmContext';
-import supabase from '../../lib/supabase';
+import { supabase } from '../../lib/supabaseClient';
 
 // Mock AuthContext with a simple provider
 const AuthContext = React.createContext();
@@ -11,7 +11,10 @@ vi.mock('../AuthContext', () => ({
 }));
 import { vi } from 'vitest';
 
-vi.mock('../../lib/supabase', () => ({ default: { from: vi.fn() } }));
+vi.mock('../../lib/supabaseClient', () => ({
+  supabase: { from: vi.fn() },
+  useSupabaseWithClerk: () => supabase
+}));
 
 const user = { id: 'advisor1' };
 
