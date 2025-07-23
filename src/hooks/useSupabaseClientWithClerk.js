@@ -1,1 +1,2 @@
-export { useSupabaseWithClerk as default } from '../lib/supabaseClient';
+// Temporary shim to maintain backwards compatibility
+export { useSupabase as default } from '../lib/supabaseClient';

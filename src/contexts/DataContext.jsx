@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
@@ -18,7 +18,7 @@ export const useData = () => {
 export const DataProvider = ({ children }) => {
   const { user } = useAuthContext();
   const { initializeClientCrm } = useCrm();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);
@@ -80,19 +80,19 @@ export const DataProvider = ({ children }) => {
           const { data: cData, error: cError } = await supabase
             .from('clients_pf')
             .select('*')
-            .eq('advisor_id', user.supabaseId);
+            .eq('advisor_id', user.id);
         if (cError) throw cError;
 
           const { data: uData, error: uError } = await supabase
             .from('users_pf')
             .select('*')
-            .eq('advisor_id', user.supabaseId);
+            .eq('advisor_id', user.id);
         if (uError) throw uError;
 
           const { data: pData, error: pError } = await supabase
             .from('projections_pf')
             .select('*')
-            .eq('advisor_id', user.supabaseId);
+            .eq('advisor_id', user.id);
         if (pError) throw pError;
 
         clientsData = cData || [];
@@ -217,11 +217,11 @@ export const DataProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('users_pf')
-        .insert({ ...userData, advisor_id: user.supabaseId })
+        .insert({ ...userData, advisor_id: user.id })
         .select();
       if (error) throw error;
 
-      const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.supabaseId };
+      const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.id };
       setUsers(prev => [...prev, newUser]);
       return newUser;
     } catch (error) {
@@ -280,11 +280,11 @@ export const DataProvider = ({ children }) => {
     try {
       const { data, error } = await supabase
         .from('projections_pf')
-        .insert({ ...proposal, advisor_id: user.supabaseId })
+        .insert({ ...proposal, advisor_id: user.id })
         .select();
       if (error) throw error;
 
-      const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.supabaseId };
+      const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.id };
       setProposals(prev => [...prev, newProposal]);
       return newProposal;
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import logDev from '../utils/logDev';
 
@@ -16,7 +16,7 @@ export const useFinancialAnalysis = () => {
 // Export the provider component directly
 export const FinancialAnalysisProvider = ({ children }) => {
   const { user } = useAuthContext();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
