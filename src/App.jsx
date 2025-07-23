@@ -6,8 +6,8 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 
 // Import providers
 import { AuthProvider } from './contexts/AuthContext';
-import DataProvider from './contexts/DataContext';
-import CrmProvider from './contexts/CrmContext';
+import { DataProvider } from './contexts/DataContext';
+import { CrmProvider } from './contexts/CrmContext';
 import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
 
 // Import pages
