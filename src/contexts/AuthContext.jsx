@@ -50,16 +50,67 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const signUp = async ({ email, password, data }) => {
+    const { data: result, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data },
+    });
+    if (error) throw error;
+    return result;
   };
 
+  const signIn = async ({ email, password }) => {
+    const { data: result, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+    return result;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  const updateProfile = async (updates) => {
+    if (!session?.user) throw new Error('No authenticated user');
+    const { data: profile, error } = await supabase
+      .from('users_pf')
+      .update(updates)
+      .eq('id', session.user.id)
+      .select()
+      .single();
+    if (error) throw error;
+    return profile;
+  };
+
+  const user = transformUser(session?.user);
+
+  const isAdmin = user?.role === 'admin';
+  const isManager = user?.role === 'manager';
+  const isFinancialProfessional = user?.role === 'financial_professional';
+  const isClient = user?.role === 'client';
+
+  const hasRole = (role) => user?.role === role;
+  const hasAnyRole = (roles) => roles.includes(user?.role);
+
   const value = {
-    user: transformUser(session?.user),
+    user,
     loading,
     isSignedIn: !!session,
     supabase,
-    logout,
+    signUp,
+    signIn,
+    signOut,
+    updateProfile,
+    isAdmin,
+    isManager,
+    isFinancialProfessional,
+    isClient,
+    hasRole,
+    hasAnyRole,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
