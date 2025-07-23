@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { useUser, useAuth, useSignIn, useSignUp } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
 import { useSupabaseWithClerk } from '../lib/supabaseClient';
 
@@ -17,7 +17,9 @@ export const useAuthContext = () => {
 
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser } = useUser();
-  const { isLoaded, isSignedIn, getToken } = useAuth(); // Add getToken here
+  const { isLoaded, isSignedIn, getToken } = useAuth();
+  const signIn = useSignIn();
+  const signUp = useSignUp();
   const supabase = useSupabaseWithClerk();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -121,7 +123,9 @@ export const AuthProvider = ({ children }) => {
     user,
     loading: loading || !isLoaded,
     isSignedIn,
-    logout
+    logout,
+    signIn,
+    signUp
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
