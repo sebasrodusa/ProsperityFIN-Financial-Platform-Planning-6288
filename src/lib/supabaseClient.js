@@ -9,7 +9,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Create a single Supabase client instance
 let supabaseInstance = null;
 
-export function useSupabaseWithClerk() {
+export function useSupabase() {
   const { getToken, isLoaded } = useAuth();
   const [supabaseClient, setSupabaseClient] = useState(null);
 

@@ -14,7 +14,7 @@ import FinancialPlanningSection from '../components/financial/FinancialPlanningS
 import FinancialGoalsSection from '../components/financial/FinancialGoalsSection';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 import logDev from '../utils/logDev';
 import * as FiIcons from 'react-icons/fi';
 
@@ -24,7 +24,7 @@ const FinancialAnalysis = () => {
   const { clientId } = useParams(); // Optional - if accessed from client details
   const navigate = useNavigate();
   const { user } = useAuth();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const { clients } = useData();
   const { analysis, loadAnalysis, saveAnalysis, setAnalysis, loading } = useFinancialAnalysis();
   const [activeTab, setActiveTab] = useState('cashflow');
