@@ -29,12 +29,17 @@ export const DataProvider = ({ children }) => {
 
   // Load data when user changes
   useEffect(() => {
-    if (user) {
+    if (user && supabase) {
       fetchData();
     }
-  }, [user]);
+  }, [user, supabase]);
 
   const fetchData = async () => {
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
@@ -114,6 +119,10 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for clients
   const addClient = async (client) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       // Strip any CRM related fields before inserting. CRM records are managed
       // separately via the CrmContext.
@@ -149,6 +158,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const updateClient = async (id, updates) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       // Remove any CRM related fields from the update payload.
       const {
@@ -177,6 +190,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteClient = async (id) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { error } = await supabase
         .from('clients_pf')
@@ -193,6 +210,10 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for users
   const addUser = async (userData) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { data, error } = await supabase
         .from('users_pf')
@@ -210,6 +231,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const updateUser = async (id, updates) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { data, error } = await supabase
         .from('users_pf')
@@ -228,6 +253,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteUser = async (id) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { error } = await supabase
         .from('users_pf')
@@ -244,6 +273,10 @@ export const DataProvider = ({ children }) => {
 
   // CRUD operations for proposals
   const addProposal = async (proposal) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { data, error } = await supabase
         .from('projections_pf')
@@ -261,6 +294,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const updateProposal = async (id, updates) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { data, error } = await supabase
         .from('projections_pf')
@@ -279,6 +316,10 @@ export const DataProvider = ({ children }) => {
   };
 
   const deleteProposal = async (id) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     try {
       const { error } = await supabase
         .from('projections_pf')
@@ -295,7 +336,9 @@ export const DataProvider = ({ children }) => {
 
   // Refresh data
   const refreshData = async () => {
-    await fetchData();
+    if (supabase) {
+      await fetchData();
+    }
   };
 
   const value = {
@@ -318,5 +361,3 @@ export const DataProvider = ({ children }) => {
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
-
-export default DataProvider;
