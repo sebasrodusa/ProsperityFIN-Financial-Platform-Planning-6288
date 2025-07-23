@@ -1,10 +1,11 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const { user, loading, isSignedIn } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -15,11 +16,11 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Check if user has required role
-  const userRole = user.publicMetadata.role;
+  const userRole = user?.role;
   if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
     return <Navigate to="/dashboard" replace />;
   }
