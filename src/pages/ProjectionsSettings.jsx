@@ -9,14 +9,14 @@ import CarriersManager from '../components/admin/CarriersManager';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabaseClient } from '../lib/supabaseClient';
 import logDev from '../utils/logDev';
 
 const { FiSettings, FiShield, FiAlertTriangle } = FiIcons;
 
 const ProjectionsSettings = () => {
   const { user } = useAuth();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabaseClient();
   logDev('ProjectionsSettings user role:', user?.role);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('strategies');

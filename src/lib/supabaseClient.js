@@ -13,9 +13,9 @@ const getClient = () => {
   return supabaseInstance;
 };
 
-export function useSupabaseWithClerk() {
+export function useSupabaseClient() {
   return useMemo(() => getClient(), []);
 }
 
-export const useSupabase = useSupabaseWithClerk;
+export const useSupabase = useSupabaseClient;
 export const supabase = getClient();

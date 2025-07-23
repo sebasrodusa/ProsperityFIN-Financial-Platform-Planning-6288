@@ -13,7 +13,7 @@ import { vi } from 'vitest';
 
 vi.mock('../../lib/supabaseClient', () => ({
   supabase: { from: vi.fn() },
-  useSupabaseWithClerk: () => supabase
+  useSupabaseClient: () => supabase
 }));
 
 const user = { id: 'advisor1' };
