@@ -16,7 +16,7 @@ const TEAM_IDS = [
 ];
 
 const ProfileSettings = () => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const { updateUser } = useData();
   const [formData, setFormData] = useState({
     name: '',

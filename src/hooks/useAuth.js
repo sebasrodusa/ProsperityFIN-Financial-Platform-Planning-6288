@@ -15,7 +15,7 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
-  const { user, loading, isSignedIn } = context;
+  const { user, loading, isSignedIn, signOut } = context;
 
   const isAdmin = user?.role === ROLES.ADMIN;
   const isManager = user?.role === ROLES.MANAGER;
@@ -35,7 +35,8 @@ export const useAuth = () => {
     isClient,
     hasRole,
     hasAnyRole,
-    role: user?.role
+    role: user?.role,
+    signOut
   };
 };
 

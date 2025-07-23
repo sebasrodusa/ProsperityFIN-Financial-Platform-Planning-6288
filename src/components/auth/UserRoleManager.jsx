@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import { useAuth } from '../../hooks/useAuth';
+import useSupabase from '../../hooks/useSupabase';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
@@ -22,8 +23,8 @@ const ROLES = [
 ];
 
 const UserRoleManager = ({ userId }) => {
-  const { user: currentUser } = useUser();
-  const { users } = useClerk();
+  const { user: currentUser } = useAuth();
+  const supabase = useSupabase();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,22 +38,27 @@ const UserRoleManager = ({ userId }) => {
   });
 
   // Check if current user is admin
-  const isAdmin = currentUser?.publicMetadata?.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
   // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
-      if (!userId || !isAdmin) return;
-      
+      if (!userId || !isAdmin || !supabase) return;
+
       setLoading(true);
       try {
-        const userDetails = await users.getUser(userId);
-        setUser(userDetails);
-        
-        // Set form data from user metadata
+        const { data, error } = await supabase
+          .from('users_pf')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        if (error) throw error;
+
+        setUser(data);
+
         setFormData({
-          role: userDetails.publicMetadata?.role || 'client',
-          teamId: userDetails.publicMetadata?.teamId || ''
+          role: data?.role || 'client',
+          teamId: data?.teamId || ''
         });
       } catch (err) {
         console.error('Error fetching user:', err);
@@ -61,9 +67,9 @@ const UserRoleManager = ({ userId }) => {
         setLoading(false);
       }
     };
-    
+
     fetchUser();
-  }, [userId, users, isAdmin]);
+  }, [userId, supabase, isAdmin]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,13 +92,17 @@ const UserRoleManager = ({ userId }) => {
     setSuccess(false);
     
     try {
-      // Update user metadata
-      await users.updateUser(userId, {
-        publicMetadata: {
+      // Update user profile in Supabase
+      const { error } = await supabase
+        .from('users_pf')
+        .update({
           role: formData.role,
-          ...(formData.teamId && { teamId: formData.teamId })
-        }
-      });
+          teamId: formData.teamId || null
+        })
+        .eq('id', userId);
+      if (error) throw error;
+
+      setUser(prev => prev ? { ...prev, role: formData.role, teamId: formData.teamId } : prev);
       
       setSuccess(true);
       // Clear success message after 3 seconds
@@ -160,14 +170,14 @@ const UserRoleManager = ({ userId }) => {
       )}
       
       <div className="flex items-center space-x-4 mb-6">
-        <img 
-          src={user.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName + ' ' + user.lastName)}&background=random`} 
-          alt={user.firstName}
+        <img
+          src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=random`}
+          alt={user.name}
           className="w-12 h-12 rounded-full object-cover"
         />
         <div>
-          <h3 className="font-medium text-gray-900">{user.firstName} {user.lastName}</h3>
-          <p className="text-gray-600">{user.emailAddresses[0]?.emailAddress}</p>
+          <h3 className="font-medium text-gray-900">{user.name}</h3>
+          <p className="text-gray-600">{user.email}</p>
         </div>
       </div>
       

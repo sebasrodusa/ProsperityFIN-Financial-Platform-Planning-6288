@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
@@ -18,7 +18,7 @@ export const useData = () => {
 export const DataProvider = ({ children }) => {
   const { user } = useAuthContext();
   const { initializeClientCrm } = useCrm();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);

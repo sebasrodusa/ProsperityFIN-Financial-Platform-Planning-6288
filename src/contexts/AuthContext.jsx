@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import logDev from '../utils/logDev';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 
 // Create the auth context
 const AuthContext = createContext();
@@ -18,7 +18,7 @@ export const useAuthContext = () => {
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser } = useUser();
   const { isLoaded, isSignedIn, getToken } = useAuth(); // Add getToken here
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -105,7 +105,7 @@ export const AuthProvider = ({ children }) => {
   }, [clerkUser, isLoaded, isSignedIn, supabase, getToken]); // Add getToken to dependencies
 
   // Logout function
-  const logout = async () => {
+  const signOut = async () => {
     try {
       setUser(null);
       if (supabase) {
@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading: loading || !isLoaded,
     isSignedIn,
-    logout
+    signOut
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
