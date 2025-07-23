@@ -17,7 +17,7 @@ export const useAuthContext = () => {
 
 export const AuthProvider = ({ children }) => {
   const { user: clerkUser } = useUser();
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn, getToken } = useAuth(); // Add getToken here
   const supabase = useSupabaseWithClerk();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,16 +30,28 @@ export const AuthProvider = ({ children }) => {
       try {
         if (isLoaded) {
           if (isSignedIn && clerkUser && supabase) {
-            // Now supabase is the direct client from the updated hook
-            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            // STEP 1: Get the JWT token from Clerk using your template
+            const token = await getToken({ template: 'supabase' });
             
-            if (sessionError) {
-              console.error('Error getting Supabase session:', sessionError);
+            if (!token) {
+              console.error('No token received from Clerk');
               setLoading(false);
               return;
             }
 
-            // Retrieve the Supabase authenticated user to get its ID
+            // STEP 2: Set the session in Supabase with Clerk's token
+            const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+              access_token: token,
+              refresh_token: 'dummy_refresh_token' // Clerk handles refresh
+            });
+            
+            if (sessionError) {
+              console.error('Error setting Supabase session:', sessionError);
+              setLoading(false);
+              return;
+            }
+
+            // STEP 3: Now we can safely get the Supabase user
             const { data: supaData, error: userError } = await supabase.auth.getUser();
             
             if (userError) {
@@ -67,6 +79,7 @@ export const AuthProvider = ({ children }) => {
             logDev('Resolved user role:', transformedUser.role);
             console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
             console.log('✅ Resolved user role:', transformedUser.role);
+            console.log('✅ Supabase session set successfully');
 
             setUser(transformedUser);
           } else {
@@ -89,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     syncAuth();
-  }, [clerkUser, isLoaded, isSignedIn, supabase]); // Add supabase to dependencies
+  }, [clerkUser, isLoaded, isSignedIn, supabase, getToken]); // Add getToken to dependencies
 
   // Logout function
   const logout = async () => {
