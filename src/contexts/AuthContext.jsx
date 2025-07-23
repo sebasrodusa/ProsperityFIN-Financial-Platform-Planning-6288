@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
       try {
         if (isLoaded) {
           if (isSignedIn && clerkUser && supabase) {
-            // Add null check for supabase
+            // Now supabase is the direct client from the updated hook
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
             
             if (sessionError) {
