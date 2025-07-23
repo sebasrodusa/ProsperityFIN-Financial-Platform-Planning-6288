@@ -185,7 +185,7 @@ const Login = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/sign-up" className="font-medium text-primary-600 hover:text-primary-700">
+                <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-700">
                   Sign up{' '}
                   <SafeIcon icon={FiArrowRight} className="ml-1 inline-block w-3 h-3" />
                 </Link>

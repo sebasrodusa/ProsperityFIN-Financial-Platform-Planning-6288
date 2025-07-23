@@ -1,12 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { user, isLoaded } = useUser();
+  const { user, loading, isSignedIn } = useAuth();
 
-  if (!isLoaded) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <LoadingSpinner size="lg" />
@@ -14,8 +14,8 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     );
   }
 
-  if (!user) {
-    return <Navigate to="/sign-in" replace />;
+  if (!isSignedIn) {
+    return <Navigate to="/login" replace />;
   }
 
   // Check if user has required role
