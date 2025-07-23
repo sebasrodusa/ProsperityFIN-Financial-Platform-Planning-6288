@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-react';
+import { useAuthContext } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -11,7 +11,8 @@ const { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn, FiArrowRight } = FiIcons;
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isLoaded, signIn, setActive } = useSignIn();
+  const { signIn } = useAuthContext();
+  const { isLoaded, setActive, signIn: signInResource } = signIn;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -32,7 +33,7 @@ const Login = () => {
 
     try {
       logDev('Attempting to sign in with:', email);
-      const result = await signIn.create({
+      const result = await signInResource.create({
         identifier: email,
         password,
       });
@@ -185,7 +186,7 @@ const Login = () => {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Don't have an account?{' '}
-                <Link to="/sign-up" className="font-medium text-primary-600 hover:text-primary-700">
+                <Link to="/signup" className="font-medium text-primary-600 hover:text-primary-700">
                   Sign up{' '}
                   <SafeIcon icon={FiArrowRight} className="ml-1 inline-block w-3 h-3" />
                 </Link>

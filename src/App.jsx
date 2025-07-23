@@ -11,8 +11,9 @@ import { CrmProvider } from './contexts/CrmContext';
 import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
 
 // Import pages
-import ClerkSignIn from './pages/ClerkSignIn';
-import ClerkSignUp from './pages/ClerkSignUp';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import AdminSignup from './pages/AdminSignup';
 import Dashboard from './pages/Dashboard';
 import CRMDashboard from './pages/CRMDashboard';
 import ClientCRM from './pages/ClientCRM';
@@ -67,9 +68,10 @@ function App() {
   if (!isSignedIn) {
     return (
       <Routes>
-        <Route path="/sign-in" element={<ClerkSignIn />} />
-        <Route path="/sign-up" element={<ClerkSignUp />} />
-        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/admin-signup" element={<AdminSignup />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
@@ -173,8 +175,8 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route path="/sign-in" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/sign-up" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </FinancialAnalysisProvider>

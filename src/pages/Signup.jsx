@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useSignUp } from '@clerk/clerk-react';
+import { useAuthContext } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
@@ -18,7 +18,8 @@ const TEAM_IDS = [
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { isLoaded, signUp, setActive } = useSignUp();
+  const { signUp } = useAuthContext();
+  const { isLoaded, setActive, signUp: signUpResource } = signUp;
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -100,7 +101,7 @@ const Signup = () => {
       }
 
       // Start the signup process with Clerk
-      const result = await signUp.create({
+      const result = await signUpResource.create({
         firstName: formData.firstName,
         lastName: formData.lastName,
         emailAddress: formData.email,
