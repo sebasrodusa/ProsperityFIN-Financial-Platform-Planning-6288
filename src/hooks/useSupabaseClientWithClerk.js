@@ -1,1 +1,1 @@
-export { useSupabaseWithClerk as default } from '../lib/supabaseClient';
+export { useSupabase as default } from '../lib/supabaseClient';

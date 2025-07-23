@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuthContext } from './AuthContext';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import { useSupabase } from '../lib/supabaseClient';
 import logDev from '../utils/logDev';
 
 // Status stages
@@ -26,7 +26,7 @@ export const useCrm = () => {
 
 export const CrmProvider = ({ children }) => {
   const { user } = useAuthContext();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabase();
   const [clientStatuses, setClientStatuses] = useState({});
   const [statusHistory, setStatusHistory] = useState({});
   const [clientTasks, setClientTasks] = useState({});
