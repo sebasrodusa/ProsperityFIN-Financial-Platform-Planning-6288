@@ -42,11 +42,11 @@ Supabase serves as both the data backend and authentication provider for this pr
 
 ## Role Metadata
 
-The application reads each user's role from `user.publicMetadata.role`. To give
+The application reads each user's role from `user.role`. To give
 your user administrative permissions during development:
 
 1. Open the **Auth → Users** page in the Supabase dashboard and select your account.
-2. Update the **Public Metadata** field to:
+2. Update the **User Metadata** field to:
    ```json
    { "role": "admin" }
    ```
