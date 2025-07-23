@@ -59,13 +59,7 @@ Supabase schema changes live in `supabase/migrations`. Apply them to a local dat
 ```bash
 supabase db reset
 ```
-Migration `006_enable_rls.sql` turns on row level security for the core tables. `007_enable_rls.sql` extends the policies to CRM and proposal tables. Run `supabase db reset` after pulling to apply them locally.
-
-### Enabling RLS
-
-The `006_enable_rls.sql` and `007_enable_rls.sql` migrations enable row level security policies for all tables that hold user data. Each policy checks that `auth.uid()` matches columns such as `created_by`, `advisor_id` or `client_id` before allowing reads or writes. Apply the migrations to your Supabase project with `supabase db push` or through the dashboard. After the SQL is applied, open each table in the Supabase dashboard and verify that **Enable RLS** is turned on.
-
-Migration `003_add_fna_code.sql` adds a `fna_code` text column (unique) along with optional `client_email` and `claimed_at` fields on the `financial_analyses_pf` table.
+All schema changes live in `supabase/migrations/001_initial.sql`. This baseline migration creates the tables and row level security policies required by the application. Run `supabase db reset` after pulling to apply the latest schema locally.
 
 ## FNA Codes
 
