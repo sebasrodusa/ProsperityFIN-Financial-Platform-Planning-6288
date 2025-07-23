@@ -1,128 +1,68 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useUser, useAuth } from '@clerk/clerk-react';
-import logDev from '../utils/logDev';
-import { useSupabaseWithClerk } from '../lib/supabaseClient';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-// Create the auth context
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const AuthContext = createContext();
 
-// Custom hook for using the auth context
 export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
     throw new Error('useAuthContext must be used within an AuthProvider');
   }
-  return context;
+  return ctx;
+};
+
+const transformUser = (user) => {
+  if (!user) return null;
+  return {
+    id: user.id,
+    supabaseId: user.id,
+    name: user.user_metadata?.name || '',
+    email: user.email,
+    role: user.user_metadata?.role || 'client',
+    teamId: user.user_metadata?.teamId,
+    agentCode: user.user_metadata?.agentCode,
+    avatar: user.user_metadata?.avatar_url,
+    phone: user.user_metadata?.phone,
+  };
 };
 
 export const AuthProvider = ({ children }) => {
-  const { user: clerkUser } = useUser();
-  const { isLoaded, isSignedIn, getToken } = useAuth(); // Add getToken here
-  const supabase = useSupabaseWithClerk();
-  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  logDev('AuthProvider rendering, Clerk user:', clerkUser?.id);
-
-  // Update local user state when Clerk user changes
   useEffect(() => {
-    const syncAuth = async () => {
-      try {
-        if (isLoaded) {
-          if (isSignedIn && clerkUser && supabase) {
-            // STEP 1: Get the JWT token from Clerk using your template
-            const token = await getToken({ template: 'supabase' });
-            
-            if (!token) {
-              console.error('No token received from Clerk');
-              setLoading(false);
-              return;
-            }
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setLoading(false);
+    });
 
-            // STEP 2: Set the session in Supabase with Clerk's token
-            const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-              access_token: token,
-              refresh_token: 'dummy_refresh_token' // Clerk handles refresh
-            });
-            
-            if (sessionError) {
-              console.error('Error setting Supabase session:', sessionError);
-              setLoading(false);
-              return;
-            }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
 
-            // STEP 3: Now we can safely get the Supabase user
-            const { data: supaData, error: userError } = await supabase.auth.getUser();
-            
-            if (userError) {
-              console.error('Error getting Supabase user:', userError);
-              setLoading(false);
-              return;
-            }
-
-            const supabaseId = supaData?.user?.id;
-
-            // Transform Clerk user to our app's user format
-            const transformedUser = {
-              id: clerkUser.id,
-              supabaseId,
-              name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
-              email: clerkUser.primaryEmailAddress?.emailAddress,
-              role: clerkUser.publicMetadata?.role || 'client',
-              teamId: clerkUser.publicMetadata?.teamId,
-              agentCode: clerkUser.unsafeMetadata?.agentCode,
-              avatar: clerkUser.imageUrl,
-              phone: clerkUser.unsafeMetadata?.phone,
-            };
-
-            logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
-            logDev('Resolved user role:', transformedUser.role);
-            console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
-            console.log('✅ Resolved user role:', transformedUser.role);
-            console.log('✅ Supabase session set successfully');
-
-            setUser(transformedUser);
-          } else {
-            // Handle sign out case
-            if (supabase) {
-              try {
-                await supabase.auth.signOut();
-              } catch (err) {
-                console.error('Error signing out of Supabase:', err);
-              }
-            }
-            setUser(null);
-          }
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error('Error in syncAuth:', error);
-        setLoading(false);
-      }
+    return () => {
+      subscription.unsubscribe();
     };
+  }, []);
 
-    syncAuth();
-  }, [clerkUser, isLoaded, isSignedIn, supabase, getToken]); // Add getToken to dependencies
-
-  // Logout function
   const logout = async () => {
-    try {
-      setUser(null);
-      if (supabase) {
-        await supabase.auth.signOut();
-      }
-    } catch (err) {
-      console.error('Error signing out of Supabase:', err);
-    }
+    await supabase.auth.signOut();
   };
 
-  // Provide the auth context value
   const value = {
-    user,
-    loading: loading || !isLoaded,
-    isSignedIn,
-    logout
+    user: transformUser(session?.user),
+    loading,
+    isSignedIn: !!session,
+    supabase,
+    logout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export default AuthProvider;
