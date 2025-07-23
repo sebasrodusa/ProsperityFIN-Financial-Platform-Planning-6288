@@ -5,7 +5,7 @@ import { useAuth as useClerkAuth } from '@clerk/clerk-react';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
 // Import providers
-import AuthProvider from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import DataProvider from './contexts/DataContext';
 import CrmProvider from './contexts/CrmContext';
 import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
