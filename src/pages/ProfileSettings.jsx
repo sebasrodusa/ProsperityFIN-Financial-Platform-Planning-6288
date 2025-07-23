@@ -6,7 +6,7 @@ import Navbar from '../components/layout/Navbar';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiUser, FiMail, FiLock, FiPhone, FiCalendar, FiSave, FiUpload } = FiIcons;
+const { FiUser, FiMail, FiLock, FiPhone, FiCalendar, FiSave, FiUpload, FiLogOut } = FiIcons;
 
 // Team ID options
 const TEAM_IDS = [
@@ -16,7 +16,7 @@ const TEAM_IDS = [
 ];
 
 const ProfileSettings = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { updateUser } = useData();
   const [formData, setFormData] = useState({
     name: '',
@@ -113,6 +113,10 @@ const ProfileSettings = () => {
       setErrorMessage('Failed to update profile. Please try again.');
       console.error('Profile update error:', error);
     }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -341,8 +345,16 @@ const ProfileSettings = () => {
               </p>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end">
+            {/* Submit and Sign Out Buttons */}
+            <div className="flex justify-between">
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="btn-danger flex items-center space-x-2"
+              >
+                <SafeIcon icon={FiLogOut} className="w-4 h-4" />
+                <span>Sign Out</span>
+              </button>
               <button
                 type="submit"
                 className="btn-primary flex items-center space-x-2"
