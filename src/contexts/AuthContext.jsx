@@ -27,54 +27,81 @@ export const AuthProvider = ({ children }) => {
   // Update local user state when Clerk user changes
   useEffect(() => {
     const syncAuth = async () => {
-      if (isLoaded) {
-        if (isSignedIn && clerkUser) {
-          await supabase.auth.getSession();
-          // Retrieve the Supabase authenticated user to get its ID
-          const { data: supaData } = await supabase.auth.getUser();
-          const supabaseId = supaData?.user?.id;
-          // Transform Clerk user to our app's user format
-          const transformedUser = {
-            id: clerkUser.id,
-            supabaseId,
-            name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
-            email: clerkUser.primaryEmailAddress?.emailAddress,
-            role: clerkUser.publicMetadata?.role || 'client',
-            teamId: clerkUser.publicMetadata?.teamId,
-            agentCode: clerkUser.unsafeMetadata?.agentCode,
-            avatar: clerkUser.imageUrl,
-            phone: clerkUser.unsafeMetadata?.phone,
-          };
-          logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
-          logDev('Resolved user role:', transformedUser.role);
-          console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
-console.log('✅ Resolved user role:', transformedUser.role);
-          setUser(transformedUser);
-        } else {
-          try {
-            await supabase.auth.signOut();
-          } catch (err) {
-            console.error('Error signing out of Supabase:', err);
+      try {
+        if (isLoaded) {
+          if (isSignedIn && clerkUser && supabase) {
+            // Add null check for supabase
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            
+            if (sessionError) {
+              console.error('Error getting Supabase session:', sessionError);
+              setLoading(false);
+              return;
+            }
+
+            // Retrieve the Supabase authenticated user to get its ID
+            const { data: supaData, error: userError } = await supabase.auth.getUser();
+            
+            if (userError) {
+              console.error('Error getting Supabase user:', userError);
+              setLoading(false);
+              return;
+            }
+
+            const supabaseId = supaData?.user?.id;
+
+            // Transform Clerk user to our app's user format
+            const transformedUser = {
+              id: clerkUser.id,
+              supabaseId,
+              name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
+              email: clerkUser.primaryEmailAddress?.emailAddress,
+              role: clerkUser.publicMetadata?.role || 'client',
+              teamId: clerkUser.publicMetadata?.teamId,
+              agentCode: clerkUser.unsafeMetadata?.agentCode,
+              avatar: clerkUser.imageUrl,
+              phone: clerkUser.unsafeMetadata?.phone,
+            };
+
+            logDev('Clerk publicMetadata:', clerkUser.publicMetadata);
+            logDev('Resolved user role:', transformedUser.role);
+            console.log('👀 Clerk publicMetadata:', clerkUser.publicMetadata);
+            console.log('✅ Resolved user role:', transformedUser.role);
+
+            setUser(transformedUser);
+          } else {
+            // Handle sign out case
+            if (supabase) {
+              try {
+                await supabase.auth.signOut();
+              } catch (err) {
+                console.error('Error signing out of Supabase:', err);
+              }
+            }
+            setUser(null);
           }
-          setUser(null);
+          setLoading(false);
         }
+      } catch (error) {
+        console.error('Error in syncAuth:', error);
         setLoading(false);
       }
     };
+
     syncAuth();
-  }, [clerkUser, isLoaded, isSignedIn]);
+  }, [clerkUser, isLoaded, isSignedIn, supabase]); // Add supabase to dependencies
 
   // Logout function
-const logout = async () => {
-  // We don't need to call supabase.auth.signOut() as we're using Clerk
-  // Just update the local state
-  setUser(null);
-  try {
-    await supabase.auth.signOut();
-  } catch (err) {
-    console.error('Error signing out of Supabase:', err);
-  }
-};
+  const logout = async () => {
+    try {
+      setUser(null);
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (err) {
+      console.error('Error signing out of Supabase:', err);
+    }
+  };
 
   // Provide the auth context value
   const value = {
@@ -86,5 +113,3 @@ const logout = async () => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export default AuthProvider;
