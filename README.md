@@ -16,7 +16,7 @@ Row level security (**RLS**) is enabled across all user data tables to ensure re
    # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
    # VITE_CLERK_PUBLISHABLE_KEY, VITE_CLERK_FRONTEND_API,
    # VITE_CLERK_SIGN_IN_URL, VITE_CLERK_SIGN_UP_URL,
-   # CLERK_WEBHOOK_SECRET, CLERK_JWT_KEY and SUPABASE_SERVICE_ROLE_KEY
+   # CLERK_JWT_KEY and SUPABASE_SERVICE_ROLE_KEY
    ```
    The app will fail to start without valid Supabase and Clerk credentials. The
    Supabase URL and key must be provided via environment variables, otherwise the
@@ -25,7 +25,7 @@ Row level security (**RLS**) is enabled across all user data tables to ensure re
   * `CLERK_JWT_KEY` can be found in the **Clerk dashboard** under **API Keys → JWT Verification Key**. Copy the entire PEM string into your `.env` file. This key allows the backend to validate Clerk-issued JWTs.
   * `SUPABASE_SERVICE_ROLE_KEY` lives in the **Supabase dashboard** under **Settings → API → Service Role**. Keep this key private as it bypasses RLS and is required for service-role operations such as migrations, seeding data, and other backend tasks that need unrestricted access.
 
-    Any API route or server-side function that must bypass RLS—like the Clerk webhook—should create its own Supabase client using this key.
+    Any API route or server-side function that must bypass RLS should create its own Supabase client using this key.
 
 Both variables are required for JWT authentication and service-role database access.
 3. Start the development server:
