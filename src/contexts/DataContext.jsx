@@ -126,13 +126,16 @@ export const DataProvider = ({ children }) => {
         ...cleanClient
       } = client;
 
+      const { data: { user: supaUser }, error: userErr } = await supabase.auth.getUser();
+      if (userErr) throw userErr;
+
       const { data, error } = await supabase
         .from('clients_pf')
-        .insert({ ...cleanClient, advisor_id: user.supabaseId })
+        .insert({ ...cleanClient, advisor_id: supaUser.id })
         .select();
       if (error) throw error;
 
-      const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: user.supabaseId };
+      const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: supaUser.id };
       setClients(prev => [...prev, newClient]);
 
       // Initialize CRM records for the newly created client
