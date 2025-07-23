@@ -23,7 +23,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
 
   // If we have role restrictions
   if (allowedRoles.length > 0) {
-    const userRole = user?.publicMetadata?.role;
+    const userRole = user?.role;
     console.debug('PrivateRoute role:', userRole);
     
     // If user has no role or unauthorized role

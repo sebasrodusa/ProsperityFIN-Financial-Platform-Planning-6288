@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useSignUp } from '@clerk/clerk-react';
+import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
@@ -18,7 +18,6 @@ const TEAM_IDS = [
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { isLoaded, signUp, setActive } = useSignUp();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -36,7 +35,7 @@ const Signup = () => {
   const [verificationStep, setVerificationStep] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  logDev('Signup page rendering, Clerk isLoaded:', isLoaded);
+  logDev('Signup page rendering');
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -80,10 +79,6 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isLoaded) {
-      setError('Authentication system is not ready yet. Please try again.');
-      return;
-    }
     
     if (!validateForm()) {
       return;
@@ -99,32 +94,29 @@ const Signup = () => {
         agentCode = `FP${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       }
 
-      // Start the signup process with Clerk
-      const result = await signUp.create({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        emailAddress: formData.email,
+      // Create account in Supabase
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
         password: formData.password,
-      });
-
-      // Add user metadata
-      await result.update({
-        unsafeMetadata: {
-          phone: formData.phone,
-          ...(agentCode && { agentCode })
-        },
-        publicMetadata: {
-          role: formData.role,
-          ...(formData.teamId && { teamId: formData.teamId })
+        options: {
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            ...(agentCode && { agentCode }),
+            role: formData.role,
+            ...(formData.teamId && { teamId: formData.teamId })
+          }
         }
       });
 
-      // Check if email needs verification
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (data.session) {
         setSuccess(true);
-        
-        // Redirect based on role
+
         setTimeout(() => {
           if (formData.role === 'financial_professional') {
             navigate('/advisor/dashboard');
@@ -133,8 +125,7 @@ const Signup = () => {
           }
         }, 2000);
       } else {
-        // Email verification needed
-        setVerificationStep(result.status);
+        setVerificationStep('needs_email_verification');
       }
     } catch (err) {
       console.error('Signup error:', err);
@@ -144,13 +135,7 @@ const Signup = () => {
     }
   };
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+
 
   const isFinancialProfessional = formData.role === 'financial_professional';
 

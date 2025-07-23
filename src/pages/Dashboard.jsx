@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import useAuth from '../hooks/useAuth';
 import { motion } from 'framer-motion';
 import logDev from '../utils/logDev';
 import Navbar from '../components/layout/Navbar';
@@ -11,11 +11,11 @@ import * as FiIcons from 'react-icons/fi';
 const { FiUsers, FiFileText, FiBarChart2 } = FiIcons;
 
 const Dashboard = () => {
-  const { isLoaded, user } = useUser();
-  
-  logDev('Dashboard rendering, Clerk user:', user?.id);
-  
-  if (!isLoaded) {
+  const { user, loading } = useAuth();
+
+  logDev('Dashboard rendering user:', user?.id);
+
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" />
