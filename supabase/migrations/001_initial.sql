@@ -5,8 +5,8 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Users table stores profile details linked to auth.users
 CREATE TABLE public.users_pf (
-  id text PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  advisor_id text REFERENCES public.users_pf(id),
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id),
   name text,
   email text,
   role text NOT NULL DEFAULT 'client',
@@ -21,9 +21,9 @@ CREATE TABLE public.users_pf (
 
 -- Clients managed by an advisor
 CREATE TABLE public.clients_pf (
-  id text PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  advisor_id text REFERENCES public.users_pf(id),
-  created_by text REFERENCES public.users_pf(id),
+  id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id),
+  created_by uuid REFERENCES public.users_pf(id),
   name text NOT NULL,
   email text NOT NULL,
   phone text,
@@ -44,8 +44,8 @@ CREATE TABLE public.clients_pf (
 -- Financial analyses for each client
 CREATE TABLE public.financial_analyses_pf (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
-  created_by text REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  created_by uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz,
   income_sources jsonb,
@@ -64,26 +64,26 @@ CREATE TABLE public.financial_analyses_pf (
 
 -- CRM tables
 CREATE TABLE public.crm_client_statuses_pf (
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
   status text NOT NULL,
   updated_at timestamptz NOT NULL,
-  advisor_id text REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
   PRIMARY KEY (client_id)
 );
 
 CREATE TABLE public.crm_status_history_pf (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
   status text NOT NULL,
   notes text,
   created_at timestamptz NOT NULL,
-  advisor_id text REFERENCES public.users_pf(id) ON DELETE CASCADE
+  advisor_id uuid REFERENCES public.users_pf(id) ON DELETE CASCADE
 );
 
 CREATE TABLE public.crm_client_tasks_pf (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
-  advisor_id text REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
   task_name text NOT NULL,
   description text,
   due_date date,
@@ -94,8 +94,8 @@ CREATE TABLE public.crm_client_tasks_pf (
 
 CREATE TABLE public.crm_client_notes_pf (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
-  advisor_id text REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
   content text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz
@@ -104,9 +104,9 @@ CREATE TABLE public.crm_client_notes_pf (
 -- Proposal / projection table
 CREATE TABLE public.projections_pf (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  client_id text REFERENCES public.clients_pf(id) ON DELETE CASCADE,
-  advisor_id text REFERENCES public.users_pf(id) ON DELETE CASCADE,
-  created_by text REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  client_id uuid REFERENCES public.clients_pf(id) ON DELETE CASCADE,
+  advisor_id uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
+  created_by uuid REFERENCES public.users_pf(id) ON DELETE CASCADE,
   title text NOT NULL,
   description text,
   strategy text,
