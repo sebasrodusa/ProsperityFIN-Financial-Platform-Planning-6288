@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useUser, useClerk } from '@clerk/clerk-react';
+import useAuth from '../../hooks/useAuth';
+import { useSupabaseWithClerk } from '../../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
@@ -22,8 +23,8 @@ const ROLES = [
 ];
 
 const UserRoleManager = ({ userId }) => {
-  const { user: currentUser } = useUser();
-  const { users } = useClerk();
+  const { user: currentUser } = useAuth();
+  const supabase = useSupabaseWithClerk();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -37,22 +38,26 @@ const UserRoleManager = ({ userId }) => {
   });
 
   // Check if current user is admin
-  const isAdmin = currentUser?.publicMetadata?.role === 'admin';
+  const isAdmin = currentUser?.role === 'admin';
 
   // Fetch user data
   useEffect(() => {
     const fetchUser = async () => {
       if (!userId || !isAdmin) return;
-      
+
       setLoading(true);
       try {
-        const userDetails = await users.getUser(userId);
-        setUser(userDetails);
-        
-        // Set form data from user metadata
+        const { data, error } = await supabase
+          .from('users_pf')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        if (error) throw error;
+
+        setUser(data);
         setFormData({
-          role: userDetails.publicMetadata?.role || 'client',
-          teamId: userDetails.publicMetadata?.teamId || ''
+          role: data.role || 'client',
+          teamId: data.team_id || ''
         });
       } catch (err) {
         console.error('Error fetching user:', err);
@@ -63,7 +68,7 @@ const UserRoleManager = ({ userId }) => {
     };
     
     fetchUser();
-  }, [userId, users, isAdmin]);
+  }, [userId, supabase, isAdmin]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,13 +91,14 @@ const UserRoleManager = ({ userId }) => {
     setSuccess(false);
     
     try {
-      // Update user metadata
-      await users.updateUser(userId, {
-        publicMetadata: {
+      const { error } = await supabase
+        .from('users_pf')
+        .update({
           role: formData.role,
-          ...(formData.teamId && { teamId: formData.teamId })
-        }
-      });
+          team_id: formData.teamId || null,
+        })
+        .eq('id', userId);
+      if (error) throw error;
       
       setSuccess(true);
       // Clear success message after 3 seconds

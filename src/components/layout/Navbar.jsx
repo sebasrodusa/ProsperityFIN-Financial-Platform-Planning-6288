@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useClerk } from '@clerk/clerk-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useAuthContext } from '../../contexts/AuthContext';
 import logDev from '../../utils/logDev';
 import menuByRole from '../../utils/menuByRole';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,7 +12,7 @@ const { FiLogOut, FiChevronDown, FiUser, FiSettings } = FiIcons;
 
 const Navbar = () => {
   const { user, role, loading } = useAuth();
-  const { signOut } = useClerk();
+  const { logout } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -26,7 +26,7 @@ const Navbar = () => {
   const navItems = menuByRole(role);
 
   const handleLogout = async () => {
-    await signOut();
+    await logout();
     navigate('/login');
   };
 

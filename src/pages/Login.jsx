@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useSignIn } from '@clerk/clerk-react';
+import { supabase } from '../lib/supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -11,41 +11,32 @@ const { FiMail, FiLock, FiEye, FiEyeOff, FiLogIn, FiArrowRight } = FiIcons;
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isLoaded, signIn, setActive } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  logDev('Login page rendering, Clerk isLoaded:', isLoaded);
+  logDev('Login page rendering');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isLoaded) {
-      setError('Authentication system is not ready yet. Please try again.');
-      return;
-    }
 
     setLoading(true);
     setError('');
 
     try {
       logDev('Attempting to sign in with:', email);
-      const result = await signIn.create({
-        identifier: email,
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
         password,
       });
 
-      if (result.status === 'complete') {
-        logDev('Sign in complete, redirecting to dashboard');
-        await setActive({ session: result.createdSessionId });
-        navigate('/dashboard');
-      } else {
-        // Handle other statuses if needed
-        logDev('Sign in status:', result.status);
-        setError('Authentication failed. Please check your credentials.');
+      if (signInError) {
+        throw signInError;
       }
+
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'Failed to sign in. Please check your credentials.');
@@ -54,13 +45,7 @@ const Login = () => {
     }
   };
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

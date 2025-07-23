@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useSignUp } from '@clerk/clerk-react';
+import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
@@ -23,7 +23,6 @@ const ACCESS_CODES = {
 
 const AdminSignup = () => {
   const navigate = useNavigate();
-  const { isLoaded, signUp, setActive } = useSignUp();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -97,10 +96,6 @@ const AdminSignup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isLoaded) {
-      setError('Authentication system is not ready yet. Please try again.');
-      return;
-    }
     
     if (!validateForm()) {
       return;
@@ -118,37 +113,33 @@ const AdminSignup = () => {
       }
 
       // Start the signup process with Clerk
-      const result = await signUp.create({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        emailAddress: formData.email,
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
         password: formData.password,
-      });
-
-      // Add user metadata
-      await result.update({
-        unsafeMetadata: {
-          phone: formData.phone,
-          agentCode: agentCode
+        options: {
+          data: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            phone: formData.phone,
+            agentCode: agentCode,
+            role: formData.role,
+            teamId: formData.teamId,
+          },
         },
-        publicMetadata: {
-          role: formData.role,
-          teamId: formData.teamId
-        }
       });
 
-      // Check if email needs verification
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId });
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      if (data.session) {
         setSuccess(true);
-        
-        // Redirect based on role
+
         setTimeout(() => {
           navigate('/admin/dashboard');
         }, 2000);
       } else {
-        // Email verification needed
-        setVerificationStep(result.status);
+        setVerificationStep('needs_email_verification');
       }
     } catch (err) {
       console.error('Signup error:', err);
@@ -158,13 +149,7 @@ const AdminSignup = () => {
     }
   };
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
