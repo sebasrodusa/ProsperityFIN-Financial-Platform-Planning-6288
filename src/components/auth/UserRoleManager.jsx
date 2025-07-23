@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
-import { useSupabaseWithClerk } from '../../lib/supabaseClient';
+import { useSupabaseClient } from '../../lib/supabaseClient';
 import { motion } from 'framer-motion';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
@@ -24,7 +24,7 @@ const ROLES = [
 
 const UserRoleManager = ({ userId }) => {
   const { user: currentUser } = useAuth();
-  const supabase = useSupabaseWithClerk();
+  const supabase = useSupabaseClient();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
