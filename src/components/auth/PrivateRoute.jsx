@@ -1,14 +1,14 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import useAuth from '../../hooks/useAuth';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
-  const { user, isLoaded, isSignedIn } = useUser();
+  const { user, loading, isSignedIn } = useAuth();
   const location = useLocation();
 
   // Show loading spinner while Clerk loads
-  if (!isLoaded) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" />
@@ -18,7 +18,7 @@ const PrivateRoute = ({ children, allowedRoles = [], requireAuth = true }) => {
 
   // If auth is required and user isn't signed in, redirect to login
   if (requireAuth && !isSignedIn) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // If we have role restrictions

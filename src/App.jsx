@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import logDev from './utils/logDev';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth as useClerkAuth } from '@clerk/clerk-react';
+import useAuth from './hooks/useAuth';
 import LoadingSpinner from './components/ui/LoadingSpinner';
 
 // Import providers
@@ -11,8 +11,8 @@ import { CrmProvider } from './contexts/CrmContext';
 import { FinancialAnalysisProvider } from './contexts/FinancialAnalysisContext';
 
 // Import pages
-import ClerkSignIn from './pages/ClerkSignIn';
-import ClerkSignUp from './pages/ClerkSignUp';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import CRMDashboard from './pages/CRMDashboard';
 import ClientCRM from './pages/ClientCRM';
@@ -29,20 +29,20 @@ import ProjectionsSettings from './pages/ProjectionsSettings';
 import PrivateRoute from './components/auth/PrivateRoute';
 
 function App() {
-  const { isLoaded, isSignedIn } = useClerkAuth();
+  const { loading, isSignedIn } = useAuth();
   const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
-    if (isLoaded || authError) return;
+    if (!loading || authError) return;
     const timer = setTimeout(() => {
-      if (!isLoaded) {
+      if (loading) {
         setAuthError('Authentication failed to initialize. Please check your environment variables or domain configuration.');
       }
     }, 10000);
     return () => clearTimeout(timer);
-  }, [isLoaded, authError]);
+  }, [loading, authError]);
   
-  logDev('App rendering, authentication state:', { isLoaded, isSignedIn });
+  logDev('App rendering, authentication state:', { loading, isSignedIn });
 
   if (authError) {
     return (
@@ -55,7 +55,7 @@ function App() {
     );
   }
   
-  if (!isLoaded) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" />
@@ -67,9 +67,9 @@ function App() {
   if (!isSignedIn) {
     return (
       <Routes>
-        <Route path="/sign-in" element={<ClerkSignIn />} />
-        <Route path="/sign-up" element={<ClerkSignUp />} />
-        <Route path="*" element={<Navigate to="/sign-in" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
   }
@@ -173,8 +173,8 @@ function App() {
                   </PrivateRoute>
                 }
               />
-              <Route path="/sign-in" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/sign-up" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/signup" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </FinancialAnalysisProvider>
