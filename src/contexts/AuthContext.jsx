@@ -16,29 +16,29 @@ export const useAuthContext = () => {
   return ctx;
 };
 
-const transformUser = (user) => {
-  if (!user) return null;
+const transformUser = (authUser, profile) => {
+  if (!authUser) return null;
   return {
-    id: user.id,
-    supabaseId: user.id,
-    name: user.user_metadata?.name || '',
-    email: user.email,
-    role: user.user_metadata?.role || 'client',
-    teamId: user.user_metadata?.teamId,
-    agentCode: user.user_metadata?.agentCode,
-    avatar: user.user_metadata?.avatar_url,
-    phone: user.user_metadata?.phone,
+    id: authUser.id,
+    supabaseId: authUser.id,
+    name: profile?.name || authUser.user_metadata?.name || '',
+    email: authUser.email,
+    role: profile?.role || authUser.user_metadata?.role || 'client',
+    teamId: profile?.team_id || authUser.user_metadata?.teamId,
+    agentCode: profile?.agent_code || authUser.user_metadata?.agentCode,
+    avatar: profile?.avatar || authUser.user_metadata?.avatar_url,
+    phone: profile?.phone || authUser.user_metadata?.phone,
   };
 };
 
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setLoading(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -49,6 +49,32 @@ export const AuthProvider = ({ children }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Load the user's profile to get the latest role
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.user) {
+        setProfile(null);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('users_pf')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+      }
+
+      setProfile(data);
+      setLoading(false);
+    };
+
+    fetchProfile();
+  }, [session]);
 
   const signUp = async ({ email, password, data }) => {
     const { data: result, error } = await supabase.auth.signUp({
@@ -86,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     return profile;
   };
 
-  const user = transformUser(session?.user);
+  const user = transformUser(session?.user, profile);
 
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
