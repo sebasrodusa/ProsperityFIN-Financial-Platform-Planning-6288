@@ -136,16 +136,35 @@ export const DataProvider = ({ children }) => {
         ...cleanClient
       } = client;
 
-      const { data: { user: supaUser }, error: userErr } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Ensure the authenticated user exists in users_pf
+      const { data: existingUser, error: userErr } = await supabase
+        .from('users_pf')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
       if (userErr) throw userErr;
+      if (!existingUser) {
+        throw new Error('Authenticated user does not exist in users table');
+      }
 
       const { data, error } = await supabase
         .from('clients_pf')
-        .insert({ ...cleanClient, advisor_id: supaUser.id })
+        .insert({
+          ...cleanClient,
+          advisor_id: user.id,
+          created_by: user.id
+        })
         .select();
       if (error) throw error;
 
-      const newClient = data && data.length > 0 ? data[0] : { ...client, advisor_id: supaUser.id };
+      const newClient =
+        data && data.length > 0
+          ? data[0]
+          : { ...client, advisor_id: user.id, created_by: user.id };
       setClients(prev => [...prev, newClient]);
 
       // Initialize CRM records for the newly created client
