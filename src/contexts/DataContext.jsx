@@ -127,6 +127,7 @@ export const DataProvider = ({ children }) => {
       // Strip any CRM related fields before inserting. CRM records are managed
       // separately via the CrmContext.
       const {
+        id, // exclude primary key when inserting
         crm_status,
         crm_notes,
         crm_tasks,
@@ -215,9 +216,11 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
+      const { id, ...cleanUserData } = userData;
+
       const { data, error } = await supabase
         .from('users_pf')
-        .insert({ ...userData, advisor_id: user.supabaseId })
+        .insert({ ...cleanUserData, advisor_id: user.supabaseId })
         .select();
       if (error) throw error;
 
@@ -278,9 +281,11 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
+      const { id, ...cleanProposal } = proposal;
+
       const { data, error } = await supabase
         .from('projections_pf')
-        .insert({ ...proposal, advisor_id: user.supabaseId })
+        .insert({ ...cleanProposal, advisor_id: user.supabaseId })
         .select();
       if (error) throw error;
 
