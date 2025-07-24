@@ -49,12 +49,15 @@ export const DataProvider = ({ children }) => {
       let usersData = [];
       let proposalsData = [];
 
+      // Use consistent user ID throughout
+      const userId = user.supabaseId || user.id;
+
       if (user.role === 'client') {
         // Clients only need their own record and related advisor data
         const { data: client, error: clientError } = await supabase
           .from('clients_pf')
           .select('*')
-          .eq('id', user.id)
+          .eq('id', userId)
           .maybeSingle();
         if (clientError) throw clientError;
 
@@ -77,22 +80,22 @@ export const DataProvider = ({ children }) => {
         proposalsData = pData || [];
       } else {
         // Advisors/managers/admins fetch by advisor id
-          const { data: cData, error: cError } = await supabase
-            .from('clients_pf')
-            .select('*')
-            .eq('advisor_id', user.supabaseId);
+        const { data: cData, error: cError } = await supabase
+          .from('clients_pf')
+          .select('*')
+          .eq('advisor_id', userId);
         if (cError) throw cError;
 
-          const { data: uData, error: uError } = await supabase
-            .from('users_pf')
-            .select('*')
-            .eq('advisor_id', user.supabaseId);
+        const { data: uData, error: uError } = await supabase
+          .from('users_pf')
+          .select('*')
+          .eq('advisor_id', userId);
         if (uError) throw uError;
 
-          const { data: pData, error: pError } = await supabase
-            .from('projections_pf')
-            .select('*')
-            .eq('advisor_id', user.supabaseId);
+        const { data: pData, error: pError } = await supabase
+          .from('projections_pf')
+          .select('*')
+          .eq('advisor_id', userId);
         if (pError) throw pError;
 
         clientsData = cData || [];
@@ -124,10 +127,9 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
-      // Strip any CRM related fields before inserting. CRM records are managed
-      // separately via the CrmContext.
+      // Strip any CRM related fields and ID before inserting
       const {
-        id, // exclude primary key when inserting
+        id, // ALWAYS exclude id when inserting - let DB generate it
         crm_status,
         crm_notes,
         crm_tasks,
@@ -140,37 +142,76 @@ export const DataProvider = ({ children }) => {
         throw new Error('User not authenticated');
       }
 
+      // Use consistent user ID
+      const userId = user.supabaseId || user.id;
+
       // Ensure the authenticated user exists in users_pf
       const { data: existingUser, error: userErr } = await supabase
         .from('users_pf')
         .select('id')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle();
-      if (userErr) throw userErr;
+      
+      if (userErr) {
+        console.error('Error checking user existence:', userErr);
+        throw userErr;
+      }
+      
       if (!existingUser) {
-        throw new Error('Authenticated user does not exist in users table');
+        // If user doesn't exist in users_pf, create them first
+        const { data: newUserData, error: createUserErr } = await supabase
+          .from('users_pf')
+          .insert({
+            id: userId,
+            email: user.email,
+            role: user.role || 'advisor',
+            full_name: user.full_name || user.email?.split('@')[0] || 'Unknown',
+            created_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+        
+        if (createUserErr) {
+          console.error('Error creating user in users_pf:', createUserErr);
+          throw createUserErr;
+        }
       }
 
+      // Now insert the client with proper advisor_id
       const { data, error } = await supabase
         .from('clients_pf')
         .insert({
           ...cleanClient,
-          advisor_id: user.id,
-          created_by: user.id
+          advisor_id: userId,
+          created_by: userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .select();
-      if (error) throw error;
+        .select()
+        .single();
 
-      const newClient =
-        data && data.length > 0
-          ? data[0]
-          : { ...client, advisor_id: user.id, created_by: user.id };
-      setClients(prev => [...prev, newClient]);
+      if (error) {
+        console.error('Error inserting client:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from insert operation');
+      }
+
+      setClients(prev => [...prev, data]);
 
       // Initialize CRM records for the newly created client
-      initializeClientCrm(newClient.id);
+      if (initializeClientCrm) {
+        try {
+          await initializeClientCrm(data.id);
+        } catch (crmError) {
+          console.error('Error initializing CRM for client:', crmError);
+          // Don't throw here - client was created successfully
+        }
+      }
 
-      return newClient;
+      return data;
     } catch (error) {
       console.error('Error adding client:', error);
       throw error;
@@ -183,26 +224,37 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
-      // Remove any CRM related fields from the update payload.
+      // Remove any CRM related fields and ID from the update payload
       const {
+        id: removeId, // Never update the ID
         crm_status,
         crm_notes,
         crm_tasks,
         status_history,
         last_activity,
+        created_at, // Don't update created_at
         ...cleanUpdates
       } = updates;
+
+      // Add updated_at timestamp
+      cleanUpdates.updated_at = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('clients_pf')
         .update(cleanUpdates)
         .eq('id', id)
-        .select();
+        .select()
+        .single();
+
       if (error) throw error;
 
-      const updated = data && data.length > 0 ? data[0] : { id, ...updates };
-      setClients(prev => prev.map(client => client.id === id ? { ...client, ...updated } : client));
-      return updated;
+      if (data) {
+        setClients(prev => prev.map(client => 
+          client.id === id ? { ...client, ...data } : client
+        ));
+      }
+      
+      return data;
     } catch (error) {
       console.error('Error updating client:', error);
       throw error;
@@ -219,6 +271,7 @@ export const DataProvider = ({ children }) => {
         .from('clients_pf')
         .delete()
         .eq('id', id);
+      
       if (error) throw error;
 
       setClients(prev => prev.filter(client => client.id !== id));
@@ -236,16 +289,24 @@ export const DataProvider = ({ children }) => {
 
     try {
       const { id, ...cleanUserData } = userData;
+      const userId = user.supabaseId || user.id;
 
       const { data, error } = await supabase
         .from('users_pf')
-        .insert({ ...cleanUserData, advisor_id: user.supabaseId })
-        .select();
+        .insert({ 
+          ...cleanUserData, 
+          advisor_id: userId,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
       if (error) throw error;
 
-      const newUser = data && data.length > 0 ? data[0] : { ...userData, advisor_id: user.supabaseId };
-      setUsers(prev => [...prev, newUser]);
-      return newUser;
+      if (data) {
+        setUsers(prev => [...prev, data]);
+      }
+      return data;
     } catch (error) {
       console.error('Error adding user:', error);
       throw error;
@@ -258,16 +319,25 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
+      // Remove id and created_at from updates
+      const { id: removeId, created_at, ...cleanUpdates } = updates;
+      cleanUpdates.updated_at = new Date().toISOString();
+
       const { data, error } = await supabase
         .from('users_pf')
-        .update(updates)
+        .update(cleanUpdates)
         .eq('id', id)
-        .select();
+        .select()
+        .single();
+
       if (error) throw error;
 
-      const updated = data && data.length > 0 ? data[0] : { id, ...updates };
-      setUsers(prev => prev.map(user => user.id === id ? { ...user, ...updated } : user));
-      return updated;
+      if (data) {
+        setUsers(prev => prev.map(user => 
+          user.id === id ? { ...user, ...data } : user
+        ));
+      }
+      return data;
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
@@ -284,6 +354,7 @@ export const DataProvider = ({ children }) => {
         .from('users_pf')
         .delete()
         .eq('id', id);
+      
       if (error) throw error;
 
       setUsers(prev => prev.filter(user => user.id !== id));
@@ -301,16 +372,24 @@ export const DataProvider = ({ children }) => {
 
     try {
       const { id, ...cleanProposal } = proposal;
+      const userId = user.supabaseId || user.id;
 
       const { data, error } = await supabase
         .from('projections_pf')
-        .insert({ ...cleanProposal, advisor_id: user.supabaseId })
-        .select();
+        .insert({ 
+          ...cleanProposal, 
+          advisor_id: userId,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
       if (error) throw error;
 
-      const newProposal = data && data.length > 0 ? data[0] : { ...proposal, advisor_id: user.supabaseId };
-      setProposals(prev => [...prev, newProposal]);
-      return newProposal;
+      if (data) {
+        setProposals(prev => [...prev, data]);
+      }
+      return data;
     } catch (error) {
       console.error('Error adding proposal:', error);
       throw error;
@@ -323,16 +402,24 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
+      const { id: removeId, created_at, ...cleanUpdates } = updates;
+      cleanUpdates.updated_at = new Date().toISOString();
+
       const { data, error } = await supabase
         .from('projections_pf')
-        .update(updates)
+        .update(cleanUpdates)
         .eq('id', id)
-        .select();
+        .select()
+        .single();
+
       if (error) throw error;
 
-      const updated = data && data.length > 0 ? data[0] : { id, ...updates };
-      setProposals(prev => prev.map(proposal => proposal.id === id ? { ...proposal, ...updated } : proposal));
-      return updated;
+      if (data) {
+        setProposals(prev => prev.map(proposal => 
+          proposal.id === id ? { ...proposal, ...data } : proposal
+        ));
+      }
+      return data;
     } catch (error) {
       console.error('Error updating proposal:', error);
       throw error;
@@ -349,6 +436,7 @@ export const DataProvider = ({ children }) => {
         .from('projections_pf')
         .delete()
         .eq('id', id);
+      
       if (error) throw error;
 
       setProposals(prev => prev.filter(proposal => proposal.id !== id));
