@@ -3,6 +3,7 @@ import { useSupabaseClient } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
+import { camelizeKeys } from "../utils/camelize";
 
 const DataContext = createContext();
 
@@ -88,6 +89,10 @@ export const DataProvider = ({ children }) => {
         clientsData = client ? [client] : [];
         usersData = uData || [];
         proposalsData = pData || [];
+
+        clientsData = clientsData.map(camelizeKeys);
+        usersData = usersData.map(camelizeKeys);
+        proposalsData = proposalsData.map(camelizeKeys);
       } else {
         // Advisors/managers fetch by advisor id, admins fetch all
         let clientsQuery = supabase
@@ -115,9 +120,9 @@ export const DataProvider = ({ children }) => {
         const { data: pData, error: pError } = await proposalsQuery;
         if (pError) throw pError;
 
-        clientsData = cData || [];
-        usersData = uData || [];
-        proposalsData = pData || [];
+        clientsData = (cData || []).map(camelizeKeys);
+        usersData = (uData || []).map(camelizeKeys);
+        proposalsData = (pData || []).map(camelizeKeys);
       }
 
       logDev('Data fetched successfully:', {
@@ -216,7 +221,7 @@ export const DataProvider = ({ children }) => {
         throw new Error('No data returned from insert operation');
       }
 
-      setClients(prev => [...prev, data]);
+      setClients(prev => [...prev, camelizeKeys(data)]);
 
       // Initialize CRM records for the newly created client
       if (initializeClientCrm) {
@@ -228,7 +233,7 @@ export const DataProvider = ({ children }) => {
         }
       }
 
-      return data;
+      return camelizeKeys(data);
     } catch (error) {
       console.error('Error adding client:', error);
       throw error;
@@ -266,12 +271,14 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
 
       if (data) {
-        setClients(prev => prev.map(client => 
-          client.id === id ? { ...client, ...data } : client
+        const camel = camelizeKeys(data);
+        setClients(prev => prev.map(client =>
+          client.id === id ? { ...client, ...camel } : client
         ));
+        return camel;
       }
-      
-      return data;
+
+      return null;
     } catch (error) {
       console.error('Error updating client:', error);
       throw error;
@@ -321,9 +328,11 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
 
       if (data) {
-        setUsers(prev => [...prev, data]);
+        const camel = camelizeKeys(data);
+        setUsers(prev => [...prev, camel]);
+        return camel;
       }
-      return data;
+      return null;
     } catch (error) {
       console.error('Error adding user:', error);
       throw error;
@@ -350,11 +359,13 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
 
       if (data) {
-        setUsers(prev => prev.map(user => 
-          user.id === id ? { ...user, ...data } : user
+        const camel = camelizeKeys(data);
+        setUsers(prev => prev.map(user =>
+          user.id === id ? { ...user, ...camel } : user
         ));
+        return camel;
       }
-      return data;
+      return null;
     } catch (error) {
       console.error('Error updating user:', error);
       throw error;
@@ -404,9 +415,11 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
 
       if (data) {
-        setProposals(prev => [...prev, data]);
+        const camel = camelizeKeys(data);
+        setProposals(prev => [...prev, camel]);
+        return camel;
       }
-      return data;
+      return null;
     } catch (error) {
       console.error('Error adding proposal:', error);
       throw error;
@@ -432,11 +445,13 @@ export const DataProvider = ({ children }) => {
       if (error) throw error;
 
       if (data) {
-        setProposals(prev => prev.map(proposal => 
-          proposal.id === id ? { ...proposal, ...data } : proposal
+        const camel = camelizeKeys(data);
+        setProposals(prev => prev.map(proposal =>
+          proposal.id === id ? { ...proposal, ...camel } : proposal
         ));
+        return camel;
       }
-      return data;
+      return null;
     } catch (error) {
       console.error('Error updating proposal:', error);
       throw error;
