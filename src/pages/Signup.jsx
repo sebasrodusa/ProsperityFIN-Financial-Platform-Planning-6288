@@ -9,7 +9,7 @@ import * as FiIcons from 'react-icons/fi';
 
 const { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiPhone, FiArrowLeft, FiUserPlus, FiBriefcase } = FiIcons;
 
-// Team ID options for financial professionals
+// Team ID options for advisors
 const TEAM_IDS = [
   { id: 'emd_rodriguez', name: 'EMD Rodriguez' },
   { id: 'md_garcia', name: 'MD Garcia' },
@@ -66,7 +66,7 @@ const Signup = () => {
       setError('Passwords do not match');
       return false;
     }
-    if (formData.role === 'financial_professional' && !formData.teamId) {
+    if (formData.role === 'advisor' && !formData.teamId) {
       setError('Please select a team');
       return false;
     }
@@ -88,9 +88,9 @@ const Signup = () => {
     setError('');
 
     try {
-      // Generate agent code automatically for financial professionals
+      // Generate agent code automatically for advisors
       let agentCode = '';
-      if (formData.role === 'financial_professional') {
+      if (formData.role === 'advisor') {
         agentCode = `FP${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
       }
 
@@ -118,7 +118,7 @@ const Signup = () => {
         setSuccess(true);
 
         setTimeout(() => {
-          if (formData.role === 'financial_professional') {
+          if (formData.role === 'advisor') {
             navigate('/advisor/dashboard');
           } else {
             navigate('/client/dashboard');
@@ -137,7 +137,7 @@ const Signup = () => {
 
 
 
-  const isFinancialProfessional = formData.role === 'financial_professional';
+  const isAdvisor = formData.role === 'advisor';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -215,7 +215,7 @@ const Signup = () => {
                   required
                 >
                   <option value="client">Client</option>
-                  <option value="financial_professional">Financial Professional</option>
+                  <option value="advisor">Advisor</option>
                 </select>
               </div>
 
@@ -334,8 +334,8 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Team selection only for financial professionals */}
-              {isFinancialProfessional && (
+              {/* Team selection only for advisors */}
+              {isAdvisor && (
                 <div>
                   <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
                     Team *
