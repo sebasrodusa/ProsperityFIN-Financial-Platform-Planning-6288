@@ -63,39 +63,56 @@ export const DataProvider = ({ children }) => {
 
         const advisorId = client?.advisor_id || null;
 
-        const { data: uData, error: uError } = await supabase
+        let userQuery = supabase
           .from('users_pf')
-          .select('*')
-          .eq('advisor_id', advisorId);
+          .select('*');
+        if (advisorId === null) {
+          userQuery = userQuery.is('advisor_id', null);
+        } else {
+          userQuery = userQuery.eq('advisor_id', advisorId);
+        }
+        const { data: uData, error: uError } = await userQuery;
         if (uError) throw uError;
 
-        const { data: pData, error: pError } = await supabase
+        let proposalQuery = supabase
           .from('projections_pf')
-          .select('*')
-          .eq('advisor_id', advisorId);
+          .select('*');
+        if (advisorId === null) {
+          proposalQuery = proposalQuery.is('advisor_id', null);
+        } else {
+          proposalQuery = proposalQuery.eq('advisor_id', advisorId);
+        }
+        const { data: pData, error: pError } = await proposalQuery;
         if (pError) throw pError;
 
         clientsData = client ? [client] : [];
         usersData = uData || [];
         proposalsData = pData || [];
       } else {
-        // Advisors/managers/admins fetch by advisor id
-        const { data: cData, error: cError } = await supabase
+        // Advisors/managers fetch by advisor id, admins fetch all
+        let clientsQuery = supabase
           .from('clients_pf')
-          .select('*')
-          .eq('advisor_id', userId);
+          .select('*');
+        let usersQuery = supabase
+          .from('users_pf')
+          .select('*');
+        let proposalsQuery = supabase
+          .from('projections_pf')
+          .select('*');
+
+        if (user.role !== 'admin') {
+          clientsQuery = clientsQuery.eq('advisor_id', userId);
+          usersQuery = usersQuery.eq('advisor_id', userId);
+          proposalsQuery = proposalsQuery.eq('advisor_id', userId);
+        }
+
+        const { data: cData, error: cError } = await clientsQuery;
         if (cError) throw cError;
 
-        const { data: uData, error: uError } = await supabase
-          .from('users_pf')
-          .select('*')
-          .eq('advisor_id', userId);
+        const { data: uData, error: uError } = await usersQuery;
         if (uError) throw uError;
 
-        const { data: pData, error: pError } = await supabase
-          .from('projections_pf')
-          .select('*')
-          .eq('advisor_id', userId);
+        const { data: pData, error: pError } = await proposalsQuery;
         if (pError) throw pError;
 
         clientsData = cData || [];
