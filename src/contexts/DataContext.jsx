@@ -4,6 +4,7 @@ import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
 import { camelizeKeys } from "../utils/camelize";
+import { decamelizeKeys } from "../utils/decamelize";
 
 const DataContext = createContext();
 
@@ -183,13 +184,15 @@ export const DataProvider = ({ children }) => {
         // If user doesn't exist in users_pf, create them first
         const { data: newUserData, error: createUserErr } = await supabase
           .from('users_pf')
-          .insert({
-            id: userId,
-            email: user.email,
-            role: user.role || 'advisor',
-            full_name: user.full_name || user.email?.split('@')[0] || 'Unknown',
-            created_at: new Date().toISOString()
-          })
+          .insert(
+            decamelizeKeys({
+              id: userId,
+              email: user.email,
+              role: user.role || 'advisor',
+              fullName: user.full_name || user.email?.split('@')[0] || 'Unknown',
+              createdAt: new Date().toISOString()
+            })
+          )
           .select()
           .single();
         
@@ -202,13 +205,15 @@ export const DataProvider = ({ children }) => {
       // Now insert the client with proper advisor_id
       const { data, error } = await supabase
         .from('clients_pf')
-        .insert({
-          ...cleanClient,
-          advisor_id: userId,
-          created_by: userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
+        .insert(
+          decamelizeKeys({
+            ...cleanClient,
+            advisorId: userId,
+            createdBy: userId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          })
+        )
         .select()
         .single();
 
@@ -259,11 +264,11 @@ export const DataProvider = ({ children }) => {
       } = updates;
 
       // Add updated_at timestamp
-      cleanUpdates.updated_at = new Date().toISOString();
+      cleanUpdates.updatedAt = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('clients_pf')
-        .update(cleanUpdates)
+        .update(decamelizeKeys(cleanUpdates))
         .eq('id', id)
         .select()
         .single();
@@ -317,11 +322,13 @@ export const DataProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from('users_pf')
-        .insert({ 
-          ...cleanUserData, 
-          advisor_id: userId,
-          created_at: new Date().toISOString()
-        })
+        .insert(
+          decamelizeKeys({
+            ...cleanUserData,
+            advisorId: userId,
+            createdAt: new Date().toISOString()
+          })
+        )
         .select()
         .single();
 
@@ -347,11 +354,11 @@ export const DataProvider = ({ children }) => {
     try {
       // Remove id and created_at from updates
       const { id: removeId, created_at, ...cleanUpdates } = updates;
-      cleanUpdates.updated_at = new Date().toISOString();
+      cleanUpdates.updatedAt = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('users_pf')
-        .update(cleanUpdates)
+        .update(decamelizeKeys(cleanUpdates))
         .eq('id', id)
         .select()
         .single();
@@ -404,11 +411,13 @@ export const DataProvider = ({ children }) => {
 
       const { data, error } = await supabase
         .from('projections_pf')
-        .insert({ 
-          ...cleanProposal, 
-          advisor_id: userId,
-          created_at: new Date().toISOString()
-        })
+        .insert(
+          decamelizeKeys({
+            ...cleanProposal,
+            advisorId: userId,
+            createdAt: new Date().toISOString()
+          })
+        )
         .select()
         .single();
 
@@ -433,11 +442,11 @@ export const DataProvider = ({ children }) => {
 
     try {
       const { id: removeId, created_at, ...cleanUpdates } = updates;
-      cleanUpdates.updated_at = new Date().toISOString();
+      cleanUpdates.updatedAt = new Date().toISOString();
 
       const { data, error } = await supabase
         .from('projections_pf')
-        .update(cleanUpdates)
+        .update(decamelizeKeys(cleanUpdates))
         .eq('id', id)
         .select()
         .single();
