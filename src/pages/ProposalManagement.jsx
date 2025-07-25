@@ -15,6 +15,7 @@ import ProposalPDF from '../components/proposals/ProposalPDF';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { useSupabaseClient } from '../lib/supabaseClient';
+import { decamelizeKeys } from '../utils/decamelize';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiSend, FiCalendar, FiUser, FiDownload, FiPrinter } = FiIcons;
 
@@ -204,61 +205,25 @@ const ProposalManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
-      logDev('Submitting proposal to Supabase:', formData);
-      
       const proposalData = {
         ...formData,
-        advisorId: user.id,
-        client_id: formData.clientId, // Add client_id foreign key
-        advisor_id: user.id, // Add advisor_id foreign key
-        created_by: user.id, // Add created_by for RLS
-        status: 'draft',
-        createdAt: new Date().toISOString()
+        createdBy: user.id,
+        status: selectedProposal ? selectedProposal.status : 'draft'
       };
-      
-      // For updates
+
+      const snakeCaseData = decamelizeKeys(proposalData);
+      logDev('Saving proposal (snake_case):', snakeCaseData);
+
       if (selectedProposal) {
-        const { data, error } = await supabase
-          .from('projections_pf')
-          .update(proposalData)
-          .eq('id', selectedProposal.id)
-          .select();
-          
-        if (error) throw error;
-        
-        logDev('Proposal updated successfully in Supabase:', data);
-        
-        // Update local state
-        if (data && data.length > 0) {
-          updateProposal(selectedProposal.id, data[0]);
-        } else {
-          updateProposal(selectedProposal.id, proposalData);
-        }
-        
+        await updateProposal(selectedProposal.id, proposalData);
         setIsEditModalOpen(false);
       } else {
-        // For new proposals
-        const { data, error } = await supabase
-          .from('projections_pf')
-          .insert(proposalData)
-          .select();
-          
-        if (error) throw error;
-        
-        logDev('Proposal added successfully to Supabase:', data);
-        
-        // Update local state
-        if (data && data.length > 0) {
-          addProposal(data[0]);
-        } else {
-          addProposal(proposalData);
-        }
-        
+        await addProposal(proposalData);
         setIsAddModalOpen(false);
       }
-      
+
       resetForm();
     } catch (error) {
       console.error('Error saving proposal to Supabase:', error);
