@@ -35,7 +35,7 @@ const ClientManagement = () => {
                            client.email.toLowerCase().includes(searchTerm.toLowerCase());
 
       // Filter by role
-      if (user?.role === 'financial_professional') {
+      if (user?.role === 'advisor') {
         if (!matchesSearch || client.advisorId !== user.id) {
           return false;
         }

@@ -30,7 +30,7 @@ const CRMDashboard = () => {
     let clientList = clients;
 
     // Filter by role
-    if (user?.role === 'financial_professional') {
+    if (user?.role === 'advisor') {
       clientList = clients.filter(client => client.advisorId === user.id);
     }
 

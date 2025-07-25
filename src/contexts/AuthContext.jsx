@@ -220,7 +220,7 @@ export const AuthProvider = ({ children }) => {
 
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
-  const isFinancialProfessional = user?.role === 'financial_professional';
+  const isAdvisor = user?.role === 'advisor';
   const isClient = user?.role === 'client';
 
   const hasRole = (role) => user?.role === role;
@@ -237,7 +237,7 @@ export const AuthProvider = ({ children }) => {
     updateProfile,
     isAdmin,
     isManager,
-    isFinancialProfessional,
+    isAdvisor,
     isClient,
     hasRole,
     hasAnyRole,

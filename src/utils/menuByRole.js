@@ -3,7 +3,7 @@
 // Expected role values:
 // - 'admin'
 // - 'manager'
-// - 'financial_professional'
+// - 'advisor'
 // - 'client'
 // Any other value will be treated as a basic user.
 

@@ -112,7 +112,7 @@ const UserManagement = () => {
     switch (role) {
       case 'admin': return 'Administrator';
       case 'manager': return 'Manager';
-      case 'financial_professional': return 'Financial Professional';
+      case 'advisor': return 'Advisor';
       case 'client': return 'Client';
       default: return role;
     }
@@ -348,7 +348,7 @@ const UserManagement = () => {
                     <option value="manager">Manager</option>
                   </>
                 )}
-                <option value="financial_professional">Financial Professional</option>
+                <option value="advisor">Advisor</option>
                 <option value="client">Client</option>
               </select>
             </div>

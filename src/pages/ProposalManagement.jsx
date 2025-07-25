@@ -183,7 +183,7 @@ const ProposalManagement = () => {
   const filteredProposals = proposals.filter(proposal => {
     const matchesSearch = proposal.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           proposal.description.toLowerCase().includes(searchTerm.toLowerCase());
-    if (user?.role === 'financial_professional') {
+    if (user?.role === 'advisor') {
       return matchesSearch && proposal.advisorId === user.id;
     }
     return matchesSearch;
@@ -195,7 +195,7 @@ const ProposalManagement = () => {
   };
 
   const availableClients = clients.filter(client => {
-    if (user?.role === 'financial_professional') {
+    if (user?.role === 'advisor') {
       return client.advisorId === user.id;
     }
     return true;

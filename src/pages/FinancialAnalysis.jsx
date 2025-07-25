@@ -39,7 +39,7 @@ const FinancialAnalysis = () => {
 
   // Filter clients based on user role
   const availableClients = clients.filter(client => {
-    if (user?.role === 'financial_professional') {
+    if (user?.role === 'advisor') {
       return client.advisorId === user.id;
     }
     return true;

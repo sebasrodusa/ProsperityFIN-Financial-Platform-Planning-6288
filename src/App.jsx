@@ -86,7 +86,7 @@ function App() {
               <Route
                 path="/crm"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <CRMDashboard />
                   </PrivateRoute>
                 }
@@ -94,7 +94,7 @@ function App() {
               <Route
                 path="/clients/:clientId/crm"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <ClientCRM />
                   </PrivateRoute>
                 }
@@ -102,7 +102,7 @@ function App() {
               <Route
                 path="/clients"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <ClientManagement />
                   </PrivateRoute>
                 }
@@ -110,7 +110,7 @@ function App() {
               <Route
                 path="/clients/:clientId"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <ClientDetails />
                   </PrivateRoute>
                 }
@@ -118,7 +118,7 @@ function App() {
               <Route
                 path="/financial-analysis"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <FinancialAnalysis />
                   </PrivateRoute>
                 }
@@ -126,7 +126,7 @@ function App() {
               <Route
                 path="/financial-analysis/:clientId"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <FinancialAnalysis />
                   </PrivateRoute>
                 }
@@ -135,7 +135,7 @@ function App() {
               <Route
                 path="/proposals"
                 element={
-                  <PrivateRoute allowedRoles={['admin', 'manager', 'financial_professional']}>
+                  <PrivateRoute allowedRoles={['admin', 'manager', 'advisor']}>
                     <ProposalManagement />
                   </PrivateRoute>
                 }
