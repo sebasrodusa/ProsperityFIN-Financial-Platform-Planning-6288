@@ -25,6 +25,7 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
     phone: '',
+    agentCode: '',
     role: 'client', // Default role
     teamId: '',
     agreeTerms: false
@@ -70,6 +71,10 @@ const Signup = () => {
       setError('Please select a team');
       return false;
     }
+    if (formData.role === 'advisor' && !formData.agentCode.trim()) {
+      setError('Agent code is required for advisor registration');
+      return false;
+    }
     if (!formData.agreeTerms) {
       setError('You must agree to the Terms of Service and Privacy Policy');
       return false;
@@ -88,11 +93,7 @@ const Signup = () => {
     setError('');
 
     try {
-      // Generate agent code automatically for advisors
-      let agentCode = '';
-      if (formData.role === 'advisor') {
-        agentCode = `FP${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-      }
+      const agentCode = formData.role === 'advisor' ? formData.agentCode.trim() : '';
 
       // Create account in Supabase
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -334,31 +335,52 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Team selection only for advisors */}
+              {/* Agent code and team for advisors */}
               {isAdvisor && (
-                <div>
-                  <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
-                    Team *
-                  </label>
-                  <div className="relative">
-                    <SafeIcon icon={FiBriefcase} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <select
-                      id="teamId"
-                      name="teamId"
-                      value={formData.teamId}
-                      onChange={handleInputChange}
-                      className="form-input pl-10"
-                      required
-                    >
-                      <option value="">Select a team</option>
-                      {TEAM_IDS.map(team => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
-                        </option>
-                      ))}
-                    </select>
+                <>
+                  <div>
+                    <label htmlFor="agentCode" className="block text-sm font-medium text-gray-700 mb-2">
+                      Agent Code *
+                    </label>
+                    <div className="relative">
+                      <SafeIcon icon={FiUser} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <input
+                        id="agentCode"
+                        name="agentCode"
+                        type="text"
+                        required
+                        value={formData.agentCode}
+                        onChange={handleInputChange}
+                        className="form-input pl-10"
+                        placeholder="Enter your agent code"
+                      />
+                    </div>
                   </div>
-                </div>
+
+                  <div>
+                    <label htmlFor="teamId" className="block text-sm font-medium text-gray-700 mb-2">
+                      Team *
+                    </label>
+                    <div className="relative">
+                      <SafeIcon icon={FiBriefcase} className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      <select
+                        id="teamId"
+                        name="teamId"
+                        value={formData.teamId}
+                        onChange={handleInputChange}
+                        className="form-input pl-10"
+                        required
+                      >
+                        <option value="">Select a team</option>
+                        {TEAM_IDS.map(team => (
+                          <option key={team.id} value={team.id}>
+                            {team.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </>
               )}
 
               <div className="flex items-center">
