@@ -58,9 +58,13 @@ const UserManagement = () => {
     }
 
     const userData = {
-      ...formData,
-      agentCode,
-      avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+      name: formData.name,
+      email: formData.email,
+      role: formData.role,
+      team_id: formData.teamId,
+      agent_code: agentCode,
+      avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+      status: formData.status
     };
 
     if (selectedUser) {

@@ -93,8 +93,8 @@ const ProfileSettings = () => {
         email: formData.email,
         phone: formData.phone,
         dateOfBirth: formData.dateOfBirth,
-        agentCode: formData.agentCode,
-        teamId: formData.teamId,
+        agent_code: formData.agentCode,
+        team_id: formData.teamId,
         avatar: imagePreview || user.avatar
       };
       
