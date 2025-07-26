@@ -71,3 +71,32 @@ Each financial analysis receives a unique **FNA code**. This code is automatical
 * The application generates the FNA code automatically when a new analysis is saved.
 * The code is shown on the Financial Analysis page right beside the save confirmation.
 * Clients can enter this code in the portal to claim the analysis and link it to their account.
+
+## Publitio Proxy Function
+
+A Supabase Edge Function located at `supabase/functions/publitio-proxy` uploads files to Publitio on behalf of authenticated users.
+
+### Deploy
+
+1. Ensure `PUBLITIO_API_KEY`, `PUBLITIO_API_SECRET` and `SUPABASE_SERVICE_ROLE_KEY` are set in your environment or Supabase project secrets.
+2. Deploy the function using the Supabase CLI:
+   ```bash
+   supabase functions deploy publitio-proxy
+   ```
+3. To test locally:
+   ```bash
+   supabase functions serve publitio-proxy
+   ```
+
+### Invoking
+
+Send a `POST` request with a valid Supabase JWT and `multipart/form-data` containing a `file` field:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <access_token>" \
+  -F file=@/path/to/file.png \
+  https://<project>.functions.supabase.co/publitio-proxy
+```
+
+The response includes the `public_id` and accessible `url` returned by Publitio.
