@@ -5,6 +5,7 @@ import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
 import { camelizeKeys } from "../utils/camelize";
 import { decamelizeKeys } from "../utils/decamelize";
+import { uploadFile, deleteFile } from '../services/publitio';
 
 const DataContext = createContext();
 
@@ -24,6 +25,7 @@ export const DataProvider = ({ children }) => {
   const [clients, setClients] = useState([]);
   const [users, setUsers] = useState([]);
   const [proposals, setProposals] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -50,6 +52,7 @@ export const DataProvider = ({ children }) => {
       let clientsData = [];
       let usersData = [];
       let proposalsData = [];
+      let documentsData = [];
 
       // Use consistent user ID throughout
       const userId = user.supabaseId || user.id;
@@ -86,14 +89,22 @@ export const DataProvider = ({ children }) => {
         }
         const { data: pData, error: pError } = await proposalQuery;
         if (pError) throw pError;
+        let documentsQuery = supabase
+          .from('documents_pf')
+          .select('*')
+          .or(`client_id.eq.${userId},user_id.eq.${userId}`);
+        const { data: dData, error: dError } = await documentsQuery;
+        if (dError) throw dError;
 
         clientsData = client ? [client] : [];
         usersData = uData || [];
         proposalsData = pData || [];
+        documentsData = dData || [];
 
         clientsData = clientsData.map(camelizeKeys);
         usersData = usersData.map(camelizeKeys);
         proposalsData = proposalsData.map(camelizeKeys);
+        documentsData = documentsData.map(camelizeKeys);
       } else {
         // Advisors/managers fetch by advisor id, admins fetch all
         let clientsQuery = supabase
@@ -105,11 +116,15 @@ export const DataProvider = ({ children }) => {
         let proposalsQuery = supabase
           .from('projections_pf')
           .select('*');
+        let documentsQuery = supabase
+          .from('documents_pf')
+          .select('*');
 
         if (user.role !== 'admin') {
           clientsQuery = clientsQuery.eq('advisor_id', userId);
           usersQuery = usersQuery.eq('advisor_id', userId);
           proposalsQuery = proposalsQuery.eq('advisor_id', userId);
+          documentsQuery = documentsQuery.eq('user_id', userId);
         }
 
         const { data: cData, error: cError } = await clientsQuery;
@@ -120,21 +135,26 @@ export const DataProvider = ({ children }) => {
 
         const { data: pData, error: pError } = await proposalsQuery;
         if (pError) throw pError;
+        const { data: dData, error: dError } = await documentsQuery;
+        if (dError) throw dError;
 
         clientsData = (cData || []).map(camelizeKeys);
         usersData = (uData || []).map(camelizeKeys);
         proposalsData = (pData || []).map(camelizeKeys);
+        documentsData = (dData || []).map(camelizeKeys);
       }
 
       logDev('Data fetched successfully:', {
         clients: clientsData.length,
         users: usersData.length,
-        proposals: proposalsData.length
+        proposals: proposalsData.length,
+        documents: documentsData.length
       });
 
       setClients(clientsData);
       setUsers(usersData);
       setProposals(proposalsData);
+      setDocuments(documentsData);
     } catch (err) {
       console.error('Error fetching data from Supabase:', err);
       setError(err.message);
@@ -487,6 +507,101 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const fetchDocuments = async () => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
+    try {
+      const userId = user.supabaseId || user.id;
+      let query = supabase
+        .from('documents_pf')
+        .select('*');
+
+      if (user.role === 'client') {
+        query = query.or(`client_id.eq.${userId},user_id.eq.${userId}`);
+      } else if (user.role !== 'admin') {
+        query = query.eq('user_id', userId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      const docs = (data || []).map(camelizeKeys);
+      setDocuments(docs);
+      return docs;
+    } catch (error) {
+      console.error('Error fetching documents:', error);
+      throw error;
+    }
+  };
+
+  const addDocument = async ({ file, name, clientId }) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+    if (!file) {
+      throw new Error('File required');
+    }
+
+    try {
+      const upload = await uploadFile(file, 'documents');
+      const userId = user.supabaseId || user.id;
+      const { data, error } = await supabase
+        .from('documents_pf')
+        .insert(
+          decamelizeKeys({
+            userId,
+            clientId,
+            name: name || file.name,
+            publitioId: upload.public_id,
+            url: upload.url,
+            createdAt: new Date().toISOString(),
+          })
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const doc = camelizeKeys(data);
+      setDocuments((prev) => [...prev, doc]);
+      return doc;
+    } catch (error) {
+      console.error('Error adding document:', error);
+      throw error;
+    }
+  };
+
+  const deleteDocument = async (id) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
+    try {
+      const doc = documents.find((d) => d.id === id);
+      if (doc?.publitioId) {
+        try {
+          await deleteFile(doc.publitioId);
+        } catch (e) {
+          console.error('Error deleting file from Publitio:', e);
+        }
+      }
+
+      const { error } = await supabase
+        .from('documents_pf')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setDocuments((prev) => prev.filter((d) => d.id !== id));
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  };
+
   // Refresh data
   const refreshData = async () => {
     if (supabase) {
@@ -498,6 +613,7 @@ export const DataProvider = ({ children }) => {
     clients,
     users,
     proposals,
+    documents,
     loading,
     error,
     addClient,
@@ -509,6 +625,9 @@ export const DataProvider = ({ children }) => {
     addProposal,
     updateProposal,
     deleteProposal,
+    fetchDocuments,
+    addDocument,
+    deleteDocument,
     refreshData
   };
 
