@@ -59,7 +59,8 @@ Supabase schema changes live in `supabase/migrations`. Apply them to a local dat
 ```bash
 supabase db reset
 ```
-All schema changes live in `supabase/migrations/001_initial.sql`. This baseline migration creates the tables and row level security policies required by the application. Run `supabase db reset` after pulling to apply the latest schema locally.
+Schema files are numbered so new migrations can be added over time (e.g. `001_initial.sql`, `002_publitio.sql`).
+Run `supabase db reset` after pulling to apply the latest schema locally.
 
 ## FNA Codes
 
