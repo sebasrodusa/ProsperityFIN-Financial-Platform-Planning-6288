@@ -202,16 +202,43 @@ const ProposalManagement = () => {
     return true;
   });
 
+  const numericFields = [
+    'initialLumpSum',
+    'monthlyContribution',
+    'annualCOI',
+    'firstYearBonus',
+    'yearsToPay',
+    'averageReturnPercentage',
+    'deathBenefitAmount',
+    'livingBenefits',
+    'terminalIllnessBenefit',
+    'chronicIllnessBenefit',
+    'criticalIllnessBenefit',
+    'averageMonthlyCost',
+    'tenYearIncome',
+    'lifetimeIncome'
+  ];
+
+  const cleanNumericFields = (data) => {
+    const cleaned = { ...data };
+    numericFields.forEach((field) => {
+      if (cleaned[field] === '') {
+        cleaned[field] = null;
+      }
+    });
+    return cleaned;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const proposalData = {
+      const proposalData = cleanNumericFields({
         ...formData,
         createdBy: user.id,
         status: selectedProposal ? selectedProposal.status : 'draft'
-      };
+      });
 
       const snakeCaseData = decamelizeKeys(proposalData);
       logDev('Saving proposal (snake_case):', snakeCaseData);
