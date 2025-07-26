@@ -44,3 +44,25 @@ export async function deleteFile(publicId) {
   }
   return true;
 }
+
+export function getTransformedImage(url, options = {}) {
+  if (!url) return '';
+  try {
+    const { width, height, format = 'webp', quality } = options;
+    const u = new URL(url);
+    const parts = u.pathname.split('/');
+    const idx = parts.indexOf('file');
+    if (idx === -1) return url;
+    const transforms = [];
+    if (width) transforms.push(`w_${width}`);
+    if (height) transforms.push(`h_${height}`);
+    if (quality) transforms.push(`q_${quality}`);
+    if (format) transforms.push(`f_${format}`);
+    if (transforms.length === 0) return url;
+    parts.splice(idx + 1, 0, transforms.join(','));
+    u.pathname = parts.join('/');
+    return u.toString();
+  } catch (_) {
+    return url;
+  }
+}

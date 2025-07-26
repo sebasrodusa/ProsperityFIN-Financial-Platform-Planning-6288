@@ -4,6 +4,7 @@ import Modal from '../ui/Modal';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { getTransformedImage } from '../../services/publitio';
 import { useSupabaseClient } from '../../lib/supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import logDev from '../../utils/logDev';
@@ -406,7 +407,7 @@ const CarriersManager = () => {
                 <div className="flex items-center space-x-3">
                   {carrier.logo_url ? (
                     <img
-                      src={carrier.logo_url}
+                      src={getTransformedImage(carrier.logo_url, { width: 128, height: 128 })}
                       alt={carrier.name}
                       className="w-16 h-16 object-contain rounded-lg bg-gray-50 p-1"
                       onError={(e) => {
@@ -529,7 +530,11 @@ const CarriersManager = () => {
               {logoPreview ? (
                 <div className="relative">
                   <img
-                    src={logoPreview}
+                    src={
+                      logoPreview && logoPreview.startsWith('http')
+                        ? getTransformedImage(logoPreview, { width: 192, height: 192 })
+                        : logoPreview
+                    }
                     alt="Logo Preview"
                     className="w-24 h-24 object-contain rounded-lg bg-gray-50 p-2"
                   />
@@ -698,7 +703,11 @@ const CarriersManager = () => {
               {logoPreview ? (
                 <div className="relative">
                   <img
-                    src={logoPreview}
+                    src={
+                      logoPreview && logoPreview.startsWith('http')
+                        ? getTransformedImage(logoPreview, { width: 192, height: 192 })
+                        : logoPreview
+                    }
                     alt="Logo Preview"
                     className="w-24 h-24 object-contain rounded-lg bg-gray-50 p-2"
                   />
