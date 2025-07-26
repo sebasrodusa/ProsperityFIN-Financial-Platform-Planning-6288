@@ -13,8 +13,8 @@ Row level security (**RLS**) is enabled across all user data tables to ensure re
 2. Copy `.env.example` to `.env` and fill in the required environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY
-   # and SUPABASE_SERVICE_ROLE_KEY
+   # Edit .env with your VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY,
+   # SUPABASE_SERVICE_ROLE_KEY, PUBLITIO_API_KEY and PUBLITIO_API_SECRET
    ```
    The app will fail to start without valid Supabase credentials. The
    Supabase URL and key must be provided via environment variables, otherwise the
