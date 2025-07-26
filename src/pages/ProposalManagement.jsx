@@ -12,6 +12,7 @@ import StrategySelector from '../components/proposals/StrategySelector';
 import CarrierSelector from '../components/proposals/CarrierSelector';
 import ProductConfiguration from '../components/proposals/ProductConfiguration';
 import ProposalPDF from '../components/proposals/ProposalPDF';
+import { getTransformedImage } from '../services/publitio';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { useSupabaseClient } from '../lib/supabaseClient';
@@ -516,7 +517,11 @@ const ProposalManagement = () => {
                   )}
                   {carrier && (
                     <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <img src={carrier.logo} alt={carrier.name} className="w-4 h-4 rounded" />
+                      <img
+                        src={getTransformedImage(carrier.logo, { width: 32, height: 32 })}
+                        alt={carrier.name}
+                        className="w-4 h-4 rounded"
+                      />
                       <span>{carrier.name}</span>
                     </div>
                   )}

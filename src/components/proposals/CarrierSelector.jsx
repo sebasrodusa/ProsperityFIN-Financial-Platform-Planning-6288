@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { getTransformedImage } from '../../services/publitio';
 import { useSupabaseClient } from '../../lib/supabaseClient';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
@@ -129,7 +130,7 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
             <div className="flex items-start space-x-3">
               {carrier.logo_url ? (
                 <img
-                  src={carrier.logo_url}
+                  src={getTransformedImage(carrier.logo_url, { width: 96, height: 96 })}
                   alt={carrier.name}
                   className="w-12 h-12 rounded-lg object-contain bg-white p-1"
                   onError={(e) => {
