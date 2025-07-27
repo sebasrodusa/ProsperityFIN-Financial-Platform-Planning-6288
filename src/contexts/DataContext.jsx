@@ -3,6 +3,7 @@ import { useSupabaseClient } from '../lib/supabaseClient';
 import { useAuthContext } from './AuthContext';
 import { useCrm } from './CrmContext';
 import logDev from '../utils/logDev';
+import logError from '../utils/logError';
 import { camelizeKeys } from "../utils/camelize";
 import { decamelizeKeys } from "../utils/decamelize";
 import { uploadFile, deleteFile } from '../services/publitio';
@@ -40,7 +41,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchData = async () => {
     if (!supabase) {
-      console.error('Supabase client not available');
+      logError('fetchData', new Error('Supabase client not available'));
       return;
     }
 
@@ -156,7 +157,7 @@ export const DataProvider = ({ children }) => {
       setProposals(proposalsData);
       setDocuments(documentsData);
     } catch (err) {
-      console.error('Error fetching data from Supabase:', err);
+      logError('fetchData', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -196,7 +197,7 @@ export const DataProvider = ({ children }) => {
         .maybeSingle();
       
       if (userErr) {
-        console.error('Error checking user existence:', userErr);
+        logError('users_pf check existence', userErr);
         throw userErr;
       }
       
@@ -217,7 +218,7 @@ export const DataProvider = ({ children }) => {
           .single();
         
         if (createUserErr) {
-          console.error('Error creating user in users_pf:', createUserErr);
+          logError('users_pf insert', createUserErr);
           throw createUserErr;
         }
       }
@@ -238,7 +239,7 @@ export const DataProvider = ({ children }) => {
         .single();
 
       if (error) {
-        console.error('Error inserting client:', error);
+        logError('clients_pf insert', error);
         throw error;
       }
 
@@ -253,14 +254,14 @@ export const DataProvider = ({ children }) => {
         try {
           await initializeClientCrm(data.id);
         } catch (crmError) {
-          console.error('Error initializing CRM for client:', crmError);
+          logError('initializeClientCrm', crmError);
           // Don't throw here - client was created successfully
         }
       }
 
       return camelizeKeys(data);
     } catch (error) {
-      console.error('Error adding client:', error);
+      logError('clients_pf add', error);
       throw error;
     }
   };
@@ -305,7 +306,7 @@ export const DataProvider = ({ children }) => {
 
       return null;
     } catch (error) {
-      console.error('Error updating client:', error);
+      logError('clients_pf update', error);
       throw error;
     }
   };
@@ -325,7 +326,7 @@ export const DataProvider = ({ children }) => {
 
       setClients(prev => prev.filter(client => client.id !== id));
     } catch (error) {
-      console.error('Error deleting client:', error);
+      logError('clients_pf delete', error);
       throw error;
     }
   };
@@ -361,7 +362,7 @@ export const DataProvider = ({ children }) => {
       }
       return null;
     } catch (error) {
-      console.error('Error adding user:', error);
+      logError('users_pf add', error);
       throw error;
     }
   };
@@ -394,7 +395,7 @@ export const DataProvider = ({ children }) => {
       }
       return null;
     } catch (error) {
-      console.error('Error updating user:', error);
+      logError('users_pf update', error);
       throw error;
     }
   };
@@ -414,7 +415,7 @@ export const DataProvider = ({ children }) => {
 
       setUsers(prev => prev.filter(user => user.id !== id));
     } catch (error) {
-      console.error('Error deleting user:', error);
+      logError('users_pf delete', error);
       throw error;
     }
   };
@@ -450,7 +451,7 @@ export const DataProvider = ({ children }) => {
       }
       return null;
     } catch (error) {
-      console.error('Error adding proposal:', error);
+      logError('projections_pf add', error);
       throw error;
     }
   };
@@ -482,7 +483,7 @@ export const DataProvider = ({ children }) => {
       }
       return null;
     } catch (error) {
-      console.error('Error updating proposal:', error);
+      logError('projections_pf update', error);
       throw error;
     }
   };
@@ -502,7 +503,7 @@ export const DataProvider = ({ children }) => {
 
       setProposals(prev => prev.filter(proposal => proposal.id !== id));
     } catch (error) {
-      console.error('Error deleting proposal:', error);
+      logError('projections_pf delete', error);
       throw error;
     }
   };
@@ -531,7 +532,7 @@ export const DataProvider = ({ children }) => {
       setDocuments(docs);
       return docs;
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      logError('documents_pf fetch', error);
       throw error;
     }
   };
@@ -568,7 +569,7 @@ export const DataProvider = ({ children }) => {
       setDocuments((prev) => [...prev, doc]);
       return doc;
     } catch (error) {
-      console.error('Error adding document:', error);
+      logError('documents_pf add', error);
       throw error;
     }
   };
@@ -584,7 +585,7 @@ export const DataProvider = ({ children }) => {
         try {
           await deleteFile(doc.publitioId);
         } catch (e) {
-          console.error('Error deleting file from Publitio:', e);
+          logError('Publitio delete', e);
         }
       }
 
@@ -597,7 +598,7 @@ export const DataProvider = ({ children }) => {
 
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     } catch (error) {
-      console.error('Error deleting document:', error);
+      logError('documents_pf delete', error);
       throw error;
     }
   };
