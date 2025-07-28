@@ -70,7 +70,14 @@ Each financial analysis receives a unique **FNA code**. This code is automatical
 
 * The application generates the FNA code automatically when a new analysis is saved.
 * The code is shown on the Financial Analysis page right beside the save confirmation.
+
 * Clients can enter this code in the portal to claim the analysis and link it to their account.
+
+## Default Avatar
+
+All profiles fall back to a Publitio-hosted avatar image when no user photo is available. The URL is exported from `src/utils/constants.js` as `DEFAULT_AVATAR_URL` and used throughout the app.
+
+## Publitio Proxy Function
 
 ## Publitio Proxy Function
 

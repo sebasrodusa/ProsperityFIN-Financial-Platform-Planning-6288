@@ -11,6 +11,7 @@ import ProposalPDF from '../components/proposals/ProposalPDF';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import { getProfileImageUrl } from '../utils/profileImage';
+import { DEFAULT_AVATAR_URL } from '../utils/constants';
 import { useSupabaseClient } from '../lib/supabaseClient';
 import * as FiIcons from 'react-icons/fi';
 
@@ -626,7 +627,7 @@ const ClientPortal = () => {
               carrier={latestProposal.carrier ? {
                 id: latestProposal.carrier,
                 name: latestProposal.carrier,
-                logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+                logo: DEFAULT_AVATAR_URL,
                 rating: 'A+'
               } : null}
               strategy={latestProposal.strategy ? {
