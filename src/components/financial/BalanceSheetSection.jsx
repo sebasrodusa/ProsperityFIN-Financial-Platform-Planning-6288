@@ -114,6 +114,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
                   type="number"
                   value={getAssetAmount(category.id)}
                   onChange={(e) => handleAssetChange(category.id, e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input w-40"
                   placeholder="Value"
                 />
@@ -160,6 +161,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
                 type="number"
                 value={liability.amount}
                 onChange={(e) => handleUpdateLiability(liability.id, 'amount', e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="form-input w-32"
                 placeholder="Amount"
               />
@@ -167,6 +169,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
                 type="number"
                 value={liability.interestRate}
                 onChange={(e) => handleUpdateLiability(liability.id, 'interestRate', e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="form-input w-32"
                 placeholder="Interest Rate %"
               />
@@ -205,6 +208,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
               type="number"
               value={newLiability.amount}
               onChange={(e) => setNewLiability({...newLiability, amount: e.target.value})}
+              onWheel={(e) => e.target.blur()}
               className="form-input w-32"
               placeholder="Amount"
             />
@@ -212,6 +216,7 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
               type="number"
               value={newLiability.interestRate}
               onChange={(e) => setNewLiability({...newLiability, interestRate: e.target.value})}
+              onWheel={(e) => e.target.blur()}
               className="form-input w-32"
               placeholder="Interest Rate %"
             />

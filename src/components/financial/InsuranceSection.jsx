@@ -157,6 +157,7 @@ const InsuranceSection = ({
                       type="number"
                       value={policy.coverageAmount}
                       onChange={(e) => handleUpdatePolicy(policy.id, 'coverageAmount', e.target.value)}
+                      onWheel={(e) => e.target.blur()}
                       className="form-input"
                     />
                   </td>
@@ -165,6 +166,7 @@ const InsuranceSection = ({
                       type="number"
                       value={policy.annualPremium}
                       onChange={(e) => handleUpdatePolicy(policy.id, 'annualPremium', e.target.value)}
+                      onWheel={(e) => e.target.blur()}
                       className="form-input"
                     />
                   </td>
@@ -224,6 +226,7 @@ const InsuranceSection = ({
               type="number"
               value={newPolicy.coverageAmount}
               onChange={(e) => setNewPolicy({...newPolicy, coverageAmount: e.target.value})}
+              onWheel={(e) => e.target.blur()}
               className="form-input"
               placeholder="Coverage Amount"
             />
@@ -231,6 +234,7 @@ const InsuranceSection = ({
               type="number"
               value={newPolicy.annualPremium}
               onChange={(e) => setNewPolicy({...newPolicy, annualPremium: e.target.value})}
+              onWheel={(e) => e.target.blur()}
               className="form-input"
               placeholder="Annual Premium"
             />
@@ -289,6 +293,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.annualIncome}
                   onChange={(e) => handleCalculatorChange('annualIncome', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Annual income"
                 />
@@ -301,6 +306,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.yearsToReplace}
                   onChange={(e) => handleCalculatorChange('yearsToReplace', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Years to replace"
                 />
@@ -313,6 +319,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.finalExpenses}
                   onChange={(e) => handleCalculatorChange('finalExpenses', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Final expenses"
                 />
@@ -325,6 +332,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.educationFund}
                   onChange={(e) => handleCalculatorChange('educationFund', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Education fund needed"
                 />
@@ -342,6 +350,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.existingCoverage}
                   onChange={(e) => handleCalculatorChange('existingCoverage', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Existing coverage"
                 />
@@ -354,6 +363,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.liquidAssets}
                   onChange={(e) => handleCalculatorChange('liquidAssets', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Liquid assets"
                 />
@@ -366,6 +376,7 @@ const InsuranceSection = ({
                   type="number"
                   value={needsCalculator.retirementAccounts}
                   onChange={(e) => handleCalculatorChange('retirementAccounts', e.target.value)}
+                  onWheel={(e) => e.target.blur()}
                   className="form-input"
                   placeholder="Retirement accounts"
                 />
