@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import FileUpload from './FileUpload';
-import { DEFAULT_AVATAR_URL } from '../../utils/constants';
+import { getProfileImageUrl } from '../../utils/profileImage';
 
 const ProfileImageUpload = ({ initialUrl, folder = 'avatars', onChange }) => {
   const [preview, setPreview] = useState(initialUrl || '');
@@ -13,7 +13,7 @@ const ProfileImageUpload = ({ initialUrl, folder = 'avatars', onChange }) => {
   return (
     <div className="flex flex-col items-center space-y-2">
       <img
-        src={preview || DEFAULT_AVATAR_URL}
+        src={getProfileImageUrl({ profileImageUrl: preview })}
         alt="Profile"
         className="w-32 h-32 rounded-full object-cover"
       />

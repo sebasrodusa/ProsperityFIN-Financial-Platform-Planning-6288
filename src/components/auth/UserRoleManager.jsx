@@ -6,6 +6,7 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { getTransformedImage } from '../../services/publitio';
+import { getProfileImageUrl } from '../../utils/profileImage';
 
 const { FiUser, FiUsers, FiShield, FiBriefcase, FiSave, FiAlertTriangle } = FiIcons;
 
@@ -168,13 +169,10 @@ const UserRoleManager = ({ userId }) => {
       
       <div className="flex items-center space-x-4 mb-6">
         <img
-          src={
-            user.imageUrl
-              ? getTransformedImage(user.imageUrl, { width: 96, height: 96 })
-              : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  user.firstName + ' ' + user.lastName
-                )}&background=random`
-          }
+          src={getTransformedImage(
+            getProfileImageUrl(user),
+            { width: 96, height: 96 }
+          )}
           alt={user.firstName}
           className="w-12 h-12 rounded-full object-cover"
         />
