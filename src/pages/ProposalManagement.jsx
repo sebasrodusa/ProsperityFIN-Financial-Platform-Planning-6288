@@ -294,8 +294,8 @@ const ProposalManagement = () => {
       clientId: proposal.clientId,
       title: proposal.title,
       description: proposal.description,
-      strategy: proposal.strategy || '',
-      productType: proposal.productType || '',
+      strategy: proposal.strategy ? String(proposal.strategy) : '',
+      productType: proposal.productType ? String(proposal.productType) : '',
       carrier: proposal.carrier || '',
       initialLumpSum: proposal.initialLumpSum || '',
       monthlyContribution: proposal.monthlyContribution || '',
@@ -458,7 +458,7 @@ const ProposalManagement = () => {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {filteredProposals.map((proposal) => {
-            const strategy = FINANCIAL_STRATEGIES.find(s => s.id === proposal.strategy);
+            const strategy = FINANCIAL_STRATEGIES.find(s => String(s.id) === String(proposal.strategy));
             const product = PRODUCT_TYPES[proposal.productType];
             const carrier = DEFAULT_CARRIERS.find(c => c.id === proposal.carrier);
             return (
@@ -629,14 +629,18 @@ const ProposalManagement = () => {
               onStrategyChange={(strategy) =>
                 setFormData((prev) => ({
                   ...prev,
-                  strategy,
+                  strategy: strategy ? String(strategy) : '',
                   productType: '',
                   carrier: ''
                 }))
               }
               selectedProduct={formData.productType}
               onProductChange={(productType) =>
-                setFormData((prev) => ({ ...prev, productType, carrier: '' }))
+                setFormData((prev) => ({
+                  ...prev,
+                  productType: productType ? String(productType) : '',
+                  carrier: ''
+                }))
               }
             />
 
@@ -714,7 +718,7 @@ const ProposalManagement = () => {
               client={clients.find(c => c.id === selectedProposal.clientId)}
               advisor={users.find(u => u.id === selectedProposal.advisorId)}
               carrier={DEFAULT_CARRIERS.find(c => c.id === selectedProposal.carrier)}
-              strategy={FINANCIAL_STRATEGIES.find(s => s.id === selectedProposal.strategy)}
+              strategy={FINANCIAL_STRATEGIES.find(s => String(s.id) === String(selectedProposal.strategy))}
               product={PRODUCT_TYPES[selectedProposal.productType]}
             />
           )}

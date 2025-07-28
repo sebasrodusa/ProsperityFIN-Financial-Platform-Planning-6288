@@ -57,12 +57,12 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
   // Update available products when strategy is selected
   useEffect(() => {
     if (selectedStrategy) {
-      const strategy = strategies.find(s => s.id === selectedStrategy);
+      const strategy = strategies.find(s => String(s.id) === String(selectedStrategy));
       if (strategy) {
         setAvailableProducts(strategy.products);
         
         // Reset product selection if current selection is not available
-        if (selectedProduct && !strategy.products.find(p => p.id === selectedProduct)) {
+        if (selectedProduct && !strategy.products.find(p => String(p.id) === String(selectedProduct))) {
           onProductChange(null);
         }
       }
@@ -131,9 +131,9 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
             <button
               key={strategy.id}
               type="button"
-              onClick={() => onStrategyChange(strategy.id)}
+              onClick={() => onStrategyChange(String(strategy.id))}
               className={`p-4 text-left border-2 rounded-lg transition-all ${
-                selectedStrategy === strategy.id
+                selectedStrategy === String(strategy.id)
                   ? 'border-primary-500 bg-primary-50'
                   : 'border-gray-200 hover:border-gray-300'
               }`}
@@ -169,9 +169,9 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
               <button
                 key={product.id}
                 type="button"
-                onClick={() => onProductChange(product.id)}
+                onClick={() => onProductChange(String(product.id))}
                 className={`p-3 text-left border-2 rounded-lg transition-all ${
-                  selectedProduct === product.id
+                  selectedProduct === String(product.id)
                     ? 'border-primary-500 bg-primary-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
