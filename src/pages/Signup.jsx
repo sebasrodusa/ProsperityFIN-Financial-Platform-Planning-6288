@@ -100,6 +100,7 @@ const Signup = () => {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/login`,
           data: {
             firstName: formData.firstName,
             lastName: formData.lastName,
