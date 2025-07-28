@@ -154,6 +154,7 @@ const FinancialEvaluationForm = ({
                 type="number"
                 value={item.amount}
                 onChange={(e) => updateIncomeItem(index, 'amount', e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="form-input w-32"
                 placeholder="Amount"
                 min="0"
@@ -206,6 +207,7 @@ const FinancialEvaluationForm = ({
                 type="number"
                 value={item.amount}
                 onChange={(e) => updateExpenseItem(index, 'amount', e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="form-input w-32"
                 placeholder="Amount"
                 min="0"

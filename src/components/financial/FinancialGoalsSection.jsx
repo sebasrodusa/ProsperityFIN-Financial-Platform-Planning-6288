@@ -157,6 +157,7 @@ const FinancialGoalsSection = ({ goals = [], onGoalsChange }) => {
                         );
                         onGoalsChange(updated);
                       }}
+                      onWheel={(e) => e.target.blur()}
                       className="form-input mt-1"
                       placeholder="0"
                     />
@@ -172,6 +173,7 @@ const FinancialGoalsSection = ({ goals = [], onGoalsChange }) => {
                         );
                         onGoalsChange(updated);
                       }}
+                      onWheel={(e) => e.target.blur()}
                       className="form-input mt-1"
                       placeholder="0"
                     />
@@ -312,6 +314,7 @@ const FinancialGoalsSection = ({ goals = [], onGoalsChange }) => {
                 type="number"
                 value={newGoal.targetAmount}
                 onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value })}
+                onWheel={(e) => e.target.blur()}
                 className="form-input"
                 placeholder="0"
               />
@@ -324,6 +327,7 @@ const FinancialGoalsSection = ({ goals = [], onGoalsChange }) => {
                 type="number"
                 value={newGoal.currentAmount}
                 onChange={(e) => setNewGoal({ ...newGoal, currentAmount: e.target.value })}
+                onWheel={(e) => e.target.blur()}
                 className="form-input"
                 placeholder="0"
               />

@@ -214,6 +214,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                 type="number"
                 value={source.amount}
                 onChange={(e) => handleIncomeUpdate(source.id, 'amount', e.target.value)}
+                onWheel={(e) => e.target.blur()}
                 className="form-input w-32"
                 placeholder="Amount"
               />
@@ -255,18 +256,19 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                 </option>
               ))}
             </select>
-            <input
-              type="number"
-              value={newIncomeSource.amount}
-              onChange={(e) => {
-                setNewIncomeSource({ ...newIncomeSource, amount: e.target.value });
-                if (incomeErrors.amount && e.target.value) {
-                  setIncomeErrors(prev => ({ ...prev, amount: false }));
-                }
-              }}
-              className={`form-input w-32 ${incomeErrors.amount ? 'border-danger-300' : ''}`}
-              placeholder="Amount"
-            />
+              <input
+                type="number"
+                value={newIncomeSource.amount}
+                onChange={(e) => {
+                  setNewIncomeSource({ ...newIncomeSource, amount: e.target.value });
+                  if (incomeErrors.amount && e.target.value) {
+                    setIncomeErrors(prev => ({ ...prev, amount: false }));
+                  }
+                }}
+                onWheel={(e) => e.target.blur()}
+                className={`form-input w-32 ${incomeErrors.amount ? 'border-danger-300' : ''}`}
+                placeholder="Amount"
+              />
             <select
               value={newIncomeSource.frequency}
               onChange={(e) => setNewIncomeSource({...newIncomeSource, frequency: e.target.value})}
@@ -307,6 +309,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                       type="number"
                       value={getExpenseAmount(category.id, item.id)}
                       onChange={(e) => handleExpenseChange(category.id, item.id, e.target.value)}
+                      onWheel={(e) => e.target.blur()}
                       className="form-input w-32"
                       placeholder="0"
                     />
