@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
+import { uploadFile } from '../services/publitio';
+import { getProfileImageUrl } from '../utils/profileImage';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -19,7 +21,7 @@ const TEAM_IDS = [
 
 const UserManagement = () => {
   const { user } = useAuth();
-  const { users, addUser, updateUser, deleteUser } = useData();
+  const { users, addUser, updateUser, deleteUser, recordDocument } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -31,6 +33,8 @@ const UserManagement = () => {
     teamId: '',
     agentCode: '',
     avatar: '',
+    profileImageId: '',
+    profileImageUrl: '',
     status: 'active'
   });
   const [imagePreview, setImagePreview] = useState(null);
@@ -63,9 +67,16 @@ const UserManagement = () => {
       role: formData.role,
       team_id: formData.teamId,
       agent_code: agentCode,
-      avatar: formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
       status: formData.status
     };
+
+    if (formData.profileImageId || formData.profileImageUrl) {
+      userData.profileImageId = formData.profileImageId;
+      userData.profileImageUrl = formData.profileImageUrl;
+      userData.avatar = null;
+    } else {
+      userData.avatar = formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face';
+    }
 
     if (selectedUser) {
       updateUser(selectedUser.id, userData);
@@ -85,6 +96,8 @@ const UserManagement = () => {
       teamId: '',
       agentCode: '',
       avatar: '',
+      profileImageId: '',
+      profileImageUrl: '',
       status: 'active'
     });
     setImagePreview(null);
@@ -100,9 +113,11 @@ const UserManagement = () => {
       teamId: userToEdit.teamId || '',
       agentCode: userToEdit.agentCode || '',
       avatar: userToEdit.avatar,
+      profileImageId: userToEdit.profileImageId || '',
+      profileImageUrl: userToEdit.profileImageUrl || '',
       status: userToEdit.status || 'active'
     });
-    setImagePreview(userToEdit.avatar);
+    setImagePreview(userToEdit.profileImageUrl || userToEdit.avatar);
     setIsEditModalOpen(true);
   };
 
@@ -130,9 +145,20 @@ const UserManagement = () => {
     return false;
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) return;
+    try {
+      const upload = await uploadFile(file, 'avatars');
+      setImagePreview(upload.url);
+      setFormData(prev => ({
+        ...prev,
+        profileImageId: upload.public_id,
+        profileImageUrl: upload.url,
+        avatar: ''
+      }));
+      await recordDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
+    } catch (err) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -207,7 +233,7 @@ const UserManagement = () => {
                   <td>
                     <div className="flex items-center space-x-3">
                       <img
-                        src={userItem.avatar}
+                        src={getProfileImageUrl(userItem)}
                         alt={userItem.name}
                         className="w-10 h-10 rounded-full object-cover"
                       />
@@ -290,7 +316,7 @@ const UserManagement = () => {
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 <img
-                  src={imagePreview || formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'}
+                  src={imagePreview || getProfileImageUrl(formData)}
                   alt="Profile"
                   className="w-24 h-24 rounded-full object-cover"
                 />

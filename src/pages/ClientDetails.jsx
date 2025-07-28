@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
 import { useCrm } from '../contexts/CrmContext';
 import Navbar from '../components/layout/Navbar';
+import { getProfileImageUrl } from '../utils/profileImage';
 import Modal from '../components/ui/Modal';
 import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
@@ -117,7 +118,7 @@ const ClientDetails = () => {
             <div className="flex justify-between items-start">
               <div className="flex items-center space-x-4">
                 <img
-                  src={client.avatar}
+                  src={getProfileImageUrl(client)}
                   alt={client.name}
                   className="w-16 h-16 rounded-full object-cover"
                 />
@@ -584,7 +585,7 @@ const ClientDetails = () => {
                   </div>
                   <div className="text-center">
                     <img
-                      src={advisor.avatar}
+                      src={getProfileImageUrl(advisor)}
                       alt={advisor.name}
                       className="w-16 h-16 rounded-full object-cover mx-auto mb-4"
                     />

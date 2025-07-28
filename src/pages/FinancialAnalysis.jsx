@@ -10,6 +10,7 @@ import Modal from '../components/ui/Modal';
 import CashflowSection from '../components/financial/CashflowSection';
 import BalanceSheetSection from '../components/financial/BalanceSheetSection';
 import InsuranceSection from '../components/financial/InsuranceSection';
+import { getProfileImageUrl } from '../utils/profileImage';
 import FinancialPlanningSection from '../components/financial/FinancialPlanningSection';
 import FinancialGoalsSection from '../components/financial/FinancialGoalsSection';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -435,7 +436,7 @@ const FinancialAnalysis = () => {
               className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
             >
               <div className="flex items-center space-x-3">
-                <img src={client.avatar} alt={client.name} className="w-10 h-10 rounded-full object-cover" />
+                <img src={getProfileImageUrl(client)} alt={client.name} className="w-10 h-10 rounded-full object-cover" />
                 <div>
                   <p className="font-medium text-gray-900">{client.name}</p>
                   <p className="text-sm text-gray-500">{client.email}</p>

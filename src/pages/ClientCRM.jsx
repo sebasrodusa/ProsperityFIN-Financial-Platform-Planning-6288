@@ -9,6 +9,7 @@ import ClientTasks from '../components/crm/ClientTasks';
 import ClientNotes from '../components/crm/ClientNotes';
 import StatusHistory from '../components/crm/StatusHistory';
 import SafeIcon from '../common/SafeIcon';
+import { getProfileImageUrl } from '../utils/profileImage';
 import * as FiIcons from 'react-icons/fi';
 
 const { FiArrowLeft, FiUser, FiMail, FiPhone, FiCalendar, FiFileText, FiMessageSquare } = FiIcons;
@@ -148,7 +149,7 @@ const ClientCRM = () => {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center space-x-4">
                 <img
-                  src={client.avatar}
+                  src={getProfileImageUrl(client)}
                   alt={client.name}
                   className="w-16 h-16 rounded-full object-cover"
                 />
