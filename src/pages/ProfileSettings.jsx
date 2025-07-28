@@ -19,7 +19,7 @@ const TEAM_IDS = [
 
 const ProfileSettings = () => {
   const { user, signOut } = useAuth();
-  const { updateUser, recordDocument } = useData();
+  const { updateUser, addDocument } = useData();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,7 +77,7 @@ const ProfileSettings = () => {
         profileImageUrl: upload.url,
         avatar: ''
       }));
-      await recordDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
+      await addDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
     } catch (err) {
       const reader = new FileReader();
       reader.onloadend = () => {
