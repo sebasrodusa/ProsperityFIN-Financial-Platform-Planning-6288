@@ -22,7 +22,7 @@ const TEAM_IDS = [
 
 const UserManagement = () => {
   const { user } = useAuth();
-  const { users, addUser, updateUser, deleteUser, recordDocument } = useData();
+  const { users, addUser, updateUser, deleteUser, addDocument } = useData();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -158,7 +158,7 @@ const UserManagement = () => {
         profileImageUrl: upload.url,
         avatar: ''
       }));
-      await recordDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
+      await addDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
     } catch (err) {
       const reader = new FileReader();
       reader.onloadend = () => {

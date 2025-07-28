@@ -547,16 +547,20 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  const addDocument = async ({ file, name, clientId }) => {
+  const addDocument = async ({ file, name, clientId, publitioId, url }) => {
     if (!supabase) {
       throw new Error('Supabase client not available');
     }
-    if (!file) {
-      throw new Error('File required');
+    if (!file && !(publitioId && url)) {
+      throw new Error('File or publitio data required');
     }
 
     try {
-      const upload = await uploadFile(file, 'documents');
+      let upload = null;
+      if (file) {
+        upload = await uploadFile(file, 'documents');
+      }
+
       const userId = user.supabaseId || user.id;
       const { data, error } = await supabase
         .from('documents_pf')
@@ -564,9 +568,9 @@ export const DataProvider = ({ children }) => {
           decamelizeKeys({
             userId,
             clientId,
-            name: name || file.name,
-            publitioId: upload.public_id,
-            url: upload.url,
+            name: name || file?.name,
+            publitioId: publitioId || upload.public_id,
+            url: url || upload.url,
             createdAt: new Date().toISOString(),
           })
         )
