@@ -19,7 +19,7 @@ async function sha1(message: string): Promise<string> {
 }
 
 serve(async (req) => {
-  if (req.method !== "POST") {
+  if (req.method !== "POST" && req.method !== "DELETE") {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
@@ -47,20 +47,68 @@ serve(async (req) => {
     });
   }
 
-  let form: FormData;
-  try {
-    form = await req.formData();
-  } catch (_) {
-    return new Response(JSON.stringify({ error: "Invalid form" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (req.method === "POST") {
+    let form: FormData;
+    try {
+      form = await req.formData();
+    } catch (_) {
+      return new Response(JSON.stringify({ error: "Invalid form" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const file = form.get("file");
+    const publicId = form.get("public_id")?.toString();
+    if (!(file instanceof File)) {
+      return new Response(JSON.stringify({ error: "File required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    const ts = Math.floor(Date.now() / 1000).toString();
+    const nonce = Math.floor(10000000 + Math.random() * 90000000).toString();
+    const signature = await sha1(ts + nonce + publitioSecret);
+
+    const url = new URL("https://api.publit.io/v1/files/create");
+    url.searchParams.set("api_key", publitioKey);
+    url.searchParams.set("api_timestamp", ts);
+    url.searchParams.set("api_nonce", nonce);
+    url.searchParams.set("api_signature", signature);
+
+    const body = new FormData();
+    if (publicId) body.append("public_id", publicId);
+    body.append("file", file);
+
+    try {
+      const res = await fetch(url.toString(), { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok || !data || data.error) {
+        return new Response(JSON.stringify({ error: data?.message || "Publitio error" }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(
+        JSON.stringify({ public_id: data.public_id ?? data.id, url: data.url || data.url_preview }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err) {
+      console.error(err);
+      return new Response(JSON.stringify({ error: "Publitio request failed" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
   }
 
-  const file = form.get("file");
-  const publicId = form.get("public_id")?.toString();
-  if (!(file instanceof File)) {
-    return new Response(JSON.stringify({ error: "File required" }), {
+  // DELETE handler
+  const url = new URL(req.url);
+  const publicId = url.searchParams.get("public_id") || "";
+  if (!publicId) {
+    return new Response(JSON.stringify({ error: "public_id required" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
     });
@@ -70,20 +118,16 @@ serve(async (req) => {
   const nonce = Math.floor(10000000 + Math.random() * 90000000).toString();
   const signature = await sha1(ts + nonce + publitioSecret);
 
-  const url = new URL("https://api.publit.io/v1/files/create");
-  url.searchParams.set("api_key", publitioKey);
-  url.searchParams.set("api_timestamp", ts);
-  url.searchParams.set("api_nonce", nonce);
-  url.searchParams.set("api_signature", signature);
-
-  const body = new FormData();
-  if (publicId) body.append("public_id", publicId);
-  body.append("file", file);
+  const delUrl = new URL(`https://api.publit.io/v1/files/delete/${encodeURIComponent(publicId)}`);
+  delUrl.searchParams.set("api_key", publitioKey);
+  delUrl.searchParams.set("api_timestamp", ts);
+  delUrl.searchParams.set("api_nonce", nonce);
+  delUrl.searchParams.set("api_signature", signature);
 
   try {
-    const res = await fetch(url.toString(), { method: "POST", body });
-    const data = await res.json();
-    if (!res.ok || !data || data.error) {
+    const res = await fetch(delUrl.toString(), { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data || data.error || !data.success) {
       return new Response(JSON.stringify({ error: data?.message || "Publitio error" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -91,7 +135,7 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ public_id: data.public_id ?? data.id, url: data.url || data.url_preview }),
+      JSON.stringify({ success: true }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   } catch (err) {

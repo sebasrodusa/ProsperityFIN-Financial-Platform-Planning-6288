@@ -60,11 +60,15 @@ describe('uploadFile', () => {
 describe('deleteFile', () => {
   it('deletes successfully', async () => {
     supabase.auth.getSession.mockResolvedValue({ data: { session: { access_token: 'tok' } } });
-    fetch.mockResolvedValue({ ok: true, json: vi.fn() });
+    fetch.mockResolvedValue({ ok: true, json: vi.fn().mockResolvedValue({ success: true }) });
 
-    const result = await deleteFile('id1');
+    const result = await deleteFile('file123');
 
-    expect(fetch).toHaveBeenCalled();
+    const baseUrl = 'https://test.functions.supabase.co/publitio-proxy?public_id=file123';
+    expect(fetch).toHaveBeenCalledWith(baseUrl, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer tok' }
+    });
     expect(result).toBe(true);
   });
 
@@ -72,6 +76,6 @@ describe('deleteFile', () => {
     supabase.auth.getSession.mockResolvedValue({ data: { session: { access_token: 'tok' } } });
     fetch.mockResolvedValue({ ok: false, json: vi.fn().mockResolvedValue({ error: 'bad' }) });
 
-    await expect(deleteFile('id1')).rejects.toThrow('bad');
+    await expect(deleteFile('file123')).rejects.toThrow('bad');
   });
 });
