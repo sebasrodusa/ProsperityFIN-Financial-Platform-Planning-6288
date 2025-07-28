@@ -240,6 +240,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
           <div className="flex items-center space-x-4">
             <select
               aria-label="Select Income Type"
+              required
               value={newIncomeSource.category}
               onChange={(e) => {
                 setNewIncomeSource({ ...newIncomeSource, category: e.target.value });
@@ -247,7 +248,7 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                   setIncomeErrors(prev => ({ ...prev, category: false }));
                 }
               }}
-              className={`form-input flex-1 ${incomeErrors.category ? 'border-danger-300' : ''}`}
+              className={`form-input w-48 ${incomeErrors.category ? 'border-danger-300' : ''}`}
             >
               <option value="">Select Income Type</option>
               {INCOME_CATEGORIES.map(category => (
@@ -281,9 +282,9 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
             <button
               onClick={handleAddIncome}
               disabled={!newIncomeSource.category || !newIncomeSource.amount}
-              className={`p-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors ${(!newIncomeSource.category || !newIncomeSource.amount) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`btn-primary ${(!newIncomeSource.category || !newIncomeSource.amount) ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <SafeIcon icon={FiPlus} className="w-4 h-4" />
+              Add Income
             </button>
             {(incomeErrors.category || incomeErrors.amount) && (
               <p className="text-danger-700 text-sm ml-2">Both fields are required</p>
