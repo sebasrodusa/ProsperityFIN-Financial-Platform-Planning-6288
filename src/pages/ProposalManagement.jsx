@@ -17,6 +17,7 @@ import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { useSupabaseClient } from '../lib/supabaseClient';
 import { decamelizeKeys } from '../utils/decamelize';
+import { DEFAULT_AVATAR_URL } from '../utils/constants';
 
 const { FiPlus, FiSearch, FiEdit, FiTrash2, FiEye, FiSend, FiCalendar, FiUser, FiDownload, FiPrinter } = FiIcons;
 
@@ -97,7 +98,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'ethos',
     name: 'Ethos',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['term_life', 'whole_life', 'universal_life'],
     rating: 'A+',
     established: '2016'
@@ -105,7 +106,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'fg',
     name: 'F&G (Fidelity & Guaranty)',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['fixed_annuity', 'indexed_annuity', 'universal_life'],
     rating: 'A',
     established: '1959'
@@ -113,7 +114,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'ameritas',
     name: 'Ameritas',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['whole_life', 'universal_life', 'variable_universal_life', 'disability_insurance'],
     rating: 'A+',
     established: '1887'
@@ -121,7 +122,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'mutual_omaha',
     name: 'Mutual of Omaha',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['term_life', 'whole_life', 'universal_life', 'disability_insurance'],
     rating: 'A+',
     established: '1909'
@@ -129,7 +130,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'american_national',
     name: 'American National',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['whole_life', 'universal_life', 'variable_universal_life', 'fixed_annuity'],
     rating: 'A',
     established: '1905'
@@ -137,7 +138,7 @@ const DEFAULT_CARRIERS = [
   {
     id: 'american_equity',
     name: 'American Equity',
-    logo: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=100&h=100&fit=crop',
+    logo: DEFAULT_AVATAR_URL,
     products: ['fixed_annuity', 'indexed_annuity', 'variable_annuity'],
     rating: 'A-',
     established: '1995'

@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
 import { uploadFile } from '../services/publitio';
 import { getProfileImageUrl } from '../utils/profileImage';
+import { DEFAULT_AVATAR_URL } from '../utils/constants';
 import Navbar from '../components/layout/Navbar';
 import Modal from '../components/ui/Modal';
 import StatusBadge from '../components/ui/StatusBadge';
@@ -75,7 +76,7 @@ const UserManagement = () => {
       userData.profileImageUrl = formData.profileImageUrl;
       userData.avatar = null;
     } else {
-      userData.avatar = formData.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face';
+      userData.avatar = formData.avatar || DEFAULT_AVATAR_URL;
     }
 
     if (selectedUser) {
