@@ -626,9 +626,18 @@ const ProposalManagement = () => {
             {/* Strategy Selection */}
             <StrategySelector
               selectedStrategy={formData.strategy}
-              onStrategyChange={(strategy) => setFormData({...formData, strategy, productType: '', carrier: ''})}
+              onStrategyChange={(strategy) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  strategy,
+                  productType: '',
+                  carrier: ''
+                }))
+              }
               selectedProduct={formData.productType}
-              onProductChange={(productType) => setFormData({...formData, productType, carrier: ''})}
+              onProductChange={(productType) =>
+                setFormData((prev) => ({ ...prev, productType, carrier: '' }))
+              }
             />
 
             {/* Carrier Selection */}
