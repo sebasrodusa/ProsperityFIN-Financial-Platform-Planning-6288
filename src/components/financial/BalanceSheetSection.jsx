@@ -154,8 +154,9 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
                 type="text"
                 value={liability.description}
                 onChange={(e) => handleUpdateLiability(liability.id, 'description', e.target.value)}
-                className="form-input flex-1"
+                className="form-input flex-1 md:w-60"
                 placeholder="Liability description"
+                maxLength={10}
               />
               <input
                 type="number"
@@ -201,8 +202,9 @@ const BalanceSheetSection = ({ assets = [], liabilities = [], onAssetChange, onL
               type="text"
               value={newLiability.description}
               onChange={(e) => setNewLiability({...newLiability, description: e.target.value})}
-              className="form-input flex-1"
+              className="form-input flex-1 md:w-60"
               placeholder="New liability"
+              maxLength={10}
             />
             <input
               type="number"
