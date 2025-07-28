@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
+import { uploadFile } from '../services/publitio';
+import { getProfileImageUrl } from '../utils/profileImage';
 import { motion } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import SafeIcon from '../common/SafeIcon';
@@ -17,7 +19,7 @@ const TEAM_IDS = [
 
 const ProfileSettings = () => {
   const { user, signOut } = useAuth();
-  const { updateUser } = useData();
+  const { updateUser, recordDocument } = useData();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -27,7 +29,10 @@ const ProfileSettings = () => {
     newPassword: '',
     confirmPassword: '',
     agentCode: '',
-    teamId: ''
+    teamId: '',
+    profileImageId: '',
+    profileImageUrl: '',
+    avatar: ''
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
@@ -44,7 +49,10 @@ const ProfileSettings = () => {
         newPassword: '',
         confirmPassword: '',
         agentCode: user.agentCode || '',
-        teamId: user.teamId || ''
+        teamId: user.teamId || '',
+        profileImageId: user.profileImageId || '',
+        profileImageUrl: user.profileImageUrl || '',
+        avatar: user.avatar || ''
       });
     }
   }, [user]);
@@ -57,9 +65,20 @@ const ProfileSettings = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) return;
+    try {
+      const upload = await uploadFile(file, 'avatars');
+      setImagePreview(upload.url);
+      setFormData(prev => ({
+        ...prev,
+        profileImageId: upload.public_id,
+        profileImageUrl: upload.url,
+        avatar: ''
+      }));
+      await recordDocument({ name: file.name, clientId: null, publitioId: upload.public_id, url: upload.url });
+    } catch (err) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -95,8 +114,15 @@ const ProfileSettings = () => {
         dateOfBirth: formData.dateOfBirth,
         agent_code: formData.agentCode,
         team_id: formData.teamId,
-        avatar: imagePreview || user.avatar
       };
+
+      if (formData.profileImageId || formData.profileImageUrl) {
+        updatedData.profileImageId = formData.profileImageId;
+        updatedData.profileImageUrl = formData.profileImageUrl;
+        updatedData.avatar = null;
+      } else if (formData.avatar) {
+        updatedData.avatar = formData.avatar;
+      }
       
       updateUser(user.id, updatedData);
       setSuccessMessage('Profile updated successfully.');
@@ -154,7 +180,7 @@ const ProfileSettings = () => {
               <div className="flex flex-col items-center space-y-4">
                 <div className="relative">
                   <img
-                    src={imagePreview || user?.avatar || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'}
+                    src={imagePreview || getProfileImageUrl(user)}
                     alt={user?.name}
                     className="w-32 h-32 rounded-full object-cover"
                   />

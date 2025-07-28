@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { getTransformedImage } from '../../services/publitio';
+import { getProfileImageUrl } from "../../utils/profileImage";
 
 const { FiLogOut, FiChevronDown, FiUser, FiSettings } = FiIcons;
 
@@ -74,13 +75,7 @@ const Navbar = () => {
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <img
-                src={
-                  user?.imageUrl
-                    ? getTransformedImage(user.imageUrl, { width: 64, height: 64 })
-                    : `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user?.fullName || 'User'
-                      )}&background=random`
-                }
+                src={getTransformedImage(getProfileImageUrl(user), { width: 64, height: 64 })}
                 alt={user?.fullName || 'User'}
                 className="w-8 h-8 rounded-full object-cover"
               />

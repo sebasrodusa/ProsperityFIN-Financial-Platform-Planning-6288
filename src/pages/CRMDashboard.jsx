@@ -8,6 +8,7 @@ import Navbar from '../components/layout/Navbar';
 import ClientStatusStepper, { FUNNEL_STAGES } from '../components/crm/ClientStatusStepper';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { getProfileImageUrl } from '../utils/profileImage';
 
 const { FiSearch, FiFilter, FiUsers, FiTrendingUp, FiClock, FiTarget, FiEye, FiCalendar, FiArchive, FiToggleRight } = FiIcons;
 
@@ -278,7 +279,7 @@ const CRMDashboard = () => {
                   <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                     {/* Client Info */}
                     <div className="flex items-center space-x-4 flex-1">
-                      <img src={client.avatar} alt={client.name} className="w-12 h-12 rounded-full object-cover" />
+                      <img src={getProfileImageUrl(client)} alt={client.name} className="w-12 h-12 rounded-full object-cover" />
                       <div>
                         <div className="flex items-center">
                           <h3 className="font-semibold text-gray-900">{client.name}</h3>

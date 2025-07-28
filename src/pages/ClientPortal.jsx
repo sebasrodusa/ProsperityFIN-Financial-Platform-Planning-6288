@@ -10,6 +10,7 @@ import ClientForm from '../components/forms/ClientForm';
 import ProposalPDF from '../components/proposals/ProposalPDF';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
+import { getProfileImageUrl } from '../utils/profileImage';
 import { useSupabaseClient } from '../lib/supabaseClient';
 import * as FiIcons from 'react-icons/fi';
 
@@ -248,7 +249,7 @@ const ClientPortal = () => {
                 </div>
 
                 <div className="flex items-center space-x-4 mb-6">
-                  <img src={clientData.avatar} alt={clientData.name} className="w-20 h-20 rounded-full object-cover" />
+                  <img src={getProfileImageUrl(clientData)} alt={clientData.name} className="w-20 h-20 rounded-full object-cover" />
                   <div>
                     <h3 className="text-2xl font-bold text-gray-900">{clientData.name}</h3>
                     <p className="text-gray-600">{clientData.email}</p>
@@ -522,7 +523,7 @@ const ClientPortal = () => {
                   </div>
                   <div className="text-center">
                     <img
-                      src={advisor.avatar}
+                      src={getProfileImageUrl(advisor)}
                       alt={advisor.name}
                       className="w-16 h-16 rounded-full object-cover mx-auto mb-4"
                     />

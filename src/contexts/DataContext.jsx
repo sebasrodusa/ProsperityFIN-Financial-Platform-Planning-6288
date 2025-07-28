@@ -338,7 +338,12 @@ export const DataProvider = ({ children }) => {
     }
 
     try {
-      const { id, ...cleanUserData } = userData;
+      const { id, profileImageId, profileImageUrl, ...cleanUserData } = userData;
+      if (profileImageId || profileImageUrl) {
+        cleanUserData.avatar = null;
+        cleanUserData.profileImageId = profileImageId;
+        cleanUserData.profileImageUrl = profileImageUrl;
+      }
       const userId = user.supabaseId || user.id;
 
       const { data, error } = await supabase
@@ -374,7 +379,12 @@ export const DataProvider = ({ children }) => {
 
     try {
       // Remove id and created_at from updates
-      const { id: removeId, created_at, ...cleanUpdates } = updates;
+      const { id: removeId, created_at, profileImageId, profileImageUrl, ...cleanUpdates } = updates;
+      if (profileImageId || profileImageUrl) {
+        cleanUpdates.avatar = null;
+        cleanUpdates.profileImageId = profileImageId;
+        cleanUpdates.profileImageUrl = profileImageUrl;
+      }
       cleanUpdates.updatedAt = new Date().toISOString();
 
       const { data, error } = await supabase
@@ -574,6 +584,38 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const recordDocument = async ({ name, clientId, publitioId, url }) => {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+    try {
+      const userId = user.supabaseId || user.id;
+      const { data, error } = await supabase
+        .from('documents_pf')
+        .insert(
+          decamelizeKeys({
+            userId,
+            clientId,
+            name,
+            publitioId,
+            url,
+            createdAt: new Date().toISOString(),
+          })
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const doc = camelizeKeys(data);
+      setDocuments((prev) => [...prev, doc]);
+      return doc;
+    } catch (error) {
+      logError('documents_pf record', error);
+      throw error;
+    }
+  };
+
   const deleteDocument = async (id) => {
     if (!supabase) {
       throw new Error('Supabase client not available');
@@ -628,6 +670,7 @@ export const DataProvider = ({ children }) => {
     deleteProposal,
     fetchDocuments,
     addDocument,
+    recordDocument,
     deleteDocument,
     refreshData
   };

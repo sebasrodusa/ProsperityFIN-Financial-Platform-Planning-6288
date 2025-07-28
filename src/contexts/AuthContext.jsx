@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { getProfileImageUrl } from '../utils/profileImage';
 import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext();
@@ -26,8 +27,11 @@ const transformUser = (authUser, profile) => {
     role: profile?.role || authUser.user_metadata?.role || 'client',
     teamId: profile?.team_id || authUser.user_metadata?.teamId,
     agentCode: profile?.agent_code || authUser.user_metadata?.agentCode,
+    
     avatar: profile?.avatar || authUser.user_metadata?.avatar_url,
+    profileImageUrl: profile?.profile_image_url,
     phone: profile?.phone || authUser.user_metadata?.phone,
+    imageUrl: getProfileImageUrl({ profileImageUrl: profile?.profile_image_url, avatar: profile?.avatar || authUser.user_metadata?.avatar_url }),
   };
 };
 

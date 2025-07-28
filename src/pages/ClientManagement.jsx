@@ -10,6 +10,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import StatusBadgeWithIcon from '../components/crm/StatusBadgeWithIcon';
 import Toggle from '../components/ui/Toggle';
 import ClientForm from '../components/forms/ClientForm';
+import { getProfileImageUrl } from '../utils/profileImage';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
@@ -227,7 +228,7 @@ const ClientManagement = () => {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <img src={client.avatar} alt={client.name} className="w-12 h-12 rounded-full object-cover" />
+                    <img src={getProfileImageUrl(client)} alt={client.name} className="w-12 h-12 rounded-full object-cover" />
                     <div>
                       <div className="flex items-center">
                         <h3 className="font-semibold text-gray-900">{client.name}</h3>
