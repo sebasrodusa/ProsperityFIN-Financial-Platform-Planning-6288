@@ -36,7 +36,11 @@ const ClientFinancialReport = () => {
     if (client && analysis) {
       // Find advisor
       const advisor = users.find(u => u.id === client.advisorId);
-      setAdvisorName(advisor ? advisor.name : 'Not Assigned');
+      setAdvisorName(
+        advisor?.name ||
+        advisor?.fullName ||
+        'Not Assigned'
+      );
 
       // Process financial data for the report
       const totalIncome = analysis.income_sources?.reduce((sum, source) => sum + parseFloat(source.amount || 0), 0) || 0;
@@ -58,7 +62,12 @@ const ClientFinancialReport = () => {
           age: calculateAge(client.dateOfBirth),
           email: client.email,
           phone: client.phone,
-          spouse: client.spouse?.name || 'None',
+          spouse:
+            client.spouse?.name ||
+            client.spouseName ||
+            client.spouse_name ||
+            client.spouseInfo?.name ||
+            null,
           children: client.children?.length || 0,
           fin: financialIndependenceNumber
         },
@@ -321,7 +330,7 @@ const ClientFinancialReport = () => {
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
                         <span className="text-gray-900">
-                          {reportData.clientInfo.spouse !== 'None' ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
+                          {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
                           {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
                         </span>
                       </div>
