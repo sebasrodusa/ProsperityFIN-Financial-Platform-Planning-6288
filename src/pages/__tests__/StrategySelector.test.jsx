@@ -4,15 +4,17 @@ import '@testing-library/jest-dom';
 import { vi } from 'vitest';
 
 const strategiesData = [
-  { id: '1', name: 'Strategy A', description: 'Desc A', category: 'retirement', strategy_products_pf: [] },
-  { id: '2', name: 'Strategy B', description: 'Desc B', category: 'wealth_building', strategy_products_pf: [] }
+  { id: '1', name: 'Strategy A', description: 'Desc A', category: 'retirement', is_featured: true, strategy_products_pf: [] },
+  { id: '2', name: 'Strategy B', description: 'Desc B', category: 'wealth_building', is_featured: false, strategy_products_pf: [] }
 ];
 
 vi.mock('../../lib/supabaseClient', () => ({
   useSupabaseClient: () => ({
     from: () => ({
       select: () => ({
-        order: () => Promise.resolve({ data: strategiesData, error: null })
+        order: () => ({
+          order: () => Promise.resolve({ data: strategiesData, error: null })
+        })
       })
     })
   })
