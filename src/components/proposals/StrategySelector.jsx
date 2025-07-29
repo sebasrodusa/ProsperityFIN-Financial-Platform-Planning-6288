@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { useSupabaseClient } from '../../lib/supabaseClient';
@@ -11,7 +11,12 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
   const [availableProducts, setAvailableProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const supabase = useSupabaseClient();
+  const categories = useMemo(
+    () => Array.from(new Set(strategies.map((s) => s.category))),
+    [strategies]
+  );
 
   // Fetch strategies from Supabase
   useEffect(() => {
@@ -127,14 +132,19 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
     );
   }
 
-  const featuredIds = strategies
+  const filteredStrategies =
+    selectedCategory === 'all'
+      ? strategies
+      : strategies.filter((s) => s.category === selectedCategory);
+
+  const featuredIds = filteredStrategies
     .filter(s => s.is_featured)
     .slice(0, 3)
     .map(s => s.id);
 
   const displayStrategies = [
-    ...strategies.filter(s => featuredIds.includes(s.id)),
-    ...strategies.filter(s => !featuredIds.includes(s.id))
+    ...filteredStrategies.filter(s => featuredIds.includes(s.id)),
+    ...filteredStrategies.filter(s => !featuredIds.includes(s.id))
   ];
 
   return (
@@ -142,6 +152,24 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
       {/* Strategy Selection */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Select Financial Strategy</h3>
+        <div className="mb-4">
+          <label htmlFor="categoryFilter" className="block text-sm font-medium text-gray-700 mb-1">
+            Filter by Category
+          </label>
+          <select
+            id="categoryFilter"
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="form-input"
+          >
+            <option value="all">All</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat.replace('_', ' ')}
+              </option>
+            ))}
+          </select>
+        </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayStrategies.map((strategy) => (
               <button

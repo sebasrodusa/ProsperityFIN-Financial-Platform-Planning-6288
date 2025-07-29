@@ -56,3 +56,19 @@ test('clicking a strategy calls handler once and highlights card', async () => {
   const selectedCard = screen.getByText('Strategy A').closest('button');
   expect(selectedCard.className).toContain('border-primary-500');
 });
+
+test('filters strategies by selected category', async () => {
+  render(<Wrapper onStrategyChange={() => {}} />);
+
+  await waitFor(() => screen.getByText('Strategy A'));
+
+  expect(screen.getByText('Strategy A')).toBeInTheDocument();
+  expect(screen.getByText('Strategy B')).toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText(/Filter by Category/i), {
+    target: { value: 'retirement' }
+  });
+
+  expect(screen.getByText('Strategy A')).toBeInTheDocument();
+  expect(screen.queryByText('Strategy B')).toBeNull();
+});
