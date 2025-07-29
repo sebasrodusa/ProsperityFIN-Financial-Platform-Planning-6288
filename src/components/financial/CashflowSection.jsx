@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 
-const { FiPlus, FiTrash2, FiDollarSign } = FiIcons;
+const { FiTrash2 } = FiIcons;
 
 const INCOME_CATEGORIES = [
   { id: 'primary', label: 'Primary Income' },
@@ -248,9 +248,9 @@ const CashflowSection = ({ incomeSources = [], expenses = [], onIncomeChange, on
                   setIncomeErrors(prev => ({ ...prev, category: false }));
                 }
               }}
-              className={`form-input w-48 ${incomeErrors.category ? 'border-danger-300' : ''}`}
+              className={`form-input w-60 ${incomeErrors.category ? 'border-danger-300' : ''}`}
             >
-              <option value="">Select Income Type</option>
+              <option value="">Select Income Type *</option>
               {INCOME_CATEGORIES.map(category => (
                 <option key={category.id} value={category.id}>
                   {category.label}
