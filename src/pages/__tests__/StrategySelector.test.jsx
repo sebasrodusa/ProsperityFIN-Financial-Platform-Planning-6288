@@ -72,3 +72,20 @@ test('filters strategies by selected category', async () => {
   expect(screen.getByText('Strategy A')).toBeInTheDocument();
   expect(screen.queryByText('Strategy B')).toBeNull();
 });
+
+test('only the clicked card has selected styling', async () => {
+  render(<Wrapper onStrategyChange={() => {}} />);
+
+  await waitFor(() => screen.getByText('Strategy A'));
+
+  const cardA = screen.getByText('Strategy A').closest('button');
+  const cardB = screen.getByText('Strategy B').closest('button');
+
+  fireEvent.click(cardA);
+  await waitFor(() => expect(cardA.className).toContain('border-primary-500'));
+  expect(cardB.className).not.toContain('border-primary-500');
+
+  fireEvent.click(cardB);
+  await waitFor(() => expect(cardB.className).toContain('border-primary-500'));
+  expect(cardA.className).not.toContain('border-primary-500');
+});

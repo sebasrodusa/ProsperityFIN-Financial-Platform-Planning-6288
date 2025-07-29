@@ -176,7 +176,7 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
                 key={strategy.id}
                 type="button"
                 onClick={() => onStrategyChange(String(strategy.id))}
-                className={`p-4 text-left border-2 rounded-lg transition-all ${
+                className={`p-2 md:p-3 text-left border-2 rounded-lg transition-all ${
                   selectedStrategy === String(strategy.id)
                     ? 'border-primary-500 bg-primary-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -219,7 +219,7 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
                 key={product.id}
                 type="button"
                 onClick={() => onProductChange(String(product.id))}
-                className={`p-3 text-left border-2 rounded-lg transition-all ${
+                className={`p-2 md:p-3 text-left border-2 rounded-lg transition-all ${
                   selectedProduct === String(product.id)
                     ? 'border-primary-500 bg-primary-50'
                     : 'border-gray-200 hover:border-gray-300'

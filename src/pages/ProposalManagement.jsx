@@ -155,6 +155,7 @@ const ProposalManagement = () => {
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedStrategyId, setSelectedStrategyId] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -286,6 +287,7 @@ const ProposalManagement = () => {
       lifetimeIncome: ''
     });
     setSelectedProposal(null);
+    setSelectedStrategyId('');
   };
 
   const handleEdit = (proposal) => {
@@ -312,6 +314,7 @@ const ProposalManagement = () => {
       tenYearIncome: proposal.tenYearIncome || '',
       lifetimeIncome: proposal.lifetimeIncome || ''
     });
+    setSelectedStrategyId(proposal.strategy ? String(proposal.strategy) : '');
     setIsEditModalOpen(true);
   };
 
@@ -625,15 +628,16 @@ const ProposalManagement = () => {
 
             {/* Strategy Selection */}
             <StrategySelector
-              selectedStrategy={formData.strategy}
-              onStrategyChange={(strategy) =>
+              selectedStrategy={selectedStrategyId}
+              onStrategyChange={(strategy) => {
+                setSelectedStrategyId(strategy);
                 setFormData((prev) => ({
                   ...prev,
                   strategy: strategy ? String(strategy) : '',
                   productType: '',
                   carrier: ''
-                }))
-              }
+                }));
+              }}
               selectedProduct={formData.productType}
               onProductChange={(productType) =>
                 setFormData((prev) => ({

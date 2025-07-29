@@ -116,7 +116,7 @@ const CarrierSelector = ({ selectedCarrier, onCarrierChange, selectedProduct }) 
             key={carrier.id}
             type="button"
             onClick={() => onCarrierChange(carrier.id)}
-            className={`p-4 text-left border-2 rounded-lg transition-all relative ${
+            className={`p-2 md:p-3 text-left border-2 rounded-lg transition-all relative ${
               selectedCarrier === carrier.id
                 ? 'border-primary-500 bg-primary-50'
                 : 'border-gray-200 hover:border-gray-300'
