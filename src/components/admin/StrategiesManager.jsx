@@ -8,7 +8,7 @@ import { useSupabaseClient } from '../../lib/supabaseClient';
 import { useAuth } from '../../hooks/useAuth';
 import logDev from '../../utils/logDev';
 
-const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch } = FiIcons;
+const { FiPlus, FiEdit, FiTrash2, FiSave, FiX, FiSearch, FiStar } = FiIcons;
 
 const CATEGORIES = [
   { id: 'retirement', name: 'Retirement' },
@@ -36,7 +36,8 @@ const StrategiesManager = () => {
     name: '',
     description: '',
     category: '',
-    productIds: []
+    productIds: [],
+    isFeatured: false
   });
   const [saving, setSaving] = useState(false);
 
@@ -87,7 +88,8 @@ const StrategiesManager = () => {
       name: '',
       description: '',
       category: '',
-      productIds: []
+      productIds: [],
+      isFeatured: false
     });
     setIsAddModalOpen(true);
   };
@@ -103,7 +105,8 @@ const StrategiesManager = () => {
       name: strategy.name,
       description: strategy.description || '',
       category: strategy.category || '',
-      productIds
+      productIds,
+      isFeatured: strategy.is_featured || false
     });
     setIsEditModalOpen(true);
   };
@@ -140,6 +143,7 @@ const StrategiesManager = () => {
             name: formData.name,
             description: formData.description,
             category: formData.category,
+            is_featured: formData.isFeatured,
             updated_at: new Date()
           })
           .eq('id', selectedStrategy.id)
@@ -190,7 +194,8 @@ const StrategiesManager = () => {
           .insert({
             name: formData.name,
             description: formData.description,
-            category: formData.category
+            category: formData.category,
+            is_featured: formData.isFeatured
           })
           .select();
 
@@ -235,10 +240,10 @@ const StrategiesManager = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -320,6 +325,9 @@ const StrategiesManager = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Strategy Name
                 </th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Featured
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Category
                 </th>
@@ -339,6 +347,11 @@ const StrategiesManager = () => {
                 <tr key={strategy.id}>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{strategy.name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {strategy.is_featured && (
+                      <SafeIcon icon={FiStar} className="w-4 h-4 text-yellow-500 inline" />
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
@@ -417,20 +430,37 @@ const StrategiesManager = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Category
             </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              className="form-input"
-            >
-              <option value="">Select Category</option>
-              {CATEGORIES.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            className="form-input"
+          >
+            <option value="">Select Category</option>
+          {CATEGORIES.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+          </select>
+        </div>
+
+
+
+
+        <div className="flex items-center">
+          <input
+            id="isFeaturedAdd"
+            name="isFeatured"
+            type="checkbox"
+            checked={formData.isFeatured}
+            onChange={handleInputChange}
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          />
+          <label htmlFor="isFeaturedAdd" className="ml-2 block text-sm text-gray-700">
+            Featured Strategy
+          </label>
+        </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -531,15 +561,29 @@ const StrategiesManager = () => {
               className="form-input"
             >
               <option value="">Select Category</option>
-              {CATEGORIES.map(category => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {CATEGORIES.map(category => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+          </select>
+        </div>
 
-          <div>
+        <div className="flex items-center">
+          <input
+            id="isFeaturedEdit"
+            name="isFeatured"
+            type="checkbox"
+            checked={formData.isFeatured}
+            onChange={handleInputChange}
+            className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+          />
+          <label htmlFor="isFeaturedEdit" className="ml-2 block text-sm text-gray-700">
+            Featured Strategy
+          </label>
+        </div>
+
+        <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Description
             </label>
