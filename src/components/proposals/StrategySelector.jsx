@@ -23,12 +23,17 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
         const { data: strategiesData, error: strategiesError } = await supabase
           .from('strategies_pf')
           .select(`
-            *,
+            id,
+            name,
+            description,
+            category,
+            is_featured,
             strategy_products_pf!strategy_products_pf_strategy_id_fkey(
               product_id,
               products_pf(*)
             )
           `)
+          .order('is_featured', { ascending: false })
           .order('name');
         
         if (strategiesError) throw strategiesError;
@@ -39,6 +44,7 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
           name: strategy.name,
           description: strategy.description || '',
           category: strategy.category || 'other',
+          is_featured: strategy.is_featured || false,
           products: strategy.strategy_products_pf.map(sp => sp.products_pf) || []
         }));
         
@@ -121,42 +127,57 @@ const StrategySelector = ({ selectedStrategy, onStrategyChange, selectedProduct,
     );
   }
 
+  const featuredIds = strategies
+    .filter(s => s.is_featured)
+    .slice(0, 3)
+    .map(s => s.id);
+
+  const displayStrategies = [
+    ...strategies.filter(s => featuredIds.includes(s.id)),
+    ...strategies.filter(s => !featuredIds.includes(s.id))
+  ];
+
   return (
     <div className="space-y-6">
       {/* Strategy Selection */}
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-4">1. Select Financial Strategy</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {strategies.map((strategy) => (
-            <button
-              key={strategy.id}
-              type="button"
-              onClick={() => onStrategyChange(String(strategy.id))}
-              className={`p-4 text-left border-2 rounded-lg transition-all ${
-                selectedStrategy === String(strategy.id)
-                  ? 'border-primary-500 bg-primary-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-start space-x-3">
-                <div className={`p-2 rounded-lg ${getCategoryColor(strategy.category)}`}>
-                  <SafeIcon icon={getIconForCategory(strategy.category)} className="w-5 h-5" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">{strategy.name}</h4>
-                  <p className="text-sm text-gray-600 mt-1">{strategy.description}</p>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <span className={`inline-block px-2 py-1 text-xs rounded-full ${getCategoryColor(strategy.category)}`}>
-                      {strategy.category.replace('_', ' ')}
-                    </span>
-                    <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
-                      {strategy.products.length} products available
-                    </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {displayStrategies.map((strategy) => (
+              <button
+                key={strategy.id}
+                type="button"
+                onClick={() => onStrategyChange(String(strategy.id))}
+                className={`p-4 text-left border-2 rounded-lg transition-all ${
+                  selectedStrategy === String(strategy.id)
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-start space-x-3">
+                  <div className={`p-2 rounded-lg ${getCategoryColor(strategy.category)}`}>
+                    <SafeIcon icon={getIconForCategory(strategy.category)} className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-gray-900">{strategy.name}</h4>
+                    <p className="text-sm text-gray-600 mt-1">{strategy.description}</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${getCategoryColor(strategy.category)}`}>
+                        {strategy.category.replace('_', ' ')}
+                      </span>
+                      <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">
+                        {strategy.products.length} products available
+                      </span>
+                      {strategy.is_featured && (
+                        <span className="inline-block px-2 py-1 text-xs rounded-full bg-secondary-100 text-secondary-800">
+                          Featured
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            ))}
         </div>
       </div>
 
