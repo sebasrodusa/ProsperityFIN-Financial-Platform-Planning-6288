@@ -142,8 +142,15 @@ const ClientFinancialReport = () => {
     window.scrollTo(0, 0);
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Create a new PDF document
-    const pdf = new jsPDF('p', 'mm', 'a4');
+    // Create a new PDF document with compression settings
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true,
+      putOnlyUsedFonts: true,
+      floatPrecision: 2
+    });
 
     // Get the width and height of the PDF document
     const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -156,11 +163,12 @@ const ClientFinancialReport = () => {
     for (const section of sections) {
       // Convert section to image
       const canvas = await html2canvas(section, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
         allowTaint: false,
         logging: false,
         backgroundColor: '#ffffff',
+        imageTimeout: 0,
         windowWidth: section.scrollWidth,
         windowHeight: section.scrollHeight,
         onclone: clonedDoc => {
@@ -182,7 +190,7 @@ const ClientFinancialReport = () => {
           });
         }
       });
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/jpeg', 0.6);
       
       // Adjust image size to fit PDF
       const imgWidth = pdfWidth - 20; // margins
@@ -195,10 +203,17 @@ const ClientFinancialReport = () => {
       }
       
       // Add image to PDF
-      pdf.addImage(imgData, 'PNG', 10, yOffset + 10, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 10, yOffset + 10, imgWidth, imgHeight, '', 'FAST');
       yOffset += imgHeight + 10;
     }
-    
+
+    // Check PDF size before saving
+    const pdfBlob = pdf.output('blob');
+    const sizeMB = pdfBlob.size / (1024 * 1024);
+    if (sizeMB > 10) {
+      console.warn('PDF too large, additional compression needed');
+    }
+
     // Save PDF
     pdf.save(`${client.name.replace(/\s+/g, '_')}_Financial_Report.pdf`);
   };

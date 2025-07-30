@@ -382,26 +382,44 @@ const ProposalManagement = () => {
     if (!element) return;
 
     try {
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true, allowTaint: true });
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const canvas = await html2canvas(element, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        imageTimeout: 0
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.6);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+        putOnlyUsedFonts: true,
+        floatPrecision: 2
+      });
       const imgWidth = 210;
       const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, '', 'FAST');
       heightLeft -= pageHeight;
 
       while (heightLeft >= 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, '', 'FAST');
         heightLeft -= pageHeight;
       }
 
       const client = clients.find(c => c.id === selectedProposal.clientId);
+      const pdfBlob = pdf.output('blob');
+      const sizeMB = pdfBlob.size / (1024 * 1024);
+      if (sizeMB > 10) {
+        console.warn('PDF too large, additional compression needed');
+      }
       const fileName = `${client?.name.replace(/\s+/g, '_')}_Strategy_Projections.pdf`;
       pdf.save(fileName);
     } catch (error) {
