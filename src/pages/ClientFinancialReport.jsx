@@ -137,26 +137,50 @@ const ClientFinancialReport = () => {
     const reportElement = document.getElementById('financial-report');
     if (!reportElement) return;
 
+    // Ensure fonts and styles are fully applied before capture
+    await document.fonts.ready;
+    window.scrollTo(0, 0);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Create a new PDF document
     const pdf = new jsPDF('p', 'mm', 'a4');
-    
+
     // Get the width and height of the PDF document
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     
-    let currentPage = 1;
-    const totalPages = Math.ceil(reportElement.scrollHeight / 900); // Estimate pages
-    
     // Add each section to the PDF
     const sections = Array.from(reportElement.children);
     let yOffset = 0;
-    
+
     for (const section of sections) {
       // Convert section to image
       const canvas = await html2canvas(section, {
         scale: 2,
         useCORS: true,
-        allowTaint: true
+        allowTaint: false,
+        logging: false,
+        backgroundColor: '#ffffff',
+        windowWidth: section.scrollWidth,
+        windowHeight: section.scrollHeight,
+        onclone: clonedDoc => {
+          const clonedSection = clonedDoc.querySelector(`#${section.id}`);
+          if (!clonedSection) return;
+          const allElements = clonedSection.querySelectorAll('*');
+          allElements.forEach(el => {
+            const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
+            el.style.color = computedStyle.color;
+            el.style.backgroundColor = computedStyle.backgroundColor;
+            el.style.fontSize = computedStyle.fontSize;
+            el.style.fontWeight = computedStyle.fontWeight;
+            el.style.fontFamily = computedStyle.fontFamily;
+            el.style.padding = computedStyle.padding;
+            el.style.margin = computedStyle.margin;
+            el.style.border = computedStyle.border;
+            el.style.borderRadius = computedStyle.borderRadius;
+            el.style.boxShadow = computedStyle.boxShadow;
+          });
+        }
       });
       const imgData = canvas.toDataURL('image/png');
       
@@ -167,7 +191,6 @@ const ClientFinancialReport = () => {
       // Check if we need a new page
       if (yOffset + 10 + imgHeight > pdfHeight) {
         pdf.addPage();
-        currentPage++;
         yOffset = 10;
       }
       
