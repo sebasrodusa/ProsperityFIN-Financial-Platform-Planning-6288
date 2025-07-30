@@ -43,7 +43,16 @@ const ClientFinancialReport = () => {
       );
 
       // Process financial data for the report
-      const totalIncome = analysis.income_sources?.reduce((sum, source) => sum + parseFloat(source.amount || 0), 0) || 0;
+      const totalIncome =
+        analysis.income_sources?.reduce((sum, source) => {
+          const amount = parseFloat(source.amount || 0);
+          const annualAmount = {
+            monthly: amount * 12,
+            weekly: amount * 52,
+            annual: amount
+          }[source.frequency || 'monthly'];
+          return sum + annualAmount;
+        }, 0) || 0;
       const totalExpenses = analysis.expenses?.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0) || 0;
       const netIncome = totalIncome - totalExpenses;
       
@@ -54,7 +63,7 @@ const ClientFinancialReport = () => {
       const totalInsuranceCoverage = analysis.insurance_policies?.reduce((sum, policy) => sum + parseFloat(policy.coverageAmount || 0), 0) || 0;
 
       // Calculate FIN (Financial Independence Number)
-      const financialIndependenceNumber = totalIncome * 25;
+      const financialIndependenceNumber = totalIncome * 20;
       
       setReportData({
         clientInfo: {
