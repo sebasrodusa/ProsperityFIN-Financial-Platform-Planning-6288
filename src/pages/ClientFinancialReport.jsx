@@ -144,7 +144,11 @@ const ClientFinancialReport = () => {
     
     for (const section of sections) {
       // Convert section to image
-      const canvas = await html2canvas(section, { scale: 2 });
+      const canvas = await html2canvas(section, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
       const imgData = canvas.toDataURL('image/png');
       
       // Adjust image size to fit PDF
