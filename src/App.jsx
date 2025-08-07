@@ -28,7 +28,7 @@ import ProfileSettings from './pages/ProfileSettings';
 import ProjectionsSettings from './pages/ProjectionsSettings';
 import PrivateRoute from './components/auth/PrivateRoute';
 
-function App() {
+function AppContent() {
   const { loading, isSignedIn } = useAuth();
   const [authError, setAuthError] = useState(null);
 
@@ -76,11 +76,10 @@ function App() {
 
   // If signed in, wrap the app with our providers
   return (
-    <AuthProvider>
-      <CrmProvider>
-        <DataProvider>
-          <FinancialAnalysisProvider>
-            <Routes>
+    <CrmProvider>
+      <DataProvider>
+        <FinancialAnalysisProvider>
+          <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route
@@ -180,6 +179,13 @@ function App() {
           </FinancialAnalysisProvider>
         </DataProvider>
       </CrmProvider>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }
