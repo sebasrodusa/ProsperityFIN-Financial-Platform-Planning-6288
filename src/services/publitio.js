@@ -1,11 +1,22 @@
 import { supabase } from '../lib/supabaseClient';
 
-const baseUrl = import.meta.env.VITE_SUPABASE_URL
-  .replace('.supabase.co', '.functions.supabase.co') + '/publitio-proxy';
+function getBaseUrl() {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error('VITE_SUPABASE_URL is not defined');
+  }
+  return (
+    supabaseUrl.replace('.supabase.co', '.functions.supabase.co') +
+    '/publitio-proxy'
+  );
+}
 
 export async function uploadFile(file, folder = '') {
   if (!file) throw new Error('File is required');
-  const { data: { session } } = await supabase.auth.getSession();
+  const baseUrl = getBaseUrl();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const token = session?.access_token;
   if (!token) throw new Error('Not authenticated');
 
@@ -30,7 +41,10 @@ export async function uploadFile(file, folder = '') {
 }
 
 export async function deleteFile(publicId) {
-  const { data: { session } } = await supabase.auth.getSession();
+  const baseUrl = getBaseUrl();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const token = session?.access_token;
   if (!token) throw new Error('Not authenticated');
   const url = `${baseUrl}?public_id=${encodeURIComponent(publicId)}`;

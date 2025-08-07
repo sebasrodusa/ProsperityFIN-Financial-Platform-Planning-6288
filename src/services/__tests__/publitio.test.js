@@ -79,3 +79,14 @@ describe('deleteFile', () => {
     await expect(deleteFile('file123')).rejects.toThrow('bad');
   });
 });
+
+describe('environment validation', () => {
+  it('throws a controlled error when VITE_SUPABASE_URL is missing', async () => {
+    delete process.env.VITE_SUPABASE_URL;
+    vi.resetModules();
+    const { uploadFile } = await import('../publitio');
+    await expect(uploadFile(new File(['data'], 'test.txt'))).rejects.toThrow(
+      'VITE_SUPABASE_URL is not defined'
+    );
+  });
+});
