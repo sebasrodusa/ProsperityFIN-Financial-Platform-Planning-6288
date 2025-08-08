@@ -157,10 +157,11 @@ const ClientFinancialReport = () => {
     const pdfHeight = pdf.internal.pageSize.getHeight();
     
     // Add each section to the PDF
-    const sections = Array.from(reportElement.children);
+    const sections = Array.from(reportElement.children).filter(el => el.id);
     let yOffset = 0;
 
     for (const section of sections) {
+      console.log('Processing section:', section.id, section);
       // Convert section to image
       const canvas = await html2canvas(section, {
         scale: 1.5,
@@ -172,7 +173,9 @@ const ClientFinancialReport = () => {
         windowWidth: section.scrollWidth,
         windowHeight: section.scrollHeight,
         onclone: clonedDoc => {
-          const clonedSection = clonedDoc.querySelector(`#${section.id}`);
+          const sectionId = section.id;
+          if (!sectionId) return;
+          const clonedSection = clonedDoc.querySelector(`#${sectionId}`);
           if (!clonedSection) return;
           const allElements = clonedSection.querySelectorAll('*');
           allElements.forEach(el => {
@@ -351,7 +354,7 @@ const ClientFinancialReport = () => {
           {/* Financial Report Content */}
           <div id="financial-report" className="space-y-8">
             {/* Report Header */}
-            <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+            <div id="report-header" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                 <div>
                   <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg flex items-center justify-center mb-4">
@@ -421,7 +424,7 @@ const ClientFinancialReport = () => {
 
             {/* Cashflow Summary */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="cashflow-summary" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Cashflow Summary</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -482,7 +485,7 @@ const ClientFinancialReport = () => {
 
             {/* Balance Sheet */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="balance-sheet" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Balance Sheet</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -557,7 +560,7 @@ const ClientFinancialReport = () => {
 
             {/* Life Insurance Overview */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="insurance-overview" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Life Insurance Overview</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -632,7 +635,7 @@ const ClientFinancialReport = () => {
 
             {/* Financial Goals */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="financial-goals" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Financial Goals</h2>
                 
                 {reportData.goals.length > 0 ? (
@@ -716,7 +719,7 @@ const ClientFinancialReport = () => {
 
             {/* Estate Planning */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="estate-planning-summary" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Estate Planning Summary</h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -775,7 +778,7 @@ const ClientFinancialReport = () => {
 
             {/* Recommendations */}
             {reportData && (
-              <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+              <div id="key-recommendations" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
                 <h2 className="text-2xl font-heading font-bold text-gray-900 mb-6">Key Recommendations</h2>
                 
                 <div className="space-y-4">
@@ -863,7 +866,7 @@ const ClientFinancialReport = () => {
             )}
 
             {/* Report Footer */}
-            <div className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+            <div id="report-footer" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
               <div className="border-t border-gray-100 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2">
