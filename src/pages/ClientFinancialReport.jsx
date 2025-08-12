@@ -183,6 +183,7 @@ const ClientFinancialReport = () => {
         logging: false,
         backgroundColor: '#ffffff',
         imageTimeout: 0,
+        willReadFrequently: true,
         windowWidth: section.scrollWidth,
         windowHeight: section.scrollHeight,
         onclone: clonedDoc => {
