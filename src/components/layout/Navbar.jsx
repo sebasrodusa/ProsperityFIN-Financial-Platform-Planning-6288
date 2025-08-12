@@ -8,6 +8,7 @@ import SafeIcon from '../../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { getTransformedImage } from '../../services/publitio';
 import { getProfileImageUrl } from "../../utils/profileImage";
+import { DEFAULT_AVATAR_URL } from '../../utils/constants';
 
 const { FiLogOut, FiChevronDown, FiUser, FiSettings } = FiIcons;
 
@@ -29,6 +30,13 @@ const Navbar = () => {
     await signOut();
     navigate('/login');
   };
+
+  let profileImageSrc = DEFAULT_AVATAR_URL;
+  try {
+    profileImageSrc = getTransformedImage(getProfileImageUrl(user), { width: 64, height: 64 });
+  } catch (err) {
+    console.warn('Failed to process profile image', err);
+  }
 
   return (
     <nav className="bg-white shadow-soft border-b border-gray-100">
@@ -75,9 +83,14 @@ const Navbar = () => {
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <img
-                src={getTransformedImage(getProfileImageUrl(user), { width: 64, height: 64 })}
+                src={profileImageSrc}
                 alt={user?.fullName || 'User'}
                 className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  console.warn('Profile image failed to load, using default.');
+                  e.currentTarget.src = DEFAULT_AVATAR_URL;
+                }}
               />
               <div className="hidden md:block text-left">
                 <p className="text-sm font-medium text-gray-900">{user?.fullName || 'User'}</p>
