@@ -11,6 +11,7 @@ import Navbar from '../components/layout/Navbar';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
+import { DEFAULT_AVATAR_URL } from '../utils/constants';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -162,6 +163,18 @@ const ClientFinancialReport = () => {
 
     for (const section of sections) {
       console.log('Processing section:', section.id, section);
+      // Ensure images in the section are loaded
+      const imgs = section.querySelectorAll('img');
+      for (const img of imgs) {
+        if (!(img.complete && img.naturalWidth > 0)) {
+          console.warn('Image not loaded, using fallback before rendering PDF:', img.src);
+          img.src = DEFAULT_AVATAR_URL;
+          await new Promise(resolve => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }
+      }
       // Convert section to image
       const canvas = await html2canvas(section, {
         scale: 1.5,
