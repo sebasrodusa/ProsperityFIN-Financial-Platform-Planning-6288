@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
@@ -24,6 +24,7 @@ const ClientFinancialReport = () => {
   const { analysis, loadAnalysis, loading, error } = useFinancialAnalysis();
   const [reportData, setReportData] = useState(null);
   const [advisorName, setAdvisorName] = useState('');
+  const failedImages = useRef(new Set());
   const client = clients.find(c => c.id === clientId);
 
   // Load financial analysis data
@@ -173,12 +174,27 @@ const ClientFinancialReport = () => {
       // Ensure images in the section are loaded
       const imgs = section.querySelectorAll('img');
       for (const img of imgs) {
-        if (!(img.complete && img.naturalWidth > 0)) {
-          console.warn('Image not loaded, using fallback before rendering PDF:', img.src);
+        const originalSrc = img.src;
+
+        if (failedImages.current.has(originalSrc) || originalSrc === DEFAULT_AVATAR_URL) {
           img.src = DEFAULT_AVATAR_URL;
+          continue;
+        }
+
+        if (!(img.complete && img.naturalWidth > 0)) {
           await new Promise(resolve => {
-            img.onload = resolve;
-            img.onerror = resolve;
+            img.onload = () => {
+              img.onload = null;
+              img.onerror = null;
+              resolve();
+            };
+            img.onerror = () => {
+              failedImages.current.add(originalSrc);
+              img.src = DEFAULT_AVATAR_URL;
+              img.onload = null;
+              img.onerror = null;
+              resolve();
+            };
           });
         }
       }
