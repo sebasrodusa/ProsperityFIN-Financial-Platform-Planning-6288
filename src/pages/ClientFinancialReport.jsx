@@ -187,6 +187,7 @@ const ClientFinancialReport = () => {
         scale: 1.5,
         useCORS: true,
         allowTaint: false,
+        foreignObjectRendering: false,
         logging: false,
         backgroundColor: '#ffffff',
         imageTimeout: 0,
