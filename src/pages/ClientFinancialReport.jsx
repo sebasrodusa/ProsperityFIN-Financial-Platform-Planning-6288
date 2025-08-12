@@ -12,6 +12,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
+import logDev from '../utils/logDev';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -156,13 +157,19 @@ const ClientFinancialReport = () => {
     // Get the width and height of the PDF document
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    
+
     // Add each section to the PDF
     const sections = Array.from(reportElement.children).filter(el => el.id);
+    logDev('Preparing PDF; sections count and IDs:', sections.length, sections.map(s => s.id));
     let yOffset = 0;
 
-    for (const section of sections) {
-      console.log('Processing section:', section.id, section);
+    for (const sec of sections) {
+      if (sec && typeof sec === 'object' && 'current' in sec) {
+        logDev(`Ref for section ${sec.current?.id ?? '(no id)'} initialized:`, !!sec.current);
+      }
+      const section = sec.current || sec;
+      logDev('Processing section:', section.id, section);
+
       // Ensure images in the section are loaded
       const imgs = section.querySelectorAll('img');
       for (const img of imgs) {
