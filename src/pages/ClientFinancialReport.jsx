@@ -32,11 +32,15 @@ const ClientFinancialReport = () => {
   const { analysis, loadAnalysis, loading, error } = useFinancialAnalysis();
   const [reportData, setReportData] = useState(null);
   const [advisorName, setAdvisorName] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progressMessage, setProgressMessage] = useState('');
+  const [pdfReady, setPdfReady] = useState(false);
   const failedImages = useRef(new Set());
   const cashflowPieCanvasRef = useRef(null);
   const netWorthBarCanvasRef = useRef(null);
   const cashflowPieChartRef = useRef(null);
   const netWorthBarChartRef = useRef(null);
+  const pdfDocRef = useRef(null);
   const client = clients.find(c => c.id === clientId);
 
   // Load financial analysis data
@@ -149,108 +153,134 @@ const ClientFinancialReport = () => {
   };
 
   const handleDownloadPDF = async () => {
+    setIsGenerating(true);
+    setPdfReady(false);
+    setProgressMessage('Capturing styles...');
+    pdfDocRef.current = null;
+
     const reportElement = document.getElementById('financial-report');
-    if (!reportElement) return;
+    if (!reportElement) {
+      setIsGenerating(false);
+      setProgressMessage('');
+      return;
+    }
 
-    // Ensure fonts and styles are fully applied before capture
-    await document.fonts.ready;
-    window.scrollTo(0, 0);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      // Ensure fonts and styles are fully applied before capture
+      await document.fonts.ready;
+      window.scrollTo(0, 0);
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Create a new PDF document with compression settings
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-      putOnlyUsedFonts: true,
-      floatPrecision: 2
-    });
+      setProgressMessage('Generating PDF...');
 
-    // Get the width and height of the PDF document
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Add each section to the PDF
-    const sections = Array.from(reportElement.children).filter(el => el.id);
-    logDev('Preparing PDF; sections count and IDs:', sections.length, sections.map(s => s.id));
-    let yOffset = 0;
-
-    for (const sec of sections) {
-      if (sec && typeof sec === 'object' && 'current' in sec) {
-        logDev(`Ref for section ${sec.current?.id ?? '(no id)'} initialized:`, !!sec.current);
-      }
-      const originalSection = sec.current || sec;
-      logDev('Processing section:', originalSection.id, originalSection);
-
-      const clonedSection = originalSection.cloneNode(true);
-      clonedSection.style.position = 'absolute';
-      clonedSection.style.left = '-10000px';
-      document.body.appendChild(clonedSection);
-      inlineStylesRecursively(clonedSection);
-
-      // Ensure images in the section are loaded
-      const imgs = clonedSection.querySelectorAll('img');
-      for (const img of imgs) {
-        const originalSrc = img.src;
-
-        if (failedImages.current.has(originalSrc) || originalSrc === DEFAULT_AVATAR_URL) {
-          img.src = DEFAULT_AVATAR_URL;
-          continue;
-        }
-
-        if (!(img.complete && img.naturalWidth > 0)) {
-          await new Promise(resolve => {
-            img.onload = () => {
-              img.onload = null;
-              img.onerror = null;
-              resolve();
-            };
-            img.onerror = () => {
-              failedImages.current.add(originalSrc);
-              img.src = DEFAULT_AVATAR_URL;
-              img.onload = null;
-              img.onerror = null;
-              resolve();
-            };
-          });
-        }
-      }
-      // Convert section to image
-      const canvas = await html2canvas(clonedSection, {
-        foreignObjectRendering: false,
-        useCORS: true,
-        logging: false,
-        allowTaint: true,
-        scale: 2
+      // Create a new PDF document with compression settings
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+        putOnlyUsedFonts: true,
+        floatPrecision: 2
       });
-      document.body.removeChild(clonedSection);
-      const imgData = canvas.toDataURL('image/jpeg', 0.6);
-      
-      // Adjust image size to fit PDF
-      const imgWidth = pdfWidth - 20; // margins
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // Check if we need a new page
-      if (yOffset + 10 + imgHeight > pdfHeight) {
-        pdf.addPage();
-        yOffset = 10;
+
+      // Get the width and height of the PDF document
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+
+      // Add each section to the PDF
+      const sections = Array.from(reportElement.children).filter(el => el.id);
+      logDev('Preparing PDF; sections count and IDs:', sections.length, sections.map(s => s.id));
+      let yOffset = 0;
+
+      for (const sec of sections) {
+        if (sec && typeof sec === 'object' && 'current' in sec) {
+          logDev(`Ref for section ${sec.current?.id ?? '(no id)'} initialized:`, !!sec.current);
+        }
+        const originalSection = sec.current || sec;
+        logDev('Processing section:', originalSection.id, originalSection);
+
+        const clonedSection = originalSection.cloneNode(true);
+        clonedSection.style.position = 'absolute';
+        clonedSection.style.left = '-10000px';
+        document.body.appendChild(clonedSection);
+        inlineStylesRecursively(clonedSection);
+
+        // Ensure images in the section are loaded
+        const imgs = clonedSection.querySelectorAll('img');
+        for (const img of imgs) {
+          const originalSrc = img.src;
+
+          if (failedImages.current.has(originalSrc) || originalSrc === DEFAULT_AVATAR_URL) {
+            img.src = DEFAULT_AVATAR_URL;
+            continue;
+          }
+
+          if (!(img.complete && img.naturalWidth > 0)) {
+            await new Promise(resolve => {
+              img.onload = () => {
+                img.onload = null;
+                img.onerror = null;
+                resolve();
+              };
+              img.onerror = () => {
+                failedImages.current.add(originalSrc);
+                img.src = DEFAULT_AVATAR_URL;
+                img.onload = null;
+                img.onerror = null;
+                resolve();
+              };
+            });
+          }
+        }
+        // Convert section to image
+        const canvas = await html2canvas(clonedSection, {
+          foreignObjectRendering: false,
+          useCORS: true,
+          logging: false,
+          allowTaint: true,
+          scale: 2
+        });
+        document.body.removeChild(clonedSection);
+        const imgData = canvas.toDataURL('image/jpeg', 0.6);
+
+        // Adjust image size to fit PDF
+        const imgWidth = pdfWidth - 20; // margins
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Check if we need a new page
+        if (yOffset + 10 + imgHeight > pdfHeight) {
+          pdf.addPage();
+          yOffset = 10;
+        }
+
+        // Add image to PDF
+        pdf.addImage(imgData, 'JPEG', 10, yOffset + 10, imgWidth, imgHeight, '', 'FAST');
+        yOffset += imgHeight + 10;
       }
-      
-      // Add image to PDF
-      pdf.addImage(imgData, 'JPEG', 10, yOffset + 10, imgWidth, imgHeight, '', 'FAST');
-      yOffset += imgHeight + 10;
-    }
 
-    // Check PDF size before saving
-    const pdfBlob = pdf.output('blob');
-    const sizeMB = pdfBlob.size / (1024 * 1024);
-    if (sizeMB > 10) {
-      console.warn('PDF too large, additional compression needed');
-    }
+      // Check PDF size before saving
+      const pdfBlob = pdf.output('blob');
+      const sizeMB = pdfBlob.size / (1024 * 1024);
+      if (sizeMB > 10) {
+        console.warn('PDF too large, additional compression needed');
+      }
 
-    // Save PDF
-    pdf.save(`${client.name.replace(/\s+/g, '_')}_Financial_Report.pdf`);
+      pdfDocRef.current = pdf;
+      setPdfReady(true);
+      setProgressMessage('Ready!');
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      setProgressMessage('Failed to generate PDF');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleSavePDF = () => {
+    if (!pdfDocRef.current) return;
+    pdfDocRef.current.save(`${client.name.replace(/\s+/g, '_')}_Financial_Report.pdf`);
+    setPdfReady(false);
+    setProgressMessage('');
   };
 
   // Cashflow pie chart data
@@ -407,14 +437,34 @@ const ClientFinancialReport = () => {
                   <SafeIcon icon={FiPrinter} className="w-4 h-4" />
                   <span>Print</span>
                 </button>
-                <button
-                  onClick={handleDownloadPDF}
-                  className="btn-primary flex items-center space-x-2"
-                >
-                  <SafeIcon icon={FiDownload} className="w-4 h-4" />
-                  <span>Download PDF</span>
-                </button>
+                {!pdfReady ? (
+                  <button
+                    onClick={handleDownloadPDF}
+                    className="btn-primary flex items-center space-x-2"
+                    disabled={isGenerating}
+                  >
+                    <SafeIcon icon={FiDownload} className="w-4 h-4" />
+                    <span>Generate PDF</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSavePDF}
+                    className="btn-primary flex items-center space-x-2"
+                  >
+                    <SafeIcon icon={FiDownload} className="w-4 h-4" />
+                    <span>Download Ready</span>
+                  </button>
+                )}
               </div>
+              {isGenerating && (
+                <div className="mt-2 flex items-center space-x-2 text-gray-600 text-sm">
+                  <LoadingSpinner size="sm" />
+                  <span>{progressMessage}</span>
+                </div>
+              )}
+              {pdfReady && (
+                <div className="mt-2 text-success-600 text-sm">{progressMessage}</div>
+              )}
             </div>
           </div>
 
