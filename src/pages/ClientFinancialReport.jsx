@@ -218,19 +218,13 @@ const ClientFinancialReport = () => {
           if (!sectionId) return;
           const clonedSection = clonedDoc.querySelector(`#${sectionId}`);
           if (!clonedSection) return;
-          const allElements = clonedSection.querySelectorAll('*');
-          allElements.forEach(el => {
+
+          const elements = [clonedSection, ...clonedSection.querySelectorAll('*')];
+          elements.forEach(el => {
             const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
-            el.style.color = computedStyle.color;
-            el.style.backgroundColor = computedStyle.backgroundColor;
-            el.style.fontSize = computedStyle.fontSize;
-            el.style.fontWeight = computedStyle.fontWeight;
-            el.style.fontFamily = computedStyle.fontFamily;
-            el.style.padding = computedStyle.padding;
-            el.style.margin = computedStyle.margin;
-            el.style.border = computedStyle.border;
-            el.style.borderRadius = computedStyle.borderRadius;
-            el.style.boxShadow = computedStyle.boxShadow;
+            Array.from(computedStyle).forEach(prop => {
+              el.style.setProperty(prop, computedStyle.getPropertyValue(prop));
+            });
           });
         }
       });
