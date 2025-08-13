@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
 import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController } from 'chart.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/layout/Navbar';
@@ -13,7 +13,7 @@ import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
 import logDev from '../utils/logDev';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController);
 
 const { FiArrowLeft, FiDownload, FiPrinter, FiUser, FiUsers, FiCalendar, FiMail, FiPhone, FiCheck, FiX } = FiIcons;
 
