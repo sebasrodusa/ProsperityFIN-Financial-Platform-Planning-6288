@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useData } from '../contexts/DataContext';
 import { useFinancialAnalysis } from '../contexts/FinancialAnalysisContext';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/layout/Navbar';
@@ -25,6 +24,10 @@ const ClientFinancialReport = () => {
   const [reportData, setReportData] = useState(null);
   const [advisorName, setAdvisorName] = useState('');
   const failedImages = useRef(new Set());
+  const cashflowPieCanvasRef = useRef(null);
+  const netWorthBarCanvasRef = useRef(null);
+  const cashflowPieChartRef = useRef(null);
+  const netWorthBarChartRef = useRef(null);
   const client = clients.find(c => c.id === clientId);
 
   // Load financial analysis data
@@ -260,7 +263,7 @@ const ClientFinancialReport = () => {
   };
 
   // Cashflow pie chart data
-  const cashflowPieData = {
+  const cashflowPieData = useMemo(() => ({
     labels: ['Income', 'Expenses'],
     datasets: [
       {
@@ -270,10 +273,10 @@ const ClientFinancialReport = () => {
         borderWidth: 1,
       },
     ],
-  };
+  }), [reportData]);
 
   // Net worth bar chart data
-  const netWorthBarData = {
+  const netWorthBarData = useMemo(() => ({
     labels: ['Assets', 'Liabilities', 'Net Worth'],
     datasets: [
       {
@@ -296,7 +299,42 @@ const ClientFinancialReport = () => {
         borderWidth: 1,
       },
     ],
-  };
+  }), [reportData]);
+
+  useEffect(() => {
+    if (!reportData) return;
+
+    if (cashflowPieCanvasRef.current) {
+      const ctx = cashflowPieCanvasRef.current.getContext('2d', { willReadFrequently: true });
+      cashflowPieChartRef.current?.destroy();
+      cashflowPieChartRef.current = new ChartJS(ctx, {
+        type: 'pie',
+        data: cashflowPieData,
+        options: { responsive: true, maintainAspectRatio: true }
+      });
+    }
+
+    if (netWorthBarCanvasRef.current) {
+      const ctx = netWorthBarCanvasRef.current.getContext('2d', { willReadFrequently: true });
+      netWorthBarChartRef.current?.destroy();
+      netWorthBarChartRef.current = new ChartJS(ctx, {
+        type: 'bar',
+        data: netWorthBarData,
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    return () => {
+      cashflowPieChartRef.current?.destroy();
+      netWorthBarChartRef.current?.destroy();
+    };
+  }, [reportData, cashflowPieData, netWorthBarData]);
 
   if (!client) {
     return (
@@ -514,7 +552,7 @@ const ClientFinancialReport = () => {
                   </div>
                   <div className="flex items-center justify-center">
                     <div className="w-full max-w-xs">
-                      <Pie data={cashflowPieData} options={{ responsive: true, maintainAspectRatio: true }} />
+                      <canvas ref={cashflowPieCanvasRef} />
                     </div>
                   </div>
                 </div>
@@ -578,18 +616,7 @@ const ClientFinancialReport = () => {
                   </div>
                   <div className="flex items-center justify-center">
                     <div className="w-full">
-                      <Bar 
-                        data={netWorthBarData} 
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: true,
-                          scales: {
-                            y: {
-                              beginAtZero: true
-                            }
-                          }
-                        }} 
-                      />
+                      <canvas ref={netWorthBarCanvasRef} />
                     </div>
                   </div>
                 </div>

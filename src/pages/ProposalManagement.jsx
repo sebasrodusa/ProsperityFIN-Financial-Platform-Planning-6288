@@ -421,7 +421,8 @@ const ProposalManagement = () => {
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
-        imageTimeout: 0
+        imageTimeout: 0,
+        willReadFrequently: true
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.6);
       const pdf = new jsPDF({
