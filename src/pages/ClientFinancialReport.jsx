@@ -15,6 +15,15 @@ import logDev from '../utils/logDev';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController);
 
+const inlineStylesRecursively = (node) => {
+  if (!node || node.nodeType !== 1) return;
+  const computedStyle = window.getComputedStyle(node);
+  Array.from(computedStyle).forEach((prop) => {
+    node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
+  });
+  node.childNodes.forEach(child => inlineStylesRecursively(child));
+};
+
 const { FiArrowLeft, FiDownload, FiPrinter, FiUser, FiUsers, FiCalendar, FiMail, FiPhone, FiCheck, FiX } = FiIcons;
 
 const ClientFinancialReport = () => {
@@ -171,11 +180,17 @@ const ClientFinancialReport = () => {
       if (sec && typeof sec === 'object' && 'current' in sec) {
         logDev(`Ref for section ${sec.current?.id ?? '(no id)'} initialized:`, !!sec.current);
       }
-      const section = sec.current || sec;
-      logDev('Processing section:', section.id, section);
+      const originalSection = sec.current || sec;
+      logDev('Processing section:', originalSection.id, originalSection);
+
+      const clonedSection = originalSection.cloneNode(true);
+      clonedSection.style.position = 'absolute';
+      clonedSection.style.left = '-10000px';
+      document.body.appendChild(clonedSection);
+      inlineStylesRecursively(clonedSection);
 
       // Ensure images in the section are loaded
-      const imgs = section.querySelectorAll('img');
+      const imgs = clonedSection.querySelectorAll('img');
       for (const img of imgs) {
         const originalSrc = img.src;
 
@@ -202,32 +217,14 @@ const ClientFinancialReport = () => {
         }
       }
       // Convert section to image
-      const canvas = await html2canvas(section, {
-        scale: 1.5,
-        useCORS: true,
-        allowTaint: false,
+      const canvas = await html2canvas(clonedSection, {
         foreignObjectRendering: false,
+        useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff',
-        imageTimeout: 0,
-        willReadFrequently: true,
-        windowWidth: section.scrollWidth,
-        windowHeight: section.scrollHeight,
-        onclone: clonedDoc => {
-          const sectionId = section.id;
-          if (!sectionId) return;
-          const clonedSection = clonedDoc.querySelector(`#${sectionId}`);
-          if (!clonedSection) return;
-
-          const elements = [clonedSection, ...clonedSection.querySelectorAll('*')];
-          elements.forEach(el => {
-            const computedStyle = clonedDoc.defaultView.getComputedStyle(el);
-            Array.from(computedStyle).forEach(prop => {
-              el.style.setProperty(prop, computedStyle.getPropertyValue(prop));
-            });
-          });
-        }
+        allowTaint: true,
+        scale: 2
       });
+      document.body.removeChild(clonedSection);
       const imgData = canvas.toDataURL('image/jpeg', 0.6);
       
       // Adjust image size to fit PDF
