@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useData } from '../contexts/DataContext';
@@ -156,6 +156,7 @@ const ProposalManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStrategyId, setSelectedStrategyId] = useState('');
+  const failedImages = useRef(new Set());
 
   // Form state
   const [formData, setFormData] = useState({
@@ -380,6 +381,39 @@ const ProposalManagement = () => {
   const handleDownloadPDF = async () => {
     const element = document.getElementById('proposal-pdf');
     if (!element) return;
+
+    // Ensure fonts and styles are applied
+    await document.fonts.ready;
+    window.scrollTo(0, 0);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Ensure images are loaded and use placeholder for failures
+    const imgs = element.querySelectorAll('img');
+    for (const img of imgs) {
+      const originalSrc = img.src;
+
+      if (failedImages.current.has(originalSrc) || originalSrc === DEFAULT_AVATAR_URL) {
+        img.src = DEFAULT_AVATAR_URL;
+        continue;
+      }
+
+      if (!(img.complete && img.naturalWidth > 0)) {
+        await new Promise(resolve => {
+          img.onload = () => {
+            img.onload = null;
+            img.onerror = null;
+            resolve();
+          };
+          img.onerror = () => {
+            failedImages.current.add(originalSrc);
+            img.src = DEFAULT_AVATAR_URL;
+            img.onload = null;
+            img.onerror = null;
+            resolve();
+          };
+        });
+      }
+    }
 
     try {
       const canvas = await html2canvas(element, {
