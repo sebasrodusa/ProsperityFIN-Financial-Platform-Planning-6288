@@ -21,6 +21,10 @@ const inlineStylesRecursively = (node) => {
   Array.from(computedStyle).forEach((prop) => {
     node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
   });
+  const fontSize = parseFloat(computedStyle.fontSize);
+  if (!isNaN(fontSize) && fontSize < 12) {
+    node.style.fontSize = '12px';
+  }
   node.childNodes.forEach(child => inlineStylesRecursively(child));
 };
 
@@ -233,12 +237,28 @@ const ClientFinancialReport = () => {
           }
         }
         // Convert section to image
+        const origCanvases = originalSection.querySelectorAll('canvas');
+        const clonedCanvases = clonedSection.querySelectorAll('canvas');
+        origCanvases.forEach((canvas, index) => {
+          const dataURL = canvas.toDataURL('image/png');
+          const img = document.createElement('img');
+          img.src = dataURL;
+          img.style.width = canvas.style.width || `${canvas.width}px`;
+          img.style.height = canvas.style.height || `${canvas.height}px`;
+          const clonedCanvas = clonedCanvases[index];
+          if (clonedCanvas) {
+            clonedCanvas.replaceWith(img);
+          }
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 300));
+
         const canvas = await html2canvas(clonedSection, {
           foreignObjectRendering: false,
           useCORS: true,
           logging: false,
           allowTaint: true,
-          scale: 2
+          scale: 4
         });
         document.body.removeChild(clonedSection);
         const imgData = canvas.toDataURL('image/jpeg', 0.6);
