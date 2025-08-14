@@ -18,13 +18,26 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 const inlineStylesRecursively = (node) => {
   if (!node || node.nodeType !== 1) return;
   const computedStyle = window.getComputedStyle(node);
+  const originalFontSize = computedStyle.fontSize;
   Array.from(computedStyle).forEach((prop) => {
     node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
   });
-  const fontSize = parseFloat(computedStyle.fontSize);
-  if (!isNaN(fontSize) && fontSize < 12) {
-    node.style.fontSize = '12px';
+  const fontSize = parseFloat(originalFontSize);
+  if (!isNaN(fontSize)) {
+    if (fontSize < 12) {
+      node.style.fontSize = '12px';
+    } else {
+      node.style.fontSize = originalFontSize;
+    }
   }
+  const tailwindFontMap = {
+    'text-3xl': '30px',
+    'text-4xl': '36px',
+    'text-5xl': '48px'
+  };
+  Object.entries(tailwindFontMap).forEach(([cls, size]) => {
+    if (node.classList.contains(cls)) node.style.fontSize = size;
+  });
   node.childNodes.forEach(child => inlineStylesRecursively(child));
 };
 
