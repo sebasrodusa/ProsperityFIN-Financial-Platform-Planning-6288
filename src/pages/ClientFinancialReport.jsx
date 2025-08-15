@@ -15,9 +15,21 @@ import logDev from '../utils/logDev';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController);
 
+const debugInlineStyles = import.meta.env.VITE_DEBUG_STYLES === 'true';
+
 const inlineStylesRecursively = (node) => {
   if (!node || node.nodeType !== 1) return;
   const computedStyle = window.getComputedStyle(node);
+  if (debugInlineStyles) {
+    logDev(
+      'inlineStylesRecursively node:',
+      node.tagName,
+      'classes:',
+      node.className,
+      'computed font size:',
+      computedStyle.fontSize
+    );
+  }
   const originalFontSize = computedStyle.fontSize;
   Array.from(computedStyle).forEach((prop) => {
     node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
@@ -38,6 +50,16 @@ const inlineStylesRecursively = (node) => {
   Object.entries(tailwindFontMap).forEach(([cls, size]) => {
     if (node.classList.contains(cls)) node.style.fontSize = size;
   });
+  if (debugInlineStyles) {
+    logDev(
+      'inlineStylesRecursively applied font size:',
+      node.tagName,
+      'classes:',
+      node.className,
+      'style font size:',
+      node.style.fontSize
+    );
+  }
   node.childNodes.forEach(child => inlineStylesRecursively(child));
 };
 
