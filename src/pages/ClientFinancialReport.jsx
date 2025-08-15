@@ -268,8 +268,37 @@ const ClientFinancialReport = () => {
         const originalSection = sec.current || sec;
         logDev('Processing section:', originalSection.id, originalSection);
 
-        const sectionType = originalSection.id === 'report-header' ? 'header' : 'body';
-        console.log('processing section', originalSection.id, 'as', sectionType);
+        let isHeader = false;
+        let headerReason = '';
+        if (originalSection.id === 'report-header') {
+          isHeader = true;
+          headerReason = "id === 'report-header'";
+        } else if (originalSection.classList?.contains('report-header')) {
+          isHeader = true;
+          headerReason = "classList contains 'report-header'";
+        } else if (sections[0] === originalSection) {
+          isHeader = true;
+          headerReason = 'first section';
+        } else if (
+          originalSection.textContent &&
+          originalSection.textContent.includes('Financial Independence Report')
+        ) {
+          isHeader = true;
+          headerReason = "text includes 'Financial Independence Report'";
+        }
+        const sectionType = isHeader ? 'header' : 'body';
+        if (isHeader) {
+          console.log(
+            'processing section',
+            originalSection.id,
+            'as',
+            sectionType,
+            'due to',
+            headerReason
+          );
+        } else {
+          console.log('processing section', originalSection.id, 'as', sectionType);
+        }
 
         const clonedSection = originalSection.cloneNode(true);
         clonedSection.style.position = 'absolute';
