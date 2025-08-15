@@ -19,6 +19,7 @@ const debugInlineStyles = import.meta.env.VITE_DEBUG_STYLES === 'true';
 
 const inlineStylesRecursively = (node, sectionType = 'body') => {
   if (!node || node.nodeType !== 1) return;
+  console.log('inlineStylesRecursively start', node.tagName, { sectionType });
   const computedStyle = window.getComputedStyle(node);
   if (debugInlineStyles) {
     logDev(
@@ -73,6 +74,8 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
       node.style.fontSize = '12px';
     }
   }
+
+  console.log('inlineStylesRecursively applied', node.tagName, node.style.fontSize);
 
   if (debugInlineStyles) {
     logDev(
