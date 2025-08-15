@@ -17,7 +17,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const debugInlineStyles = import.meta.env.VITE_DEBUG_STYLES === 'true';
 
-const inlineStylesRecursively = (node) => {
+const inlineStylesRecursively = (node, sectionType = 'body') => {
   if (!node || node.nodeType !== 1) return;
   const computedStyle = window.getComputedStyle(node);
   if (debugInlineStyles) {
@@ -30,90 +30,50 @@ const inlineStylesRecursively = (node) => {
       computedStyle.fontSize
     );
   }
-  const originalFontSize = computedStyle.fontSize;
+
+  const originalFontSizeStr = computedStyle.fontSize;
+  const originalFontSize = parseFloat(originalFontSizeStr);
+
   Array.from(computedStyle).forEach((prop) => {
     node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
   });
-  const fontSize = parseFloat(originalFontSize);
-  if (!isNaN(fontSize)) {
-    node.style.fontSize = originalFontSize;
+  if (!isNaN(originalFontSize)) {
+    node.style.fontSize = `${originalFontSize}px`;
   }
+
   const tailwindFontMap = {
     'text-xs': '12px',
     'text-sm': '14px',
-    'text-base': '16px',
-    'text-lg': '18px',
-    'text-xl': '20px',
-    'text-2xl': '24px',
-    'text-3xl': '30px',
-    'text-4xl': '36px',
-    'text-5xl': '48px',
-    'text-6xl': '60px',
-    'text-7xl': '72px',
-    'text-8xl': '96px',
-    'text-9xl': '128px'
+    'text-base': '16px'
   };
   node.classList.forEach(cls => {
     const pureClass = cls.split(':').pop();
     const size = tailwindFontMap[pureClass];
     if (size) node.style.fontSize = size;
   });
+
   const textContent = node.textContent || '';
-  let currentFontSize = parseFloat(node.style.fontSize);
-  if (/\$[\d,]+/.test(textContent) && (isNaN(currentFontSize) || currentFontSize < 48)) {
-    node.style.fontSize = '48px';
-    if (debugInlineStyles) {
-      logDev(
-        'inlineStylesRecursively override currency font size:',
-        node.tagName,
-        'text:',
-        textContent.trim(),
-        'font size:',
-        node.style.fontSize
-      );
+
+  if (sectionType === 'header') {
+    if (/\$[\d,]+/.test(textContent)) {
+      node.style.fontSize = '48px';
+    } else if (node.tagName === 'H1') {
+      node.style.fontSize = '28px';
+    } else if (['H2', 'H3'].includes(node.tagName)) {
+      node.style.fontSize = '20px';
+    } else {
+      node.style.fontSize = '14px';
+    }
+  } else {
+    if (['H1', 'H2', 'H3'].includes(node.tagName)) {
+      node.style.fontSize = '16px';
+    } else if (!isNaN(originalFontSize)) {
+      node.style.fontSize = `${Math.min(originalFontSize * 1.2, 12)}px`;
+    } else {
+      node.style.fontSize = '12px';
     }
   }
-  currentFontSize = parseFloat(node.style.fontSize);
-  if (['H1', 'H2', 'H3'].includes(node.tagName) && (isNaN(currentFontSize) || currentFontSize < 24)) {
-    node.style.fontSize = '24px';
-    if (debugInlineStyles) {
-      logDev(
-        'inlineStylesRecursively override header font size:',
-        node.tagName,
-        'font size:',
-        node.style.fontSize
-      );
-    }
-  }
-  currentFontSize = parseFloat(node.style.fontSize);
-  if (textContent.includes('Prepared by') && (isNaN(currentFontSize) || currentFontSize < 14)) {
-    node.style.fontSize = '14px';
-    if (debugInlineStyles) {
-      logDev(
-        'inlineStylesRecursively override "Prepared by" font size:',
-        node.tagName,
-        'text:',
-        textContent.trim(),
-        'font size:',
-        node.style.fontSize
-      );
-    }
-  }
-  currentFontSize = parseFloat(node.style.fontSize);
-  const visibilityThreshold = 12;
-  const scaleFactor = 1.5;
-  if (!isNaN(currentFontSize) && currentFontSize < visibilityThreshold) {
-    const scaledFontSize = currentFontSize * scaleFactor;
-    if (debugInlineStyles) {
-      logDev(
-        'inlineStylesRecursively scaled font size:',
-        node.tagName,
-        'original:', `${currentFontSize}px`,
-        'scaled:', `${scaledFontSize}px`
-      );
-    }
-    node.style.fontSize = `${scaledFontSize}px`;
-  }
+
   if (debugInlineStyles) {
     logDev(
       'inlineStylesRecursively applied font size:',
@@ -124,7 +84,8 @@ const inlineStylesRecursively = (node) => {
       node.style.fontSize
     );
   }
-  node.childNodes.forEach(child => inlineStylesRecursively(child));
+
+  node.childNodes.forEach(child => inlineStylesRecursively(child, sectionType));
 };
 
 const { FiArrowLeft, FiDownload, FiPrinter, FiUser, FiUsers, FiCalendar, FiMail, FiPhone, FiCheck, FiX } = FiIcons;
@@ -306,7 +267,8 @@ const ClientFinancialReport = () => {
         clonedSection.style.position = 'absolute';
         clonedSection.style.left = '-10000px';
         document.body.appendChild(clonedSection);
-        inlineStylesRecursively(clonedSection);
+        const sectionType = originalSection.id === 'report-header' ? 'header' : 'body';
+        inlineStylesRecursively(clonedSection, sectionType);
 
         // Ensure images in the section are loaded
         const imgs = clonedSection.querySelectorAll('img');
