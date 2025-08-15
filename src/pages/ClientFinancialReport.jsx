@@ -43,12 +43,24 @@ const inlineStylesRecursively = (node) => {
     }
   }
   const tailwindFontMap = {
+    'text-xs': '12px',
+    'text-sm': '14px',
+    'text-base': '16px',
+    'text-lg': '18px',
+    'text-xl': '20px',
+    'text-2xl': '24px',
     'text-3xl': '30px',
     'text-4xl': '36px',
-    'text-5xl': '48px'
+    'text-5xl': '48px',
+    'text-6xl': '60px',
+    'text-7xl': '72px',
+    'text-8xl': '96px',
+    'text-9xl': '128px'
   };
-  Object.entries(tailwindFontMap).forEach(([cls, size]) => {
-    if (node.classList.contains(cls)) node.style.fontSize = size;
+  node.classList.forEach(cls => {
+    const pureClass = cls.split(':').pop();
+    const size = tailwindFontMap[pureClass];
+    if (size) node.style.fontSize = size;
   });
   if (debugInlineStyles) {
     logDev(
