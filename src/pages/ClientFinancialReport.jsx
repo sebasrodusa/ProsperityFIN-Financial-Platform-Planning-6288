@@ -309,6 +309,12 @@ const ClientFinancialReport = () => {
         clonedSection.style.position = 'absolute';
         clonedSection.style.left = '-10000px';
         document.body.appendChild(clonedSection);
+        console.log(
+          'calling inlineStylesRecursively for',
+          originalSection.id,
+          'as',
+          sectionType
+        );
         inlineStylesRecursively(clonedSection, sectionType);
 
         // Ensure images in the section are loaded
