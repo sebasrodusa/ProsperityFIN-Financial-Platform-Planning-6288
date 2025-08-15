@@ -256,6 +256,8 @@ const ClientFinancialReport = () => {
 
       // Add each section to the PDF
       const sections = Array.from(reportElement.children).filter(el => el.id);
+      console.log('report-header exists?', !!document.getElementById('report-header'));
+      console.log('section ids:', sections.map(s => s.id));
       logDev('Preparing PDF; sections count and IDs:', sections.length, sections.map(s => s.id));
       let yOffset = 0;
 
@@ -266,11 +268,13 @@ const ClientFinancialReport = () => {
         const originalSection = sec.current || sec;
         logDev('Processing section:', originalSection.id, originalSection);
 
+        const sectionType = originalSection.id === 'report-header' ? 'header' : 'body';
+        console.log('processing section', originalSection.id, 'as', sectionType);
+
         const clonedSection = originalSection.cloneNode(true);
         clonedSection.style.position = 'absolute';
         clonedSection.style.left = '-10000px';
         document.body.appendChild(clonedSection);
-        const sectionType = originalSection.id === 'report-header' ? 'header' : 'body';
         inlineStylesRecursively(clonedSection, sectionType);
 
         // Ensure images in the section are loaded
