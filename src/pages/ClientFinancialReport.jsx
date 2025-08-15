@@ -36,11 +36,7 @@ const inlineStylesRecursively = (node) => {
   });
   const fontSize = parseFloat(originalFontSize);
   if (!isNaN(fontSize)) {
-    if (fontSize < 12) {
-      node.style.fontSize = '12px';
-    } else {
-      node.style.fontSize = originalFontSize;
-    }
+    node.style.fontSize = originalFontSize;
   }
   const tailwindFontMap = {
     'text-xs': '12px',
@@ -102,6 +98,21 @@ const inlineStylesRecursively = (node) => {
         node.style.fontSize
       );
     }
+  }
+  currentFontSize = parseFloat(node.style.fontSize);
+  const visibilityThreshold = 12;
+  const scaleFactor = 1.5;
+  if (!isNaN(currentFontSize) && currentFontSize < visibilityThreshold) {
+    const scaledFontSize = currentFontSize * scaleFactor;
+    if (debugInlineStyles) {
+      logDev(
+        'inlineStylesRecursively scaled font size:',
+        node.tagName,
+        'original:', `${currentFontSize}px`,
+        'scaled:', `${scaledFontSize}px`
+      );
+    }
+    node.style.fontSize = `${scaledFontSize}px`;
   }
   if (debugInlineStyles) {
     logDev(
