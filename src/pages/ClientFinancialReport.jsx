@@ -55,6 +55,11 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
 
   const textContent = node.textContent || '';
 
+  if (node.textContent.includes('$') && node.textContent.includes(',000')) {
+    node.style.fontSize = '48px';
+    console.log('FIN element forced to 48px', node.textContent);
+  }
+
   if (sectionType === 'header') {
     if (/\$[\d,]+/.test(textContent)) {
       node.style.fontSize = '48px';
