@@ -62,6 +62,47 @@ const inlineStylesRecursively = (node) => {
     const size = tailwindFontMap[pureClass];
     if (size) node.style.fontSize = size;
   });
+  const textContent = node.textContent || '';
+  let currentFontSize = parseFloat(node.style.fontSize);
+  if (/\$[\d,]+/.test(textContent) && (isNaN(currentFontSize) || currentFontSize < 48)) {
+    node.style.fontSize = '48px';
+    if (debugInlineStyles) {
+      logDev(
+        'inlineStylesRecursively override currency font size:',
+        node.tagName,
+        'text:',
+        textContent.trim(),
+        'font size:',
+        node.style.fontSize
+      );
+    }
+  }
+  currentFontSize = parseFloat(node.style.fontSize);
+  if (['H1', 'H2', 'H3'].includes(node.tagName) && (isNaN(currentFontSize) || currentFontSize < 24)) {
+    node.style.fontSize = '24px';
+    if (debugInlineStyles) {
+      logDev(
+        'inlineStylesRecursively override header font size:',
+        node.tagName,
+        'font size:',
+        node.style.fontSize
+      );
+    }
+  }
+  currentFontSize = parseFloat(node.style.fontSize);
+  if (textContent.includes('Prepared by') && (isNaN(currentFontSize) || currentFontSize < 14)) {
+    node.style.fontSize = '14px';
+    if (debugInlineStyles) {
+      logDev(
+        'inlineStylesRecursively override "Prepared by" font size:',
+        node.tagName,
+        'text:',
+        textContent.trim(),
+        'font size:',
+        node.style.fontSize
+      );
+    }
+  }
   if (debugInlineStyles) {
     logDev(
       'inlineStylesRecursively applied font size:',
