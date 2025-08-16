@@ -18,7 +18,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const debugInlineStyles = import.meta.env.VITE_DEBUG_STYLES === 'true';
 
-const inlineStylesRecursively = (node, sectionType = 'body') => {
+export const inlineStylesRecursively = (node, sectionType = 'body') => {
   if (!node || node.nodeType !== 1) return;
   console.log('inlineStylesRecursively start', node.tagName, { sectionType });
   const computedStyle = window.getComputedStyle(node);
