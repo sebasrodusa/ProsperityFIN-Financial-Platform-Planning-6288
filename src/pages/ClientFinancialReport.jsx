@@ -57,7 +57,11 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
     const tailwindFontMap = {
       'text-xs': '12px',
       'text-sm': '14px',
-      'text-base': '16px'
+      'text-base': '16px',
+      'text-xl': '20px',
+      'text-2xl': '24px',
+      'text-3xl': '30px',
+      'text-4xl': '36px'
     };
     node.classList.forEach(cls => {
       const pureClass = cls.split(':').pop();
@@ -78,10 +82,19 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
         node.nextElementSibling
       ].some(el => finLabelRegex.test(el?.textContent || ''));
 
-      const hasLargeTextClass = Array.from(node.classList).some(cls => {
+      const largeTextClassMap = {
+        'text-4xl': '48px',
+        'text-5xl': '48px',
+        'text-6xl': '64px',
+        'text-7xl': '72px'
+      };
+      const largeTextClass = Array.from(node.classList).find(cls => {
         const pure = cls.split(':').pop();
-        return pure === 'text-4xl' || pure === 'text-5xl';
+        return largeTextClassMap[pure];
       });
+      const largeTextClassSize = largeTextClass
+        ? largeTextClassMap[largeTextClass.split(':').pop()]
+        : null;
 
       console.log('FIN detection check', {
         tag: node.tagName,
@@ -94,17 +107,17 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
       if (isFinAmount && contextHasFinLabel) {
         console.log('FIN number detected, applying 48px');
         node.style.fontSize = '48px';
-      } else if (hasLargeTextClass) {
-        node.style.fontSize = '48px';
-      } else if (node.tagName === 'H1') {
-        node.style.fontSize = '40px';
-      } else if (node.tagName === 'H2' || node.tagName === 'H3') {
-        node.style.fontSize = '32px';
+      } else if (largeTextClassSize) {
+        node.style.fontSize = largeTextClassSize;
+      } else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 48;
+        node.style.fontSize = `${Math.max(currentSize, 48)}px`;
       } else if (node.tagName === 'P') {
-        node.style.fontSize = '20px';
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 24;
+        node.style.fontSize = `${Math.max(currentSize, 24)}px`;
       } else {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 20;
-        node.style.fontSize = `${Math.max(currentSize, 20)}px`;
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 24;
+        node.style.fontSize = `${Math.max(currentSize, 24)}px`;
       }
     } else {
       if (['H1', 'H2', 'H3'].includes(node.tagName)) {
