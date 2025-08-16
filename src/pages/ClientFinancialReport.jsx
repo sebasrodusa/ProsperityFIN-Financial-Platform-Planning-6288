@@ -634,7 +634,7 @@ const ClientFinancialReport = () => {
                   <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
-                  <h1 className="text-3xl font-heading font-bold text-gray-900">Financial Independence Report</h1>
+                  <h1 className="text-3xl font-heading font-bold text-gray-900" style={{ fontSize: '32px' }}>Financial Independence Report</h1>
                   <p className="text-gray-600">Prepared on: {new Date().toLocaleDateString()}</p>
                 </div>
                 <div className="mt-4 md:mt-0 text-right">
