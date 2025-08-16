@@ -685,7 +685,12 @@ const ClientFinancialReport = () => {
                       </p>
                       <div className="text-center my-6">
                         <p className="text-sm text-gray-600">Your Financial Independence Number (FIN)</p>
-                        <p className="text-4xl font-bold text-primary-600">{formatCurrency(reportData.clientInfo.fin)}</p>
+                        <p
+                          className="text-4xl font-bold text-primary-600"
+                          style={{ fontSize: '48px', color: '#0066cc', fontWeight: 'bold' }}
+                        >
+                          {formatCurrency(reportData.clientInfo.fin)}
+                        </p>
                       </div>
                       <p className="text-gray-800">
                         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you achieve financial independence.
