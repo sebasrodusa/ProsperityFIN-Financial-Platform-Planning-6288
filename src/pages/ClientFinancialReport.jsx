@@ -8,6 +8,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/layout/Navbar';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import HeroSection from '../components/financial/HeroSection';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
@@ -686,29 +687,7 @@ const ClientFinancialReport = () => {
                   </div>
 
                   {/* Cover Letter / FIN */}
-                  <div>
-                    <h1 className="text-4xl font-semibold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Your Financial Independence</h1>
-                    <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-6 rounded-lg">
-                      <p className="text-gray-800 mb-4" style={{ fontSize: '20px' }}>
-                        Dear {reportData.clientInfo.name},
-                      </p>
-                      <p className="text-gray-800 mb-4" style={{ fontSize: '20px' }}>
-                        Based on your current financial situation, we've calculated your Financial Independence Number (FIN) - the amount needed to support your lifestyle indefinitely:
-                      </p>
-                      <div className="text-center my-6">
-                        <p className="text-gray-600" style={{ fontSize: '20px' }}>Your Financial Independence Number (FIN)</p>
-                        <p
-                          className="text-4xl font-bold text-primary-600"
-                          style={{ fontSize: '48px', color: '#0066cc', fontWeight: 'bold' }}
-                        >
-                          {formatCurrency(reportData.clientInfo.fin)}
-                        </p>
-                      </div>
-                      <p className="text-gray-800" style={{ fontSize: '20px' }}>
-                        This report provides a comprehensive overview of your current financial position and identifies opportunities to help you achieve financial independence.
-                      </p>
-                    </div>
-                  </div>
+                    <HeroSection fin={reportData.clientInfo.fin} clientName={reportData.clientInfo.name} />
                 </div>
               )}
             </div>
