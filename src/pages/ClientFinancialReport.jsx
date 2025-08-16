@@ -61,7 +61,10 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
       'text-xl': '20px',
       'text-2xl': '24px',
       'text-3xl': '30px',
-      'text-4xl': '36px'
+      'text-4xl': '36px',
+      'text-5xl': '48px',
+      'text-6xl': '64px',
+      'text-7xl': '72px'
     };
     node.classList.forEach(cls => {
       const pureClass = cls.split(':').pop();
@@ -70,6 +73,18 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
     });
 
     const textContent = node.textContent || '';
+
+    const largeTextClass = Array.from(node.classList).find(cls => {
+      const pure = cls.split(':').pop();
+      return ['text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'].includes(pure);
+    });
+    const pureLargeClass = largeTextClass?.split(':').pop();
+    const largeTextClassSize =
+      pureLargeClass === 'text-4xl'
+        ? '48px'
+        : pureLargeClass
+          ? tailwindFontMap[pureLargeClass]
+          : null;
 
     if (sectionType === 'header') {
       const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
@@ -81,20 +96,6 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
         node.previousElementSibling,
         node.nextElementSibling
       ].some(el => finLabelRegex.test(el?.textContent || ''));
-
-      const largeTextClassMap = {
-        'text-4xl': '48px',
-        'text-5xl': '48px',
-        'text-6xl': '64px',
-        'text-7xl': '72px'
-      };
-      const largeTextClass = Array.from(node.classList).find(cls => {
-        const pure = cls.split(':').pop();
-        return largeTextClassMap[pure];
-      });
-      const largeTextClassSize = largeTextClass
-        ? largeTextClassMap[largeTextClass.split(':').pop()]
-        : null;
 
       const defaultFinAmountSize = '72px';
 
