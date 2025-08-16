@@ -96,14 +96,14 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
       } else if (hasLargeTextClass) {
         node.style.fontSize = '48px';
       } else if (node.tagName === 'H1') {
+        node.style.fontSize = '40px';
+      } else if (node.tagName === 'H2' || node.tagName === 'H3') {
         node.style.fontSize = '32px';
-      } else if (node.tagName === 'H3') {
-        node.style.fontSize = '24px';
       } else if (node.tagName === 'P') {
-        node.style.fontSize = '16px';
+        node.style.fontSize = '20px';
       } else {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 14;
-        node.style.fontSize = `${Math.max(currentSize, 14)}px`;
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 20;
+        node.style.fontSize = `${Math.max(currentSize, 20)}px`;
       }
     } else {
       if (['H1', 'H2', 'H3'].includes(node.tagName)) {
@@ -687,16 +687,16 @@ const ClientFinancialReport = () => {
 
                   {/* Cover Letter / FIN */}
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Your Financial Independence</h3>
+                    <h1 className="text-4xl font-semibold text-gray-900 mb-4" style={{ fontSize: '40px' }}>Your Financial Independence</h1>
                     <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-6 rounded-lg">
-                      <p className="text-gray-800 mb-4" style={{ fontSize: '16px' }}>
+                      <p className="text-gray-800 mb-4" style={{ fontSize: '20px' }}>
                         Dear {reportData.clientInfo.name},
                       </p>
-                      <p className="text-gray-800 mb-4" style={{ fontSize: '16px' }}>
+                      <p className="text-gray-800 mb-4" style={{ fontSize: '20px' }}>
                         Based on your current financial situation, we've calculated your Financial Independence Number (FIN) - the amount needed to support your lifestyle indefinitely:
                       </p>
                       <div className="text-center my-6">
-                        <p className="text-sm text-gray-600" style={{ fontSize: '16px' }}>Your Financial Independence Number (FIN)</p>
+                        <p className="text-gray-600" style={{ fontSize: '20px' }}>Your Financial Independence Number (FIN)</p>
                         <p
                           className="text-4xl font-bold text-primary-600"
                           style={{ fontSize: '48px', color: '#0066cc', fontWeight: 'bold' }}
@@ -704,7 +704,7 @@ const ClientFinancialReport = () => {
                           {formatCurrency(reportData.clientInfo.fin)}
                         </p>
                       </div>
-                      <p className="text-gray-800" style={{ fontSize: '16px' }}>
+                      <p className="text-gray-800" style={{ fontSize: '20px' }}>
                         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you achieve financial independence.
                       </p>
                     </div>
