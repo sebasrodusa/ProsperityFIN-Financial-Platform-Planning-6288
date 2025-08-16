@@ -56,21 +56,43 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
   const textContent = node.textContent || '';
 
   if (sectionType === 'header') {
-    const finAmountRegex = /^\s*\$[\d,]+(?:\.\d{2})?\s*$/;
+    const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
     const finLabelRegex = /financial independence number/i;
-    const isFinAmount = finAmountRegex.test(textContent);
-    const hasFinLabel =
-      finLabelRegex.test(node.previousElementSibling?.textContent || '') ||
-      finLabelRegex.test(node.parentElement?.textContent || '');
+    const trimmedText = textContent.trim();
+    const isFinAmount = finAmountRegex.test(trimmedText);
+    const contextHasFinLabel = [
+      node.parentElement,
+      node.previousElementSibling,
+      node.nextElementSibling
+    ].some(el => finLabelRegex.test(el?.textContent || ''));
 
-    if (isFinAmount && hasFinLabel) {
+    const hasLargeTextClass = Array.from(node.classList).some(cls => {
+      const pure = cls.split(':').pop();
+      return pure === 'text-4xl' || pure === 'text-5xl';
+    });
+
+    console.log('FIN detection check', {
+      tag: node.tagName,
+      text: trimmedText,
+      className: node.className,
+      isFinAmount,
+      contextHasFinLabel
+    });
+
+    if (isFinAmount && contextHasFinLabel) {
+      console.log('FIN number detected, applying 48px');
+      node.style.fontSize = '48px';
+    } else if (hasLargeTextClass) {
       node.style.fontSize = '48px';
     } else if (node.tagName === 'H1') {
-      node.style.fontSize = '28px';
-    } else if (['H2', 'H3'].includes(node.tagName)) {
-      node.style.fontSize = '20px';
+      node.style.fontSize = '32px';
+    } else if (node.tagName === 'H3') {
+      node.style.fontSize = '24px';
+    } else if (node.tagName === 'P') {
+      node.style.fontSize = '16px';
     } else {
-      node.style.fontSize = '14px';
+      const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 14;
+      node.style.fontSize = `${Math.max(currentSize, 14)}px`;
     }
   } else {
     if (['H1', 'H2', 'H3'].includes(node.tagName)) {
