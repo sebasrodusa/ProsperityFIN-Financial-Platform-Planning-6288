@@ -55,13 +55,15 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
 
   const textContent = node.textContent || '';
 
-  if (node.textContent.includes('$') && node.textContent.includes(',000')) {
-    node.style.fontSize = '48px';
-    console.log('FIN element forced to 48px', node.textContent);
-  }
-
   if (sectionType === 'header') {
-    if (/\$[\d,]+/.test(textContent)) {
+    const finAmountRegex = /^\s*\$[\d,]+(?:\.\d{2})?\s*$/;
+    const finLabelRegex = /financial independence number/i;
+    const isFinAmount = finAmountRegex.test(textContent);
+    const hasFinLabel =
+      finLabelRegex.test(node.previousElementSibling?.textContent || '') ||
+      finLabelRegex.test(node.parentElement?.textContent || '');
+
+    if (isFinAmount && hasFinLabel) {
       node.style.fontSize = '48px';
     } else if (node.tagName === 'H1') {
       node.style.fontSize = '28px';
