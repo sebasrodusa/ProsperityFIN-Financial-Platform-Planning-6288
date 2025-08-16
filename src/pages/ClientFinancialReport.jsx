@@ -317,6 +317,11 @@ const ClientFinancialReport = () => {
         );
         inlineStylesRecursively(clonedSection, sectionType);
 
+        // Log text content and font size of all elements within the cloned section
+        clonedSection.querySelectorAll('*').forEach(el => {
+          console.log('Element text:', el.textContent, 'font size:', el.style.fontSize);
+        });
+
         // Ensure images in the section are loaded
         const imgs = clonedSection.querySelectorAll('img');
         for (const img of imgs) {
