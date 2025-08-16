@@ -653,14 +653,31 @@ const ClientFinancialReport = () => {
 
           {/* Financial Report Content */}
           <div id="financial-report" className="space-y-8">
+            {reportData && (
+              <div className="w-full" style={{ pageBreakAfter: 'always' }}>
+                <HeroSection
+                  fin={reportData.clientInfo.fin}
+                  clientName={reportData.clientInfo.name}
+                />
+              </div>
+            )}
+
             {/* Report Header */}
-            <div id="report-header" className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none">
+            <div
+              id="report-header"
+              className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
+            >
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                 <div>
                   <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
-                  <h1 className="text-3xl font-heading font-bold text-gray-900" style={{ fontSize: '32px' }}>Financial Independence Report</h1>
+                  <h1
+                    className="text-3xl font-heading font-bold text-gray-900"
+                    style={{ fontSize: '32px' }}
+                  >
+                    Financial Independence Report
+                  </h1>
                   <p className="text-gray-600">Prepared on: {new Date().toLocaleDateString()}</p>
                 </div>
                 <div className="mt-4 md:mt-0 text-right">
@@ -675,11 +692,18 @@ const ClientFinancialReport = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Client Information */}
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Client Information</h3>
+                    <h3
+                      className="text-xl font-semibold text-gray-900 mb-4"
+                      style={{ fontSize: '24px' }}
+                    >
+                      Client Information
+                    </h3>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 font-medium">{reportData.clientInfo.name}, {reportData.clientInfo.age} years old</span>
+                        <span className="text-gray-900 font-medium">
+                          {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
+                        </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
@@ -697,11 +721,6 @@ const ClientFinancialReport = () => {
                         <span className="text-gray-900">{reportData.clientInfo.phone}</span>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Cover Letter / FIN */}
-                  <div style={{ pageBreakAfter: 'always' }}>
-                    <HeroSection fin={reportData.clientInfo.fin} clientName={reportData.clientInfo.name} />
                   </div>
                 </div>
               )}
