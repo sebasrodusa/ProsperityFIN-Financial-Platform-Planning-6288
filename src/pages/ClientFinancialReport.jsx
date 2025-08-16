@@ -658,7 +658,11 @@ const ClientFinancialReport = () => {
           {/* Financial Report Content */}
           <div id="financial-report" className="space-y-8">
             {reportData && (
-              <div className="w-full" style={{ pageBreakAfter: 'always' }}>
+              <div
+                id="hero-section"
+                className="w-full"
+                style={{ pageBreakAfter: 'always' }}
+              >
                 <HeroSection
                   fin={reportData.clientInfo.fin}
                   clientName={reportData.clientInfo.name}
