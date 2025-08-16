@@ -10,7 +10,7 @@ const HeroSection = ({ fin, clientName }) => {
     }).format(amount);
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center text-center p-10 space-y-6 bg-gradient-to-r from-primary-50 to-secondary-100">
+    <div className="text-center space-y-6">
       <h1 className="text-6xl font-semibold text-gray-900">Your Financial Independence</h1>
       <p className="text-2xl text-gray-800">Dear {clientName},</p>
       <p className="text-2xl text-gray-800">

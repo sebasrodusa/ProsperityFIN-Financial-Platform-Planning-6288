@@ -657,19 +657,6 @@ const ClientFinancialReport = () => {
 
           {/* Financial Report Content */}
           <div id="financial-report" className="space-y-8">
-            {reportData && (
-              <div
-                id="hero-section"
-                className="w-full"
-                style={{ pageBreakAfter: 'always' }}
-              >
-                <HeroSection
-                  fin={reportData.clientInfo.fin}
-                  clientName={reportData.clientInfo.name}
-                />
-              </div>
-            )}
-
             {/* Report Header */}
             <div
               id="report-header"
@@ -733,6 +720,19 @@ const ClientFinancialReport = () => {
                 </div>
               )}
             </div>
+
+            {reportData && (
+              <div
+                id="fin-summary"
+                className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
+                style={{ pageBreakAfter: 'always' }}
+              >
+                <HeroSection
+                  fin={reportData.clientInfo.fin}
+                  clientName={reportData.clientInfo.name}
+                />
+              </div>
+            )}
 
             {/* Cashflow Summary */}
             {reportData && (
