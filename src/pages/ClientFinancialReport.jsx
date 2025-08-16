@@ -649,7 +649,7 @@ const ClientFinancialReport = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Client Information */}
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Client Information</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Client Information</h3>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
@@ -675,16 +675,16 @@ const ClientFinancialReport = () => {
 
                   {/* Cover Letter / FIN */}
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Financial Independence</h3>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Your Financial Independence</h3>
                     <div className="bg-gradient-to-r from-primary-50 to-secondary-50 p-6 rounded-lg">
-                      <p className="text-gray-800 mb-4">
+                      <p className="text-gray-800 mb-4" style={{ fontSize: '16px' }}>
                         Dear {reportData.clientInfo.name},
                       </p>
-                      <p className="text-gray-800 mb-4">
+                      <p className="text-gray-800 mb-4" style={{ fontSize: '16px' }}>
                         Based on your current financial situation, we've calculated your Financial Independence Number (FIN) - the amount needed to support your lifestyle indefinitely:
                       </p>
                       <div className="text-center my-6">
-                        <p className="text-sm text-gray-600">Your Financial Independence Number (FIN)</p>
+                        <p className="text-sm text-gray-600" style={{ fontSize: '16px' }}>Your Financial Independence Number (FIN)</p>
                         <p
                           className="text-4xl font-bold text-primary-600"
                           style={{ fontSize: '48px', color: '#0066cc', fontWeight: 'bold' }}
@@ -692,7 +692,7 @@ const ClientFinancialReport = () => {
                           {formatCurrency(reportData.clientInfo.fin)}
                         </p>
                       </div>
-                      <p className="text-gray-800">
+                      <p className="text-gray-800" style={{ fontSize: '16px' }}>
                         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you achieve financial independence.
                       </p>
                     </div>
@@ -727,7 +727,7 @@ const ClientFinancialReport = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Income Sources</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Income Sources</h3>
                         <div className="space-y-2">
                           {reportData.cashflow.sources.map((source, index) => (
                             <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -738,7 +738,7 @@ const ClientFinancialReport = () => {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Expenses</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Top Expenses</h3>
                         <div className="space-y-2">
                           {reportData.cashflow.expenseCategories
                             .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
@@ -788,7 +788,7 @@ const ClientFinancialReport = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Assets</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Top Assets</h3>
                         <div className="space-y-2">
                           {reportData.balanceSheet.assetDetails
                             .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
@@ -802,7 +802,7 @@ const ClientFinancialReport = () => {
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Liabilities</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Top Liabilities</h3>
                         <div className="space-y-2">
                           {reportData.balanceSheet.liabilityDetails
                             .sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount))
@@ -992,7 +992,7 @@ const ClientFinancialReport = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Estate Planning Checklist</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Estate Planning Checklist</h3>
                     <div className="space-y-3">
                       {[
                         { key: 'will', label: 'Last Will & Testament' },
@@ -1029,7 +1029,7 @@ const ClientFinancialReport = () => {
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Legacy Wishes & Special Instructions</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4" style={{ fontSize: '24px' }}>Legacy Wishes & Special Instructions</h3>
                     {reportData.legacy_wishes ? (
                       <div className="p-4 bg-gray-50 rounded-lg">
                         <p className="text-gray-700 whitespace-pre-line">{reportData.legacy_wishes}</p>
@@ -1138,7 +1138,7 @@ const ClientFinancialReport = () => {
               <div className="border-t border-gray-100 pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Disclaimer</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2" style={{ fontSize: '24px' }}>Disclaimer</h3>
                     <p className="text-sm text-gray-600">
                       This report is based on the information provided and is intended for educational and informational purposes only.
                       It does not constitute financial, legal, or tax advice. Please consult with qualified professionals before making
