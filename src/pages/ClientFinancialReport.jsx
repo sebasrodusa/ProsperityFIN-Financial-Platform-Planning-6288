@@ -32,75 +32,87 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
     );
   }
 
+  const inlineStyleAttr = node.getAttribute('style') || '';
+  const inlineProps = inlineStyleAttr
+    .split(';')
+    .map(s => s.split(':')[0].trim())
+    .filter(Boolean);
+  const hasInlineFontSize = inlineProps.includes('font-size');
+
+  Array.from(computedStyle).forEach(prop => {
+    if (prop === 'font-size') return;
+    if (inlineProps.includes(prop)) return;
+    node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
+  });
+
   const originalFontSizeStr = computedStyle.fontSize;
   const originalFontSize = parseFloat(originalFontSizeStr);
 
-  Array.from(computedStyle).forEach((prop) => {
-    node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
-  });
-  if (!isNaN(originalFontSize)) {
-    node.style.fontSize = `${originalFontSize}px`;
-  }
-
-  const tailwindFontMap = {
-    'text-xs': '12px',
-    'text-sm': '14px',
-    'text-base': '16px'
-  };
-  node.classList.forEach(cls => {
-    const pureClass = cls.split(':').pop();
-    const size = tailwindFontMap[pureClass];
-    if (size) node.style.fontSize = size;
-  });
-
-  const textContent = node.textContent || '';
-
-  if (sectionType === 'header') {
-    const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
-    const finLabelRegex = /financial independence number/i;
-    const trimmedText = textContent.trim();
-    const isFinAmount = finAmountRegex.test(trimmedText);
-    const contextHasFinLabel = [
-      node.parentElement,
-      node.previousElementSibling,
-      node.nextElementSibling
-    ].some(el => finLabelRegex.test(el?.textContent || ''));
-
-    const hasLargeTextClass = Array.from(node.classList).some(cls => {
-      const pure = cls.split(':').pop();
-      return pure === 'text-4xl' || pure === 'text-5xl';
-    });
-
-    console.log('FIN detection check', {
-      tag: node.tagName,
-      text: trimmedText,
-      className: node.className,
-      isFinAmount,
-      contextHasFinLabel
-    });
-
-    if (isFinAmount && contextHasFinLabel) {
-      console.log('FIN number detected, applying 48px');
-      node.style.fontSize = '48px';
-    } else if (hasLargeTextClass) {
-      node.style.fontSize = '48px';
-    } else if (node.tagName === 'H1') {
-      node.style.fontSize = '32px';
-    } else if (node.tagName === 'H3') {
-      node.style.fontSize = '24px';
-    } else if (node.tagName === 'P') {
-      node.style.fontSize = '16px';
-    } else {
-      const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 14;
-      node.style.fontSize = `${Math.max(currentSize, 14)}px`;
+  if (!hasInlineFontSize && !node.style.fontSize) {
+    if (!isNaN(originalFontSize)) {
+      node.style.fontSize = `${originalFontSize}px`;
     }
-  } else {
-    if (['H1', 'H2', 'H3'].includes(node.tagName)) {
-      node.style.fontSize = '16px';
-    } else if (!isNaN(originalFontSize)) {
-      node.style.fontSize = `${Math.min(originalFontSize * 1.2, 12)}px`;
+
+    const tailwindFontMap = {
+      'text-xs': '12px',
+      'text-sm': '14px',
+      'text-base': '16px'
+    };
+    node.classList.forEach(cls => {
+      const pureClass = cls.split(':').pop();
+      const size = tailwindFontMap[pureClass];
+      if (size) node.style.fontSize = size;
+    });
+
+    const textContent = node.textContent || '';
+
+    if (sectionType === 'header') {
+      const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
+      const finLabelRegex = /financial independence number/i;
+      const trimmedText = textContent.trim();
+      const isFinAmount = finAmountRegex.test(trimmedText);
+      const contextHasFinLabel = [
+        node.parentElement,
+        node.previousElementSibling,
+        node.nextElementSibling
+      ].some(el => finLabelRegex.test(el?.textContent || ''));
+
+      const hasLargeTextClass = Array.from(node.classList).some(cls => {
+        const pure = cls.split(':').pop();
+        return pure === 'text-4xl' || pure === 'text-5xl';
+      });
+
+      console.log('FIN detection check', {
+        tag: node.tagName,
+        text: trimmedText,
+        className: node.className,
+        isFinAmount,
+        contextHasFinLabel
+      });
+
+      if (isFinAmount && contextHasFinLabel) {
+        console.log('FIN number detected, applying 48px');
+        node.style.fontSize = '48px';
+      } else if (hasLargeTextClass) {
+        node.style.fontSize = '48px';
+      } else if (node.tagName === 'H1') {
+        node.style.fontSize = '32px';
+      } else if (node.tagName === 'H3') {
+        node.style.fontSize = '24px';
+      } else if (node.tagName === 'P') {
+        node.style.fontSize = '16px';
+      } else {
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 14;
+        node.style.fontSize = `${Math.max(currentSize, 14)}px`;
+      }
     } else {
-      node.style.fontSize = '12px';
+      if (['H1', 'H2', 'H3'].includes(node.tagName)) {
+        node.style.fontSize = '16px';
+      } else if (!isNaN(originalFontSize)) {
+        node.style.fontSize = `${Math.min(originalFontSize * 1.2, 12)}px`;
+      } else {
+        node.style.fontSize = '12px';
+      }
     }
   }
 
