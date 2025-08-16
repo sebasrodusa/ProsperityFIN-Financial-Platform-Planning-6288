@@ -96,6 +96,8 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
         ? largeTextClassMap[largeTextClass.split(':').pop()]
         : null;
 
+      const defaultFinAmountSize = '72px';
+
       console.log('FIN detection check', {
         tag: node.tagName,
         text: trimmedText,
@@ -105,8 +107,9 @@ const inlineStylesRecursively = (node, sectionType = 'body') => {
       });
 
       if (isFinAmount && contextHasFinLabel) {
-        console.log('FIN number detected, applying 48px');
-        node.style.fontSize = '48px';
+        const finalSize = largeTextClassSize || defaultFinAmountSize;
+        console.log('FIN number detected, applying', finalSize);
+        node.style.fontSize = finalSize;
       } else if (largeTextClassSize) {
         node.style.fontSize = largeTextClassSize;
       } else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
