@@ -700,7 +700,9 @@ const ClientFinancialReport = () => {
                   </div>
 
                   {/* Cover Letter / FIN */}
+                  <div style={{ pageBreakAfter: 'always' }}>
                     <HeroSection fin={reportData.clientInfo.fin} clientName={reportData.clientInfo.name} />
+                  </div>
                 </div>
               )}
             </div>
