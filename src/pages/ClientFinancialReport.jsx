@@ -332,6 +332,12 @@ const ClientFinancialReport = () => {
         } else if (originalSection.classList?.contains('report-header')) {
           isHeader = true;
           headerReason = "classList contains 'report-header'";
+        } else if (
+          originalSection.id === 'fin-summary' ||
+          originalSection.classList?.contains('fin-summary')
+        ) {
+          isHeader = true;
+          headerReason = "id/class indicates 'fin-summary'";
         } else if (sections[0] === originalSection) {
           isHeader = true;
           headerReason = 'first section';
