@@ -679,56 +679,50 @@ const ClientFinancialReport = () => {
               </div>
 
               {reportData && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Client Information */}
-                  <div>
-                    <h3
-                      className="text-xl font-semibold text-gray-900 mb-4"
-                      style={{ fontSize: '24px' }}
-                    >
-                      Client Information
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center space-x-3">
-                        <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 font-medium">
-                          {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">
-                          {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
-                          {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{reportData.clientInfo.email}</span>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <SafeIcon icon={FiPhone} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{reportData.clientInfo.phone}</span>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Client Information */}
+                    <div>
+                      <h3
+                        className="text-xl font-semibold text-gray-900 mb-4"
+                        style={{ fontSize: '24px' }}
+                      >
+                        Client Information
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
+                          <span className="text-gray-900 font-medium">
+                            {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
+                          <span className="text-gray-900">
+                            {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
+                            {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
+                          <span className="text-gray-900">{reportData.clientInfo.email}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <SafeIcon icon={FiPhone} className="w-5 h-5 text-gray-400" />
+                          <span className="text-gray-900">{reportData.clientInfo.phone}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                  <div id="fin-summary" className="mt-8 pt-8 border-t border-gray-100">
+                    <FinancialIndependenceSummary
+                      fin={reportData.clientInfo.fin}
+                      clientName={reportData.clientInfo.name}
+                    />
+                  </div>
+                </>
               )}
             </div>
-
-            {/* FIN Summary */}
-            {reportData && (
-              <div
-                id="fin-summary"
-                className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none mt-8"
-                style={{ pageBreakBefore: 'always', breakInside: 'avoid' }}
-              >
-                <FinancialIndependenceSummary
-                  fin={reportData.clientInfo.fin}
-                  clientName={reportData.clientInfo.name}
-                />
-              </div>
-            )}
 
             {/* Cashflow Summary */}
             {reportData && (
