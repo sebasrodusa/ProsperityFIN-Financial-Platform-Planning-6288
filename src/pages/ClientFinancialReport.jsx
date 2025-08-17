@@ -662,8 +662,8 @@ const ClientFinancialReport = () => {
               id="report-header"
               className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
             >
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                <div>
+              <div className="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center mb-8 print:flex-col">
+                <div className="w-full md:w-1/2">
                   <div className="w-12 h-12 bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg flex items-center justify-center mb-4">
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
@@ -675,7 +675,7 @@ const ClientFinancialReport = () => {
                   </h1>
                   <p className="text-gray-600">Prepared on: {new Date().toLocaleDateString()}</p>
                 </div>
-                <div className="mt-4 md:mt-0 text-right">
+                <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
                   <p className="text-lg font-medium text-gray-900">Prepared by:</p>
                   <p className="text-gray-700">{advisorName}</p>
                   <p className="text-gray-700">Financial Professional</p>
