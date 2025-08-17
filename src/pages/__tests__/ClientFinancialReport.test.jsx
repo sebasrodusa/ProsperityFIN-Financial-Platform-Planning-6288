@@ -1,19 +1,23 @@
 import { test, expect } from 'vitest';
-
-function calculateFIN(incomeSources) {
-  const totalIncome = incomeSources.reduce((sum, source) => {
-    const amount = parseFloat(source.amount || 0);
-    const annualAmount = {
-      monthly: amount * 12,
-      weekly: amount * 52,
-      annual: amount
-    }[source.frequency || 'monthly'];
-    return sum + annualAmount;
-  }, 0);
-  return totalIncome * 20;
-}
+import {
+  calculateFinancialIndependenceNumber,
+  calculateTotalAnnualIncome,
+} from '../../utils/financial';
 
 test('monthly income of $5,000 results in FIN of $1,200,000', () => {
-  const fin = calculateFIN([{ amount: '5000', frequency: 'monthly' }]);
-  expect(fin).toBe(1200000);
+  const sources = [{ amount: '5000', frequency: 'monthly' }];
+  const annual = calculateTotalAnnualIncome(sources);
+  expect(calculateFinancialIndependenceNumber(sources)).toBe(annual * 20);
+  expect(calculateFinancialIndependenceNumber(sources)).toBe(1200000);
+});
+
+test('mixed income sources produce FIN equal to 20× annual income', () => {
+  const sources = [
+    { amount: '5000', frequency: 'monthly' },
+    { amount: '600', frequency: 'weekly' },
+    { amount: '10000', frequency: 'annual' },
+  ];
+  const annual = calculateTotalAnnualIncome(sources);
+  expect(annual).toBe(101200);
+  expect(calculateFinancialIndependenceNumber(sources)).toBe(annual * 20);
 });

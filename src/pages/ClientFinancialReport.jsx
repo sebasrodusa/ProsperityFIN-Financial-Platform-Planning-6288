@@ -13,6 +13,7 @@ import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
 import logDev from '../utils/logDev';
+import { calculateTotalAnnualIncome, calculateFinancialIndependenceNumber } from '../utils/financial';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController);
 
@@ -188,16 +189,7 @@ const ClientFinancialReport = () => {
       );
 
       // Process financial data for the report
-      const totalIncome =
-        analysis.income_sources?.reduce((sum, source) => {
-          const amount = parseFloat(source.amount || 0);
-          const annualAmount = {
-            monthly: amount * 12,
-            weekly: amount * 52,
-            annual: amount
-          }[source.frequency || 'monthly'];
-          return sum + annualAmount;
-        }, 0) || 0;
+      const totalIncome = calculateTotalAnnualIncome(analysis.income_sources);
       const totalExpenses = analysis.expenses?.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0) || 0;
       const netIncome = totalIncome - totalExpenses;
       
@@ -208,7 +200,10 @@ const ClientFinancialReport = () => {
       const totalInsuranceCoverage = analysis.insurance_policies?.reduce((sum, policy) => sum + parseFloat(policy.coverageAmount || 0), 0) || 0;
 
       // Calculate FIN (Financial Independence Number)
-      const financialIndependenceNumber = totalIncome * 20;
+      // The FIN follows the 4% rule: 20× total annual income
+      const financialIndependenceNumber = calculateFinancialIndependenceNumber(
+        analysis.income_sources
+      );
       
       setReportData({
         clientInfo: {
