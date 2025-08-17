@@ -126,11 +126,13 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
       }
     } else {
       if (['H1', 'H2', 'H3'].includes(node.tagName)) {
-        node.style.fontSize = '16px';
+        node.style.fontSize = !isNaN(originalFontSize)
+          ? `${Math.max(originalFontSize, 24)}px`
+          : '24px';
       } else if (!isNaN(originalFontSize)) {
-        node.style.fontSize = `${Math.min(originalFontSize * 1.2, 12)}px`;
+        node.style.fontSize = `${Math.max(originalFontSize, 14)}px`;
       } else {
-        node.style.fontSize = '12px';
+        node.style.fontSize = '14px';
       }
     }
   }
