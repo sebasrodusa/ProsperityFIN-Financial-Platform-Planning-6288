@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Navbar from '../components/layout/Navbar';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import HeroSection from '../components/financial/HeroSection';
+import FinancialIndependenceSummary from '../components/financial/FinancialIndependenceSummary';
 import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
@@ -114,8 +114,8 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
       } else if (largeTextClassSize) {
         node.style.fontSize = largeTextClassSize;
       } else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 48;
-        node.style.fontSize = `${Math.max(currentSize, 48)}px`;
+        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 30;
+        node.style.fontSize = `${Math.max(currentSize, 30)}px`;
       } else if (node.tagName === 'P') {
         const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 24;
         node.style.fontSize = `${Math.max(currentSize, 24)}px`;
@@ -727,7 +727,7 @@ const ClientFinancialReport = () => {
                 className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
                 style={{ pageBreakAfter: 'always' }}
               >
-                <HeroSection
+                <FinancialIndependenceSummary
                   fin={reportData.clientInfo.fin}
                   clientName={reportData.clientInfo.name}
                 />
