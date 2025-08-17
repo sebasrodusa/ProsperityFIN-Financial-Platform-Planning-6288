@@ -671,18 +671,20 @@ const ClientFinancialReport = () => {
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
                   <h1
-                    className="text-3xl font-heading font-bold text-gray-900"
-                    style={{ fontSize: '32px' }}
+                    className="text-3xl font-heading font-bold text-gray-900 leading-tight"
+                    style={{ fontSize: '28px' }}
                   >
                     Financial Independence Report
                   </h1>
-                  <p className="text-gray-600">Prepared on: {new Date().toLocaleDateString()}</p>
+                  <p className="text-gray-600 leading-tight">
+                    Prepared on: {new Date().toLocaleDateString()}
+                  </p>
                 </div>
                 <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
-                  <p className="text-lg font-medium text-gray-900">Prepared by:</p>
-                  <p className="text-gray-700">{advisorName}</p>
-                  <p className="text-gray-700">Financial Professional</p>
-                  <p className="text-gray-600">ProsperityFIN™</p>
+                  <p className="text-lg font-medium text-gray-900 leading-tight">Prepared by:</p>
+                  <p className="text-gray-700 leading-tight">{advisorName}</p>
+                  <p className="text-gray-700 leading-tight">Financial Professional</p>
+                  <p className="text-gray-600 leading-tight">ProsperityFIN™</p>
                 </div>
               </div>
 
