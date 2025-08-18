@@ -32,7 +32,7 @@ test('body heading and paragraph use new defaults', () => {
   const heading = content.querySelector('h2');
   const paragraph = content.querySelector('p');
   expect(heading.style.fontSize).toBe('24px');
-  expect(paragraph.style.fontSize).toBe('14px');
+  expect(paragraph.style.fontSize).toBe('12px');
 });
 
 test('client-info heading respects body defaults', () => {
@@ -44,5 +44,5 @@ test('client-info heading respects body defaults', () => {
   const clientInfo = dom.window.document.getElementById('client-info');
   inlineStylesRecursively(clientInfo);
   const heading = clientInfo.querySelector('h4');
-  expect(heading.style.fontSize).toBe('14px');
+  expect(heading.style.fontSize).toBe('12px');
 });
