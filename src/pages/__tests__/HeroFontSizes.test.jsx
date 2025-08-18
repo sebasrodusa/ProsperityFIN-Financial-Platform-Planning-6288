@@ -72,3 +72,29 @@ test('FIN summary key elements share font size', () => {
   expect(getComputedStyle(finAmount).fontSize).toBe(expected);
 });
 
+test('cover sections render with consistent font sizes', () => {
+  const dom = new JSDOM(`
+    <style>.text-xl{font-size:20px}</style>
+    <div id="cover">
+      <div id="report-header">
+        <h2>Financial Independence Report</h2>
+      </div>
+      <div id="client-info">
+        <h4>Client Information</h4>
+      </div>
+      <div id="fin-summary">
+        <p class="text-xl">$1,234,567</p>
+      </div>
+    </div>
+  `);
+  const cover = dom.window.document.getElementById('cover');
+  inlineStylesRecursively(cover, 'header');
+  const header = cover.querySelector('#report-header h2');
+  const client = cover.querySelector('#client-info h4');
+  const finAmount = cover.querySelector('#fin-summary p');
+  const expected = header.style.fontSize;
+  expect(expected).toBe('18px');
+  expect(client.style.fontSize).toBe(expected);
+  expect(finAmount.style.fontSize).toBe(expected);
+});
+
