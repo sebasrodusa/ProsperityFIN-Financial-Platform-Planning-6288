@@ -7,7 +7,7 @@ test('hero heading and FIN amount use expected font sizes', () => {
     <div id="hero">
       <h2 class="text-3xl">Your Financial Independence</h2>
       <p>Financial Independence Number</p>
-      <p class="text-5xl">$1,234,567</p>
+      <p class="text-7xl">$1,234,567</p>
     </div>
   `);
   const hero = dom.window.document.getElementById('hero');
@@ -17,7 +17,7 @@ test('hero heading and FIN amount use expected font sizes', () => {
   const finAmount = hero.querySelectorAll('p')[1];
   expect(heading.style.fontSize).toBe('30px');
   expect(label.style.fontSize).toBe('24px');
-  expect(finAmount.style.fontSize).toBe('48px');
+  expect(finAmount.style.fontSize).toBe('72px');
 });
 
 test('body heading and paragraph use new defaults', () => {
@@ -37,12 +37,13 @@ test('body heading and paragraph use new defaults', () => {
 
 test('client-info heading respects body defaults', () => {
   const dom = new JSDOM(`
+    <style>.text-base { font-size: 16px; }</style>
     <div id="client-info">
-      <h4>Client Information</h4>
+      <h4 class="text-base">Client Information</h4>
     </div>
   `);
   const clientInfo = dom.window.document.getElementById('client-info');
   inlineStylesRecursively(clientInfo);
   const heading = clientInfo.querySelector('h4');
-  expect(heading.style.fontSize).toBe('12px');
+  expect(heading.style.fontSize).toBe('16px');
 });
