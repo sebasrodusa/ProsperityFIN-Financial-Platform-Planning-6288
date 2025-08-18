@@ -85,7 +85,8 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
       });
 
       if (isFinAmount && contextHasFinLabel) {
-        node.style.fontSize = '20px';
+        // Preserve emphasized FIN amount at text-2xl
+        node.style.fontSize = '24px';
       } else if (['H1', 'H2', 'H3'].includes(node.tagName)) {
         node.style.fontSize = '20px';
       } else {

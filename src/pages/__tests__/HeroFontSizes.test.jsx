@@ -17,7 +17,7 @@ test('hero heading and FIN amount use expected font sizes', () => {
   const finAmount = hero.querySelectorAll('p')[1];
   expect(heading.style.fontSize).toBe('20px');
   expect(label.style.fontSize).toBe('14px');
-  expect(finAmount.style.fontSize).toBe('20px');
+  expect(finAmount.style.fontSize).toBe('24px');
 });
 
 test('body heading and paragraph use new defaults', () => {
