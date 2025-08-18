@@ -11,15 +11,15 @@ const FinancialIndependenceSummary = ({ fin, clientName }) => {
 
   return (
     <div className="text-center space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">Your Financial Independence</h2>
+      <h2 className="text-xl font-semibold text-gray-900">Your Financial Independence</h2>
       <p className="text-base text-gray-800">Dear {clientName},</p>
-      <p className="text-base text-gray-800">
+      <p className="text-sm text-gray-800">
         Based on your current financial situation, we've calculated your Financial Independence Number (FIN) - the amount needed
         to support your lifestyle indefinitely:
       </p>
       {/* Emphasized FIN amount */}
-      <p className="text-2xl font-bold text-primary-600">{formatCurrency(fin)}</p>
-      <p className="text-base text-gray-800">
+      <p className="text-xl font-bold text-primary-600">{formatCurrency(fin)}</p>
+      <p className="text-sm text-gray-800">
         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you
         achieve financial independence.
       </p>
