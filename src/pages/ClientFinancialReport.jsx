@@ -47,25 +47,15 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
     node.style.setProperty(prop, computedStyle.getPropertyValue(prop));
   });
 
-  const originalFontSizeStr = computedStyle.fontSize;
-  const originalFontSize = parseFloat(originalFontSizeStr);
-
-  if (!hasInlineFontSize && !node.style.fontSize) {
-    if (!isNaN(originalFontSize)) {
-      node.style.fontSize = `${originalFontSize}px`;
-    }
-
+  if (!hasInlineFontSize) {
     const tailwindFontMap = {
       'text-xs': '12px',
       'text-sm': '14px',
       'text-base': '16px',
+      'text-lg': '18px',
       'text-xl': '20px',
       'text-2xl': '24px',
-      'text-3xl': '30px',
-      'text-4xl': '36px',
-      'text-5xl': '48px',
-      'text-6xl': '64px',
-      'text-7xl': '72px'
+      'text-3xl': '30px'
     };
     node.classList.forEach(cls => {
       const pureClass = cls.split(':').pop();
@@ -74,18 +64,6 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
     });
 
     const textContent = node.textContent || '';
-
-    const largeTextClass = Array.from(node.classList).find(cls => {
-      const pure = cls.split(':').pop();
-      return ['text-4xl', 'text-5xl', 'text-6xl', 'text-7xl'].includes(pure);
-    });
-    const pureLargeClass = largeTextClass?.split(':').pop();
-    const largeTextClassSize =
-      pureLargeClass === 'text-4xl'
-        ? '48px'
-        : pureLargeClass
-          ? tailwindFontMap[pureLargeClass]
-          : null;
 
     if (sectionType === 'header') {
       const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
@@ -98,8 +76,6 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
         node.nextElementSibling
       ].some(el => finLabelRegex.test(el?.textContent || ''));
 
-      const defaultFinAmountSize = '72px';
-
       console.log('FIN detection check', {
         tag: node.tagName,
         text: trimmedText,
@@ -109,21 +85,17 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
       });
 
       if (isFinAmount && contextHasFinLabel) {
-        const finalSize = largeTextClassSize || defaultFinAmountSize;
-        console.log('FIN number detected, applying', finalSize);
-        node.style.fontSize = finalSize;
-      } else if (largeTextClassSize) {
-        node.style.fontSize = largeTextClassSize;
+        node.style.fontSize = '20px';
+      } else if (['H1', 'H2', 'H3'].includes(node.tagName)) {
+        node.style.fontSize = '20px';
+      } else {
+        node.style.fontSize = '14px';
       }
     } else {
       if (['H1', 'H2', 'H3'].includes(node.tagName)) {
-        node.style.fontSize = !isNaN(originalFontSize)
-          ? `${Math.max(originalFontSize, 24)}px`
-          : '24px';
-      } else if (!isNaN(originalFontSize)) {
-        node.style.fontSize = `${Math.max(originalFontSize, 12)}px`;
-      } else {
-        node.style.fontSize = '12px';
+        node.style.fontSize = '20px';
+      } else if (!node.style.fontSize) {
+        node.style.fontSize = '14px';
       }
     }
   }
@@ -662,20 +634,19 @@ const ClientFinancialReport = () => {
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
                   <h1
-                    className="text-3xl font-heading font-bold text-gray-900 leading-tight"
-                    style={{ fontSize: '28px' }}
+                    className="text-2xl font-heading font-bold text-gray-900 leading-tight"
                   >
                     Financial Independence Report
                   </h1>
-                  <p className="text-gray-600 leading-tight">
+                  <p className="text-sm text-gray-600 leading-tight">
                     Prepared on: {new Date().toLocaleDateString()}
                   </p>
                 </div>
               <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
-                  <p className="text-lg font-medium text-gray-900 leading-tight">Prepared by:</p>
-                  <p className="text-gray-700 leading-tight">{advisorName}</p>
-                  <p className="text-gray-700 leading-tight">Financial Professional</p>
-                  <p className="text-gray-600 leading-tight">ProsperityFIN™</p>
+                  <p className="text-base font-medium text-gray-900 leading-tight">Prepared by:</p>
+                  <p className="text-sm text-gray-700 leading-tight">{advisorName}</p>
+                  <p className="text-sm text-gray-700 leading-tight">Financial Professional</p>
+                  <p className="text-sm text-gray-600 leading-tight">ProsperityFIN™</p>
                 </div>
               </div>
             </div>
@@ -691,24 +662,24 @@ const ClientFinancialReport = () => {
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 font-medium text-xs">
+                        <span className="text-gray-900 font-medium text-sm">
                           {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-xs">
+                        <span className="text-gray-900 text-sm">
                           {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
                           {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-xs">{reportData.clientInfo.email}</span>
+                        <span className="text-gray-900 text-sm">{reportData.clientInfo.email}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiPhone} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-xs">{reportData.clientInfo.phone}</span>
+                        <span className="text-gray-900 text-sm">{reportData.clientInfo.phone}</span>
                       </div>
                     </div>
                   </div>

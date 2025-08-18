@@ -5,9 +5,9 @@ import { inlineStylesRecursively } from '../ClientFinancialReport.jsx';
 test('hero heading and FIN amount use expected font sizes', () => {
   const dom = new JSDOM(`
     <div id="hero">
-      <h2 class="text-3xl">Your Financial Independence</h2>
+      <h2 class="text-2xl">Your Financial Independence</h2>
       <p class="text-base">Financial Independence Number</p>
-      <p class="text-7xl">$1,234,567</p>
+      <p class="text-2xl">$1,234,567</p>
     </div>
   `);
   const hero = dom.window.document.getElementById('hero');
@@ -15,9 +15,9 @@ test('hero heading and FIN amount use expected font sizes', () => {
   const heading = hero.querySelector('h2');
   const label = hero.querySelectorAll('p')[0];
   const finAmount = hero.querySelectorAll('p')[1];
-  expect(heading.style.fontSize).toBe('30px');
-  expect(label.style.fontSize).toBe('16px');
-  expect(finAmount.style.fontSize).toBe('72px');
+  expect(heading.style.fontSize).toBe('20px');
+  expect(label.style.fontSize).toBe('14px');
+  expect(finAmount.style.fontSize).toBe('20px');
 });
 
 test('body heading and paragraph use new defaults', () => {
@@ -31,19 +31,19 @@ test('body heading and paragraph use new defaults', () => {
   inlineStylesRecursively(content);
   const heading = content.querySelector('h2');
   const paragraph = content.querySelector('p');
-  expect(heading.style.fontSize).toBe('24px');
-  expect(paragraph.style.fontSize).toBe('12px');
+  expect(heading.style.fontSize).toBe('20px');
+  expect(paragraph.style.fontSize).toBe('14px');
 });
 
 test('client-info elements use Tailwind font sizes', () => {
   const dom = new JSDOM(`
     <style>
       .text-base { font-size: 16px; }
-      .text-xs { font-size: 12px; }
+      .text-sm { font-size: 14px; }
     </style>
     <div id="client-info">
       <h4 class="text-base">Client Information</h4>
-      <p class="text-xs">Some detail</p>
+      <p class="text-sm">Some detail</p>
     </div>
   `);
   const clientInfo = dom.window.document.getElementById('client-info');
@@ -51,5 +51,5 @@ test('client-info elements use Tailwind font sizes', () => {
   const heading = clientInfo.querySelector('h4');
   const detail = clientInfo.querySelector('p');
   expect(heading.style.fontSize).toBe('16px');
-  expect(detail.style.fontSize).toBe('12px');
+  expect(detail.style.fontSize).toBe('14px');
 });
