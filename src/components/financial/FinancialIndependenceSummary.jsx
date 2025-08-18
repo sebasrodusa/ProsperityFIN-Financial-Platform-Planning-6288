@@ -18,7 +18,9 @@ const FinancialIndependenceSummary = ({ fin, clientName }) => {
         to support your lifestyle indefinitely:
       </p>
       {/* Emphasized FIN amount */}
-      <p className="text-xl font-bold text-primary-600">{formatCurrency(fin)}</p>
+      <p className="text-xl text-[18px] font-bold text-primary-600 inline-block border-b border-gray-300 pb-1">
+        {formatCurrency(fin)}
+      </p>
       <p className="text-sm text-gray-800">
         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you
         achieve financial independence.
