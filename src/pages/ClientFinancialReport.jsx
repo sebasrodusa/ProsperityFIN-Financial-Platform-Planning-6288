@@ -130,9 +130,9 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
           ? `${Math.max(originalFontSize, 24)}px`
           : '24px';
       } else if (!isNaN(originalFontSize)) {
-        node.style.fontSize = `${Math.max(originalFontSize, 14)}px`;
+        node.style.fontSize = `${Math.max(originalFontSize, 12)}px`;
       } else {
-        node.style.fontSize = '14px';
+        node.style.fontSize = '12px';
       }
     }
   }
@@ -696,28 +696,28 @@ const ClientFinancialReport = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="text-lg font-semibold mb-4">Client Information</h4>
+                    <h4 className="text-base font-semibold mb-4">Client Information</h4>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 font-medium text-sm">
+                        <span className="text-gray-900 font-medium text-xs">
                           {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-sm">
+                        <span className="text-gray-900 text-xs">
                           {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
                           {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-sm">{reportData.clientInfo.email}</span>
+                        <span className="text-gray-900 text-xs">{reportData.clientInfo.email}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiPhone} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 text-sm">{reportData.clientInfo.phone}</span>
+                        <span className="text-gray-900 text-xs">{reportData.clientInfo.phone}</span>
                       </div>
                     </div>
                   </div>
