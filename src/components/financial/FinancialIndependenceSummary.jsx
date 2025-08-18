@@ -17,6 +17,7 @@ const FinancialIndependenceSummary = ({ fin, clientName }) => {
         Based on your current financial situation, we've calculated your Financial Independence Number (FIN) - the amount needed
         to support your lifestyle indefinitely:
       </p>
+      {/* Emphasized FIN amount */}
       <p className="text-2xl font-bold text-primary-600">{formatCurrency(fin)}</p>
       <p className="text-base text-gray-800">
         This report provides a comprehensive overview of your current financial position and identifies opportunities to help you
