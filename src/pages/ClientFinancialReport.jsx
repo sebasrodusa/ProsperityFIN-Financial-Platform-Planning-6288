@@ -63,38 +63,19 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
       if (size) node.style.fontSize = size;
     });
 
-    const textContent = node.textContent || '';
-
     if (sectionType === 'header') {
-      const finAmountRegex = /^\$[\d,]+(?:\.\d{2})?$/; // strict currency pattern
-      const finLabelRegex = /financial independence number/i;
-      const trimmedText = textContent.trim();
-      const isFinAmount = finAmountRegex.test(trimmedText);
-      const contextHasFinLabel = [
-        node.parentElement,
-        node.previousElementSibling,
-        node.nextElementSibling
-      ].some(el => finLabelRegex.test(el?.textContent || ''));
-
-      console.log('FIN detection check', {
-        tag: node.tagName,
-        text: trimmedText,
-        className: node.className,
-        isFinAmount,
-        contextHasFinLabel
-      });
-
-      if (isFinAmount && contextHasFinLabel) {
-        // Preserve emphasized FIN amount at text-2xl
-        node.style.fontSize = '24px';
-      } else if (['H1', 'H2', 'H3'].includes(node.tagName)) {
-        node.style.fontSize = '20px';
+      const size = parseInt(node.style.fontSize);
+      if (
+        ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName) ||
+        size > 14
+      ) {
+        node.style.fontSize = '18px';
       } else {
         node.style.fontSize = '14px';
       }
     } else {
-      if (['H1', 'H2', 'H3'].includes(node.tagName)) {
-        node.style.fontSize = '20px';
+      if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
+        node.style.fontSize = '18px';
       } else if (!node.style.fontSize) {
         node.style.fontSize = '14px';
       }
@@ -635,7 +616,7 @@ const ClientFinancialReport = () => {
                     <span className="text-white font-bold text-xl">P</span>
                   </div>
                   <h1
-                    className="text-2xl font-heading font-bold text-gray-900 leading-tight"
+                    className="text-xl font-heading font-bold text-gray-900 leading-tight"
                   >
                     Financial Independence Report
                   </h1>
@@ -644,7 +625,7 @@ const ClientFinancialReport = () => {
                   </p>
                 </div>
               <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
-                  <p className="text-base font-medium text-gray-900 leading-tight">Prepared by:</p>
+                  <p className="text-sm font-medium text-gray-900 leading-tight">Prepared by:</p>
                   <p className="text-sm text-gray-700 leading-tight">{advisorName}</p>
                   <p className="text-sm text-gray-700 leading-tight">Financial Professional</p>
                   <p className="text-sm text-gray-600 leading-tight">ProsperityFIN™</p>
@@ -659,7 +640,7 @@ const ClientFinancialReport = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="text-base font-semibold mb-4">Client Information</h4>
+                    <h4 className="text-xl font-semibold mb-4">Client Information</h4>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
