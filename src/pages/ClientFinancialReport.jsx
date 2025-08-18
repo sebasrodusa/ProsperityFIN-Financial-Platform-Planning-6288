@@ -114,15 +114,6 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
         node.style.fontSize = finalSize;
       } else if (largeTextClassSize) {
         node.style.fontSize = largeTextClassSize;
-      } else if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].includes(node.tagName)) {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 30;
-        node.style.fontSize = `${Math.max(currentSize, 30)}px`;
-      } else if (node.tagName === 'P') {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 24;
-        node.style.fontSize = `${Math.max(currentSize, 24)}px`;
-      } else {
-        const currentSize = parseFloat(node.style.fontSize) || originalFontSize || 24;
-        node.style.fontSize = `${Math.max(currentSize, 24)}px`;
       }
     } else {
       if (['H1', 'H2', 'H3'].includes(node.tagName)) {
