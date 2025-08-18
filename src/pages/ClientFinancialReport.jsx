@@ -680,51 +680,50 @@ const ClientFinancialReport = () => {
                     Prepared on: {new Date().toLocaleDateString()}
                   </p>
                 </div>
-                <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
+              <div className="w-full md:w-1/2 mt-4 md:mt-0 text-right print:text-left print:mt-4 space-y-1">
                   <p className="text-lg font-medium text-gray-900 leading-tight">Prepared by:</p>
                   <p className="text-gray-700 leading-tight">{advisorName}</p>
                   <p className="text-gray-700 leading-tight">Financial Professional</p>
                   <p className="text-gray-600 leading-tight">ProsperityFIN™</p>
                 </div>
               </div>
+            </div>
 
-              {reportData && (
+            {reportData && (
+              <div
+                id="client-info"
+                className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Client Information */}
                   <div>
-                    <h3
-                      className="text-xl font-semibold text-gray-900 mb-4"
-                      style={{ fontSize: '24px' }}
-                    >
-                      Client Information
-                    </h3>
+                    <h4 className="text-lg font-semibold mb-4">Client Information</h4>
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUser} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900 font-medium">
+                        <span className="text-gray-900 font-medium text-sm">
                           {reportData.clientInfo.name}, {reportData.clientInfo.age} years old
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiUsers} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">
+                        <span className="text-gray-900 text-sm">
                           {reportData.clientInfo.spouse ? `Spouse: ${reportData.clientInfo.spouse}` : 'No spouse'}
                           {reportData.clientInfo.children > 0 && `, ${reportData.clientInfo.children} children`}
                         </span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiMail} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{reportData.clientInfo.email}</span>
+                        <span className="text-gray-900 text-sm">{reportData.clientInfo.email}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <SafeIcon icon={FiPhone} className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{reportData.clientInfo.phone}</span>
+                        <span className="text-gray-900 text-sm">{reportData.clientInfo.phone}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* FIN Summary */}
             {reportData && (
