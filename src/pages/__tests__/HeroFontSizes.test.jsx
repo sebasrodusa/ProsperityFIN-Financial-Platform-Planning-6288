@@ -56,7 +56,7 @@ test('client-info elements use Tailwind font sizes', () => {
   expect(detail.style.fontSize).toBe('14px');
 });
 
-test('FIN summary key elements share font size', () => {
+test('FIN amount displays with enlarged font size', () => {
   const style = document.createElement('style');
   style.textContent = '.text-xl{font-size:18px}.text-base{font-size:18px}';
   document.head.appendChild(style);
@@ -69,7 +69,7 @@ test('FIN summary key elements share font size', () => {
   const expected = getComputedStyle(title).fontSize;
   expect(expected).toBe('18px');
   expect(getComputedStyle(clientHeading).fontSize).toBe(expected);
-  expect(getComputedStyle(finAmount).fontSize).toBe(expected);
+  expect(getComputedStyle(finAmount).fontSize).toBe('60px');
 });
 
 test('cover sections render with consistent font sizes', () => {

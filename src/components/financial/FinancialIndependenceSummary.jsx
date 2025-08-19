@@ -10,7 +10,7 @@ const FinancialIndependenceSummary = ({ fin, clientName }) => {
     }).format(amount);
 
   return (
-    <div className="text-center space-y-6">
+    <div className="text-center space-y-8">
       <h2 className="text-xl font-semibold text-gray-900">Your Financial Independence</h2>
       <p className="text-base text-gray-800">Dear {clientName},</p>
       <p className="text-sm text-gray-800">
@@ -18,7 +18,10 @@ const FinancialIndependenceSummary = ({ fin, clientName }) => {
         to support your lifestyle indefinitely:
       </p>
       {/* Emphasized FIN amount */}
-      <p className="text-xl text-[18px] font-bold text-primary-600 inline-block border-b border-gray-300 pb-1">
+      <p
+        style={{ fontSize: '60px', padding: '20px 0' }}
+        className="font-bold text-primary-600 inline-block border-b border-gray-300"
+      >
         {formatCurrency(fin)}
       </p>
     </div>
