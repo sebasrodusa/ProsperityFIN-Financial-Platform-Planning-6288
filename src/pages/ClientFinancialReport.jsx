@@ -678,7 +678,7 @@ const ClientFinancialReport = () => {
             {reportData && (
               <div
                 id="fin-summary"
-                className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none mt-8"
+                className="bg-white rounded-xl shadow-soft border border-gray-100 p-12 print:border-0 print:shadow-none mt-8"
                 style={{ pageBreakBefore: 'always', breakInside: 'avoid' }}
               >
                 <FinancialIndependenceSummary
