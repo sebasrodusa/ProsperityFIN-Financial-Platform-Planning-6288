@@ -611,7 +611,8 @@ const ClientFinancialReport = () => {
             {/* Report Header */}
             <div
               id="report-header"
-              className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
+              className="bg-white rounded-xl shadow-soft border border-gray-100 p-4 print:border-0 print:shadow-none"
+              style={{ maxHeight: '120px' }}
             >
               <div className="flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center mb-8 print:flex-col">
                 <div className="w-full md:w-1/2">
@@ -639,7 +640,8 @@ const ClientFinancialReport = () => {
             {reportData && (
               <div
                 id="client-info"
-                className="bg-white rounded-xl shadow-soft border border-gray-100 p-8 print:border-0 print:shadow-none"
+                className="bg-white rounded-xl shadow-soft border border-gray-100 p-4 print:border-0 print:shadow-none"
+                style={{ maxHeight: '120px' }}
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
