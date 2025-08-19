@@ -271,7 +271,7 @@ const ClientFinancialReport = () => {
         }
         const originalSection = sec.current || sec;
         logDev('Processing section:', originalSection.id, originalSection);
-        const scaleFactor = index < 2 ? 0.75 : 1;
+        const scaleFactor = 1;
 
         let isHeader = false;
         let headerReason = '';
@@ -315,11 +315,6 @@ const ClientFinancialReport = () => {
         clonedSection.style.position = 'absolute';
         clonedSection.style.left = '-10000px';
         document.body.appendChild(clonedSection);
-        if (index < 2) {
-          clonedSection.style.transform = 'scale(0.75)';
-          clonedSection.style.transformOrigin = 'top left';
-          clonedSection.style.height = `${originalSection.offsetHeight * 0.75}px`;
-        }
         console.log(
           'calling inlineStylesRecursively for',
           originalSection.id,
