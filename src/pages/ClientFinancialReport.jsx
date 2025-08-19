@@ -19,7 +19,7 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 
 const debugInlineStyles = import.meta.env.VITE_DEBUG_STYLES === 'true';
 
-export const inlineStylesRecursively = (node, sectionType = 'body') => {
+export const inlineStylesRecursively = (node, sectionType = 'body', fontScale = 1) => {
   if (!node || node.nodeType !== 1) return;
   console.log('inlineStylesRecursively start', node.tagName, { sectionType });
   const computedStyle = window.getComputedStyle(node);
@@ -82,6 +82,8 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
     }
   }
 
+  node.style.fontSize = (parseFloat(node.style.fontSize) * fontScale) + 'px';
+
   console.log('inlineStylesRecursively applied', node.tagName, node.style.fontSize);
 
   if (debugInlineStyles) {
@@ -95,7 +97,7 @@ export const inlineStylesRecursively = (node, sectionType = 'body') => {
     );
   }
 
-  node.childNodes.forEach(child => inlineStylesRecursively(child, sectionType));
+  node.childNodes.forEach(child => inlineStylesRecursively(child, sectionType, fontScale));
 };
 
 const { FiArrowLeft, FiDownload, FiPrinter, FiUser, FiUsers, FiCalendar, FiMail, FiPhone, FiCheck, FiX } = FiIcons;
@@ -262,7 +264,8 @@ const ClientFinancialReport = () => {
       logDev('Preparing PDF; sections count and IDs:', sections.length, sections.map(s => s.id));
       let yOffset = 0;
 
-      for (const sec of sections) {
+      for (let index = 0; index < sections.length; index++) {
+        const sec = sections[index];
         if (sec && typeof sec === 'object' && 'current' in sec) {
           logDev(`Ref for section ${sec.current?.id ?? '(no id)'} initialized:`, !!sec.current);
         }
@@ -317,7 +320,7 @@ const ClientFinancialReport = () => {
           'as',
           sectionType
         );
-        inlineStylesRecursively(clonedSection, sectionType);
+        inlineStylesRecursively(clonedSection, sectionType, index < 2 ? 0.75 : 1);
 
         // Log text content and font size of all elements within the cloned section
         clonedSection.querySelectorAll('*').forEach(el => {
