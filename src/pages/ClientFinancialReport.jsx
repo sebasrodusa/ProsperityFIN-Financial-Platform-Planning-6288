@@ -13,7 +13,12 @@ import SafeIcon from '../common/SafeIcon';
 import * as FiIcons from 'react-icons/fi';
 import { DEFAULT_AVATAR_URL } from '../utils/constants';
 import logDev from '../utils/logDev';
-import { calculateTotalAnnualIncome, calculateFinancialIndependenceNumber } from '../utils/financial';
+import {
+  calculateTotalAnnualIncome,
+  calculateFinancialIndependenceNumber,
+  calculateTotalAnnualExpenses,
+  annualizeExpense
+} from '../utils/financial';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, PieController, BarController);
 
@@ -139,7 +144,7 @@ const ClientFinancialReport = () => {
 
       // Process financial data for the report
       const totalIncome = calculateTotalAnnualIncome(analysis.income_sources);
-      const totalExpenses = analysis.expenses?.reduce((sum, expense) => sum + parseFloat(expense.amount || 0), 0) || 0;
+      const totalExpenses = calculateTotalAnnualExpenses(analysis.expenses);
       const netIncome = totalIncome - totalExpenses;
       
       const totalAssets = analysis.assets?.reduce((sum, asset) => sum + parseFloat(asset.amount || 0), 0) || 0;
@@ -174,7 +179,10 @@ const ClientFinancialReport = () => {
           expenses: totalExpenses,
           netIncome: netIncome,
           sources: analysis.income_sources || [],
-          expenseCategories: analysis.expenses || []
+          expenseCategories: (analysis.expenses || []).map(exp => ({
+            ...exp,
+            amount: annualizeExpense(exp.amount, exp.frequency)
+          }))
         },
         balanceSheet: {
           assets: totalAssets,
@@ -1048,7 +1056,7 @@ const ClientFinancialReport = () => {
                     <div className="p-4 border-l-4 border-danger-500 bg-danger-50 rounded-r-lg">
                       <h4 className="font-semibold text-danger-700">Negative Cash Flow</h4>
                       <p className="text-danger-600">
-                        Your expenses exceed your income by {formatCurrency(Math.abs(reportData.cashflow.netIncome))} monthly.
+                        Your expenses exceed your income by {formatCurrency(Math.abs(reportData.cashflow.netIncome) / 12)} per month.
                         Consider reviewing discretionary spending to balance your budget.
                       </p>
                     </div>
