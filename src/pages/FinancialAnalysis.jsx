@@ -27,7 +27,7 @@ const FinancialAnalysis = () => {
   const { user } = useAuth();
   const supabase = useSupabaseClient();
   const { clients } = useData();
-  const { analysis, loadAnalysis, saveAnalysis, setAnalysis, loading } = useFinancialAnalysis();
+  const { analysis, loadAnalysis, saveAnalysis, setAnalysis, loading, error: analysisError } = useFinancialAnalysis();
   const [activeTab, setActiveTab] = useState('cashflow');
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -52,17 +52,17 @@ const FinancialAnalysis = () => {
       const client = clients.find(c => c.id === clientId);
       if (client) {
         setSelectedClient(client);
-        loadAnalysis(clientId);
+        loadAnalysis(clientId, user.role !== 'admin');
       }
     }
-  }, [clientId, clients, loadAnalysis]);
+  }, [clientId, clients, loadAnalysis, user?.role]);
 
   // Load analysis when client is selected
   useEffect(() => {
     if (selectedClient && !clientId) {
-      loadAnalysis(selectedClient.id);
+      loadAnalysis(selectedClient.id, user.role !== 'admin');
     }
-  }, [selectedClient, loadAnalysis, clientId]);
+  }, [selectedClient, loadAnalysis, clientId, user?.role]);
 
   // When analysis data loads with an existing share code, populate it
   useEffect(() => {
@@ -179,7 +179,7 @@ const FinancialAnalysis = () => {
   const handleClientSelect = (client) => {
     setSelectedClient(client);
     setIsClientModalOpen(false);
-    loadAnalysis(client.id);
+    loadAnalysis(client.id, user.role !== 'admin');
   };
 
   const handleDataChange = (section, data) => {
@@ -215,6 +215,11 @@ const FinancialAnalysis = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          {analysisError && (
+            <div className="mb-8 p-4 bg-red-50 text-red-800 border border-red-200 rounded">
+              {analysisError}
+            </div>
+          )}
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center mb-4">

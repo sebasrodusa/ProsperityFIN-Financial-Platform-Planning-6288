@@ -85,10 +85,11 @@ export const FinancialAnalysisProvider = ({ children }) => {
         setAnalysis(inserted || { ...newAnalysis });
       } else {
         setAnalysis(null);
+        setError('No financial analysis found for this client.');
       }
     } catch (err) {
       console.error('Error loading analysis:', err);
-      setError('Failed to load financial analysis data.');
+      setError(err.message || 'Failed to load financial analysis data.');
     } finally {
       setLoading(false);
     }
