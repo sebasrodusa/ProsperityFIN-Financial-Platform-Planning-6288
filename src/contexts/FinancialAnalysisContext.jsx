@@ -36,7 +36,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
         .select('*')
         .eq('client_id', clientId);
 
-      if (user.role !== 'client') {
+      if (user.role === 'advisor') {
         query = query.eq('created_by', user.id);
       }
 
@@ -105,7 +105,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
         updated_at: new Date().toISOString()
       };
 
-      if (user.role !== 'client') {
+      if (user.role === 'advisor') {
         payload.created_by = user.id;
       }
 
@@ -114,11 +114,12 @@ export const FinancialAnalysisProvider = ({ children }) => {
         let updateQuery = supabase
           .from('financial_analyses_pf')
           .update(payload)
-          .eq('id', payload.id);
+          .eq('id', payload.id)
+          .eq('client_id', payload.client_id);
 
         if (user.role === 'client') {
           updateQuery = updateQuery.eq('client_id', user.id);
-        } else {
+        } else if (user.role === 'advisor') {
           updateQuery = updateQuery.eq('created_by', user.id);
         }
 
@@ -130,7 +131,7 @@ export const FinancialAnalysisProvider = ({ children }) => {
         saved = updated || payload;
       } else {
         const insertPayload = { ...payload };
-        if (user.role !== 'client') {
+        if (user.role === 'advisor') {
           insertPayload.created_by = user.id;
         }
 
@@ -161,14 +162,21 @@ export const FinancialAnalysisProvider = ({ children }) => {
     try {
       setSaving(true);
 
-      const { data, error } = await supabase
+      let updateQuery = supabase
         .from('financial_analyses_pf')
         .update({
           income_sources: sources,
           updated_at: new Date().toISOString()
         })
-        .eq('id', analysisId)
-        .eq('created_by', user.id)
+        .eq('id', analysisId);
+
+      if (user.role === 'client') {
+        updateQuery = updateQuery.eq('client_id', user.id);
+      } else if (user.role === 'advisor') {
+        updateQuery = updateQuery.eq('created_by', user.id);
+      }
+
+      const { data, error } = await updateQuery
         .select()
         .maybeSingle();
 
@@ -191,14 +199,21 @@ export const FinancialAnalysisProvider = ({ children }) => {
     try {
       setSaving(true);
 
-      const { data, error } = await supabase
+      let updateQuery = supabase
         .from('financial_analyses_pf')
         .update({
           expenses: expenses,
           updated_at: new Date().toISOString()
         })
-        .eq('id', analysisId)
-        .eq('created_by', user.id)
+        .eq('id', analysisId);
+
+      if (user.role === 'client') {
+        updateQuery = updateQuery.eq('client_id', user.id);
+      } else if (user.role === 'advisor') {
+        updateQuery = updateQuery.eq('created_by', user.id);
+      }
+
+      const { data, error } = await updateQuery
         .select()
         .maybeSingle();
 
